@@ -26,9 +26,9 @@ CompetitionRoot = Annotated[
 @app.command("inspect")
 def inspect_command(
     competition_root: CompetitionRoot = Path("data/competition"),
-    report: Annotated[
-        Path, typer.Option("--report", help="JSON report path.")
-    ] = Path("outputs/inspection_report.json"),
+    report: Annotated[Path, typer.Option("--report", help="JSON report path.")] = Path(
+        "outputs/inspection_report.json"
+    ),
 ) -> None:
     """Discover official files and report metadata without reading image volumes."""
     result = inspect_competition(competition_root)
@@ -85,4 +85,3 @@ def validate_submission_command(
 
 if __name__ == "__main__":
     app()
-

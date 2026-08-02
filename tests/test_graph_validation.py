@@ -50,4 +50,3 @@ def test_skipped_empty_frame_is_supported() -> None:
         edges=[PredictedEdge("a", 1, 2)],
     )
     validate_graph(graph)
-

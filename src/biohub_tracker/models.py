@@ -105,4 +105,3 @@ class FileTableInspection:
     dtypes: dict[str, str]
     row_count: int | None
     sample_rows: tuple[dict[str, Any], ...]
-

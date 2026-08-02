@@ -100,19 +100,32 @@ def _voxel_spacing(
         raise ValueError(
             "No coordinate scale transformation was found; refusing to assume voxel spacing."
         )
-    return tuple(float(effective_scale[axes.index(axis)]) for axis in ("z", "y", "x"))
+    return (
+        float(effective_scale[axes.index("z")]),
+        float(effective_scale[axes.index("y")]),
+        float(effective_scale[axes.index("x")]),
+    )
 
 
 class VolumeDatasetReader:
     """Lazy, metadata-first reader exposing frames in strict ``(z, y, x)`` order."""
 
-    def __init__(self, competition_root: str | Path, channel: int = 0) -> None:
+    def __init__(
+        self,
+        competition_root: str | Path,
+        channel: int = 0,
+        *,
+        split: str = "test",
+    ) -> None:
         self.competition_root = Path(competition_root)
         self.channel = channel
-        discovered = discover_zarr_stores(self.competition_root, "test")
+        self.split = split
+        discovered = discover_zarr_stores(self.competition_root, split)
         self._stores = {path.stem: path for path in discovered}
-        if len(self._stores) != len(discover_zarr_stores(self.competition_root, "test")):
-            raise ValueError("Test Zarr dataset names must be unique after removing .zarr")
+        if len(self._stores) != len(discovered):
+            raise ValueError(
+                f"{split.title()} Zarr dataset names must be unique after removing .zarr"
+            )
         self._metadata_cache: dict[str, DatasetMetadata] = {}
 
     def dataset_names(self) -> list[str]:
@@ -127,7 +140,7 @@ class VolumeDatasetReader:
             store = self._stores[dataset]
         except KeyError as exc:
             raise KeyError(
-                f"Unknown test dataset {dataset!r}; found {self.dataset_names()}"
+                f"Unknown {self.split} dataset {dataset!r}; found {self.dataset_names()}"
             ) from exc
         root = zarr.open_group(str(store), mode="r")
         root_attrs = _plain_attributes(root.attrs)
@@ -188,9 +201,11 @@ class VolumeDatasetReader:
             time_points=sizes.get("t", 1),
             channel_count=channel_count,
             voxel_spacing_zyx=spacing,
-            multiscale_levels=tuple(item.path for item in arrays if item.path in {
-                str(value.get("path")) for value in multiscale.get("datasets", [])
-            }),
+            multiscale_levels=tuple(
+                item.path
+                for item in arrays
+                if item.path in {str(value.get("path")) for value in multiscale.get("datasets", [])}
+            ),
             arrays=arrays,
             coordinate_transformations=tuple(transformations),
             attributes=json.loads(json.dumps(_plain_attributes(root.attrs), default=str)),

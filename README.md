@@ -16,7 +16,7 @@ Expected inputs are discovered, not assumed:
 
 - exactly one `sample_submission.csv` anywhere below the competition root;
 - test stores below `test/**/*.zarr`;
-- training image stores below `train/**/*.zarr`;
+- training image stores below `train/**/*.zarr`, with their metadata inspected separately;
 - table-like training annotations discovered by name/location.
 
 The reader accepts axis definitions only from OME-NGFF `multiscales.axes`, `_ARRAY_DIMENSIONS`, or
@@ -77,6 +77,7 @@ tracking works.
 ```powershell
 python scripts/generate_tiny_fixture.py data/sample
 biohub-track inspect --competition-root data/sample
+biohub-track validate-data --competition-root data/sample
 ```
 
 It contains nodes 1–7 and edges `1→3`, `2→4`, `3→5`, `3→6`, `4→7`, including a division at node 3.
@@ -123,4 +124,3 @@ raw private data, or silently promote guesses to facts.
 Do not begin the classical detector until `validate-data` passes on the official download and the
 resulting report has been reviewed. All numerical values in the YAML files are unconfirmed starting
 hypotheses and must be tuned on training data.
-

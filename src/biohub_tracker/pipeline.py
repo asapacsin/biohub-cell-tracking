@@ -15,4 +15,3 @@ def run_prediction_pipeline(
         "Prediction is intentionally unavailable in Milestones 0-1. "
         "Inspect official data successfully before implementing detection and tracking."
     )
-

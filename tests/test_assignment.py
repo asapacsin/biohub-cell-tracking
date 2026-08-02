@@ -9,4 +9,3 @@ def test_one_continuation_is_one_edge_with_new_target_id() -> None:
     )
     validate_graph(graph)
     assert graph.edges == [PredictedEdge("a", 10, 25)]
-

@@ -22,13 +22,17 @@ def discover_competition_layout(root: str | Path) -> CompetitionLayout:
     train_stores = discover_zarr_stores(competition_root, "train")
     annotations = discover_annotation_files(competition_root)
     excluded = {path.resolve() for path in sample_candidates + annotations}
-    other_files = tuple(
-        str(path)
-        for path in sorted(competition_root.rglob("*"))
-        if path.is_file()
-        and path.resolve() not in excluded
-        and not any(parent.suffix.lower() == ".zarr" for parent in path.parents)
-    ) if competition_root.exists() else ()
+    other_files = (
+        tuple(
+            str(path)
+            for path in sorted(competition_root.rglob("*"))
+            if path.is_file()
+            and path.resolve() not in excluded
+            and not any(parent.suffix.lower() == ".zarr" for parent in path.parents)
+        )
+        if competition_root.exists()
+        else ()
+    )
     return CompetitionLayout(
         root=str(competition_root),
         sample_submission=str(sample_candidates[0]) if sample_candidates else None,
@@ -47,6 +51,7 @@ def inspect_competition(root: str | Path) -> dict[str, Any]:
         "missing_authoritative_inputs": [],
         "sample_submission": None,
         "test_datasets": [],
+        "training_datasets": [],
         "training_annotations": [],
         "errors": [],
     }
@@ -70,6 +75,12 @@ def inspect_competition(root: str | Path) -> dict[str, Any]:
             report["test_datasets"].append(asdict(reader.metadata(dataset)))
         except Exception as exc:
             report["errors"].append(f"test dataset {dataset}: {exc}")
+    training_reader = VolumeDatasetReader(root, split="train")
+    for dataset in training_reader.dataset_names():
+        try:
+            report["training_datasets"].append(asdict(training_reader.metadata(dataset)))
+        except Exception as exc:
+            report["errors"].append(f"training dataset {dataset}: {exc}")
     for annotation in layout.annotation_files:
         try:
             report["training_annotations"].append(asdict(inspect_table(annotation)))
@@ -107,6 +118,23 @@ def format_inspection_report(report: dict[str, Any]) -> str:
                 f"  multiscale_levels={tuple(dataset['multiscale_levels'])}",
             ]
         )
+    for dataset in report["training_datasets"]:
+        lines.extend(
+            [
+                f"Training dataset {dataset['name']}:",
+                f"  array={dataset['array_path']} shape={tuple(dataset['shape'])}",
+                f"  axes={tuple(dataset['axes'])} dtype={dataset['dtype']}",
+                f"  time_points={dataset['time_points']} channels={dataset['channel_count']}",
+                f"  voxel_spacing_zyx={tuple(dataset['voxel_spacing_zyx'])}",
+                f"  multiscale_levels={tuple(dataset['multiscale_levels'])}",
+            ]
+        )
+    for annotation in report["training_annotations"]:
+        lines.append(
+            f"Training annotation {annotation['path']}: "
+            f"columns={tuple(annotation['columns'])} dtypes={annotation['dtypes']} "
+            f"rows={annotation['row_count']} sample={annotation['sample_rows']}"
+        )
     if report["sample_submission"]:
         sample = report["sample_submission"]
         lines.append(f"Sample columns: {tuple(sample['columns'])}")
@@ -116,4 +144,3 @@ def format_inspection_report(report: dict[str, Any]) -> str:
         lines.append("Inspection errors:")
         lines.extend(f"  - {message}" for message in report["errors"])
     return "\n".join(lines)
-

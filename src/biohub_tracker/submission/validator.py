@@ -86,9 +86,7 @@ def validate_graph(
         if edge.source_id == edge.target_id:
             errors.append(f"edge {edge_key} is a self-edge")
         if source is not None and target is not None and source.t >= target.t:
-            errors.append(
-                f"edge {edge_key} is not forward in time ({source.t} -> {target.t})"
-            )
+            errors.append(f"edge {edge_key} is not forward in time ({source.t} -> {target.t})")
         incoming[(edge.dataset, edge.target_id)] += 1
         per_dataset_edges[edge.dataset].append((edge.source_id, edge.target_id))
     for key, count in incoming.items():
@@ -104,7 +102,15 @@ def validate_graph(
 
 def _schema_from_sample(path: str | Path) -> tuple[list[str], dict[str, str]]:
     sample = pd.read_csv(path)
-    return list(sample.columns), {column: str(dtype) for column, dtype in sample.dtypes.items()}
+    return [str(column) for column in sample.columns], {
+        str(column): str(dtype) for column, dtype in sample.dtypes.items()
+    }
+
+
+def _validated_int(value: object, field: str) -> int:
+    if not isinstance(value, (int, np.integer)):
+        raise ValidationError(f"{field} must contain integer values; got {value!r}")
+    return int(value)
 
 
 def validate_submission(
@@ -125,10 +131,9 @@ def validate_submission(
         missing = submission.columns[submission.isna().any()].tolist()
         errors.append(f"missing values found in columns {missing}")
     for column in NUMERIC_COLUMNS:
-        if not is_integer_dtype(submission[column].dtype):
+        if submission[column].dtype != np.dtype(np.int64):
             errors.append(
-                f"column {column!r} must have an integer dtype, "
-                f"got {submission[column].dtype}"
+                f"column {column!r} must have dtype int64, got {submission[column].dtype}"
             )
     if not np.array_equal(submission["id"].to_numpy(), np.arange(len(submission), dtype=np.int64)):
         errors.append("id values must be consecutive integers starting at zero")
@@ -169,26 +174,26 @@ def validate_submission(
     duplicate_nodes = nodes.duplicated(["dataset", "node_id"], keep=False)
     if duplicate_nodes.any():
         values = (
-            nodes.loc[duplicate_nodes, ["dataset", "node_id"]]
-            .drop_duplicates()
-            .to_dict("records")
+            nodes.loc[duplicate_nodes, ["dataset", "node_id"]].drop_duplicates().to_dict("records")
         )
         errors.append(f"duplicate node IDs: {values}")
     duplicate_edges = edges.duplicated(["dataset", "source_id", "target_id"], keep=False)
     if duplicate_edges.any():
-        values = edges.loc[
-            duplicate_edges, ["dataset", "source_id", "target_id"]
-        ].drop_duplicates().to_dict("records")
+        values = (
+            edges.loc[duplicate_edges, ["dataset", "source_id", "target_id"]]
+            .drop_duplicates()
+            .to_dict("records")
+        )
         errors.append(f"duplicate edges: {values}")
     graph = PredictionGraph(
         nodes=[
             PredictedNode(
                 dataset=str(row.dataset),
-                node_id=int(row.node_id),
-                t=int(row.t),
-                z=int(row.z),
-                y=int(row.y),
-                x=int(row.x),
+                node_id=_validated_int(row.node_id, "node_id"),
+                t=_validated_int(row.t, "t"),
+                z=_validated_int(row.z, "z"),
+                y=_validated_int(row.y, "y"),
+                x=_validated_int(row.x, "x"),
             )
             for row in nodes.itertuples(index=False)
         ],
@@ -199,8 +204,8 @@ def validate_submission(
     graph.edges = [
         PredictedEdge(
             dataset=str(row.dataset),
-            source_id=int(row.source_id),
-            target_id=int(row.target_id),
+            source_id=_validated_int(row.source_id, "source_id"),
+            target_id=_validated_int(row.target_id, "target_id"),
         )
         for row in edges.itertuples(index=False)
     ]

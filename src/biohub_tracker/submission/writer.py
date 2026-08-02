@@ -87,4 +87,3 @@ def write_submission(table: pd.DataFrame, output_path: str | Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(destination, index=False)
     return destination
-

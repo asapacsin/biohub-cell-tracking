@@ -21,4 +21,3 @@ def test_same_biological_track_uses_distinct_detection_nodes() -> None:
     edge = PredictedEdge("a", before.node_id, after.node_id)
     assert before.node_id != after.node_id
     assert edge == PredictedEdge("a", 1, 2)
-
