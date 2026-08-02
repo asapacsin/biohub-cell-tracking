@@ -39,8 +39,7 @@ def create_test_store(
     permutation = tuple(canonical_axes.index(axis) for axis in axes)
     data = np.transpose(canonical, permutation)
     chunks = tuple(
-        1 if axis in {"t", "c"} else size
-        for axis, size in zip(axes, data.shape, strict=True)
+        1 if axis in {"t", "c"} else size for axis, size in zip(axes, data.shape, strict=True)
     )
     if hasattr(group, "create_array"):
         group.create_array("0", data=data, chunks=chunks)

@@ -44,3 +44,11 @@ def test_reader_is_lazy_until_read_frame(tmp_path, monkeypatch) -> None:
     reader = VolumeDatasetReader(tmp_path)
     metadata = reader.metadata("tiny")
     assert metadata.shape == (2, 1, 3, 4, 5)
+
+
+def test_reader_can_inspect_training_split(tmp_path) -> None:
+    create_test_store(tmp_path)
+    (tmp_path / "test").rename(tmp_path / "train")
+    reader = VolumeDatasetReader(tmp_path, split="train")
+    assert reader.dataset_names() == ["tiny"]
+    assert reader.metadata("tiny").spatial_shape_zyx == (3, 4, 5)

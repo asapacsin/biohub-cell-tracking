@@ -37,4 +37,3 @@ def load_config(path: str | Path) -> ProjectConfig:
     if submission.node_id_start < 0:
         raise ValueError("submission.node_id_start must be non-negative")
     return ProjectConfig(raw=raw, submission=submission)
-

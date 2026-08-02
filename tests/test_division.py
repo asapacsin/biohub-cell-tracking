@@ -13,4 +13,3 @@ def test_division_is_two_outgoing_edges() -> None:
         (3, 5),
         (3, 6),
     }
-

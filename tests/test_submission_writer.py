@@ -68,3 +68,10 @@ def test_empty_detection_result_has_exact_typed_schema() -> None:
     assert table.empty
     numeric = [column for column in SUBMISSION_COLUMNS if column not in {"dataset", "row_type"}]
     assert all(str(table[column].dtype) == "int64" for column in numeric)
+
+
+def test_validator_rejects_non_int64_numeric_columns() -> None:
+    table = build_submission([tiny_expected_graph()])
+    table["node_id"] = table["node_id"].astype(np.int32)
+    with pytest.raises(ValidationError, match="dtype int64"):
+        validate_submission(table, expected_dataset_names={"tiny"})

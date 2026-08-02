@@ -8,4 +8,3 @@ __all__ = [
     "validate_submission",
     "write_submission",
 ]
-

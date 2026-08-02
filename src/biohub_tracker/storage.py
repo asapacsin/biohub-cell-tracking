@@ -24,4 +24,3 @@ class LocalStorageBackend:
 
     def open_binary(self, path: str) -> BinaryIO:
         return Path(path).open("rb")
-

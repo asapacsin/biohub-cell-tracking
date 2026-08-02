@@ -17,6 +17,8 @@ def discover_annotation_files(root: str | Path) -> list[Path]:
     for path in competition_root.rglob("*") if competition_root.exists() else []:
         if not path.is_file() or path.name.lower() == "sample_submission.csv":
             continue
+        if any(parent.suffix.lower() == ".zarr" for parent in path.parents):
+            continue
         lowered = "/".join(part.lower() for part in path.parts)
         if path.suffix.lower() in TABLE_SUFFIXES and any(
             marker in lowered for marker in ("annot", "track", "label", "train")

@@ -22,8 +22,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "mypy>=1.11",
+  "pandas-stubs>=2.2",
   "pytest>=8.3",
   "ruff>=0.6",
+  "types-PyYAML>=6.0",
 ]
 parquet = ["pyarrow>=17"]
 
@@ -34,7 +36,7 @@ biohub-track = "biohub_tracker.cli:app"
 packages = ["src/biohub_tracker"]
 
 [tool.pytest.ini_options]
-addopts = "-ra"
+addopts = "-ra -p no:cacheprovider"
 testpaths = ["tests"]
 
 [tool.ruff]
@@ -48,4 +50,3 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 python_version = "3.12"
 strict = true
 packages = ["biohub_tracker"]
-

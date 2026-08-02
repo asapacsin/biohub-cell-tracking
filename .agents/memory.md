@@ -26,3 +26,13 @@
 - Commit the generated inspection report or summarize verified facts here before starting
   Milestone 2.
 
+## Verified Milestone 1 foundation
+
+- On 2026-08-02, the reader and inspection report were extended to inspect both test and training
+  Zarr metadata while preserving metadata-first, frame-lazy access.
+- The deterministic fixture now contains a test Zarr store, training Zarr store, tracking table,
+  and sample submission. Its `inspect`, `validate-data`, and `validate-submission` CLI paths pass.
+- The submission validator requires every numeric output column to be NumPy `int64`.
+- Verification passed with 30 pytest tests, Ruff lint/format checks, and strict mypy.
+- Official files were not found in the workspace, Administrator Downloads/Desktop,
+  `D:\Downloads`, or `D:\桌面`; authoritative Milestone 0 findings remain blocked.

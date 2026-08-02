@@ -54,4 +54,3 @@ def permutation_to_zyx(axes: Sequence[str]) -> tuple[int, int, int]:
     if missing:
         raise ValueError(f"Missing spatial axes: {missing}; found {normalized}")
     return tuple(normalized.index(axis) for axis in ("z", "y", "x"))  # type: ignore[return-value]
-

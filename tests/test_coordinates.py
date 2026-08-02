@@ -14,9 +14,7 @@ def test_coordinates_remain_zyx() -> None:
 
 
 def test_physical_distance_respects_anisotropy() -> None:
-    assert physical_distance_zyx((0, 0, 0), (1, 2, 2), (4, 1, 1)) == pytest.approx(
-        np.sqrt(24)
-    )
+    assert physical_distance_zyx((0, 0, 0), (1, 2, 2), (4, 1, 1)) == pytest.approx(np.sqrt(24))
 
 
 def test_round_and_clip_uses_zyx_shape() -> None:
@@ -26,4 +24,3 @@ def test_round_and_clip_uses_zyx_shape() -> None:
 def test_coordinate_helpers_reject_bad_shapes() -> None:
     with pytest.raises(ValueError, match="exactly"):
         voxel_to_physical_zyx((1, 2), (1, 1, 1))
-
