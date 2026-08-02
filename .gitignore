@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+dist/
+build/
+data/competition/*
+!data/competition/.gitkeep
+data/cache/*
+!data/cache/.gitkeep
+outputs/*
+!outputs/.gitkeep
+*.parquet
+

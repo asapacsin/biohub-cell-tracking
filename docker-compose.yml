@@ -1,0 +1,9 @@
+services:
+  tracker:
+    build: .
+    volumes:
+      - ./data:/workspace/data:ro
+      - ./outputs:/workspace/outputs
+      - ./configs:/workspace/configs:ro
+    command: ["inspect", "--competition-root", "data/competition"]
+

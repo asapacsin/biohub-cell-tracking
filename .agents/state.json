@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-08-02T00:00:00+08:00",
+  "project": "biohub-cell-tracking",
+  "active_milestone": "Milestone 0 and Milestone 1",
+  "status": "in_progress",
+  "completed": [],
+  "in_progress": [
+    "Competition inspection infrastructure",
+    "Typed graph and submission infrastructure"
+  ],
+  "blocked": [
+    {
+      "item": "Authoritative competition-data inspection",
+      "reason": "sample_submission.csv, test .zarr datasets, training images, and annotations were not found locally"
+    }
+  ],
+  "last_verified_commands": [],
+  "next_action": "Place downloaded competition files under data/competition and run biohub-track inspect"
+}
+

@@ -1,0 +1,28 @@
+runtime:
+  seed: 42
+  chunk_frames: 1
+  num_workers: 4
+detection:
+  method: blob
+  lower_percentile: 1.0
+  upper_percentile: 99.8
+  gaussian_sigma_um: 1.5
+  threshold: 0.08
+  minimum_separation_um: 4.0
+tracking:
+  candidate_neighbors: 5
+  max_match_distance_um: 15.0
+  use_hungarian: true
+  distance_weight: 1.0
+  intensity_weight: 0.0
+  volume_weight: 0.0
+division:
+  enabled: true
+  max_parent_daughter_distance_um: 18.0
+  max_sister_distance_um: 12.0
+  acceptance_threshold: 25.0
+submission:
+  node_id_start: 1
+  sort_rows: true
+  strict_validation: true
+

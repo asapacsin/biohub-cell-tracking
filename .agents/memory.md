@@ -1,0 +1,28 @@
+# Durable project memory
+
+## Sources of truth
+
+- The local `sample_submission.csv`, test `.zarr` stores, training images, annotations, and Zarr
+  metadata override prompt assumptions.
+- As of 2026-08-02, those authoritative files were not found in the workspace or common local
+  download/data directories. No array shapes, axes, spacing, annotation schema, or sample dtypes
+  have been inferred.
+
+## Design decisions
+
+- Competition identity is a per-detection `node_id`, allocated per dataset; biological continuity
+  and divisions are represented only by directed edges.
+- Submission voxel coordinates are always integer `(z, y, x)`; tracking distances will use
+  physical `(z, y, x)` values derived from dataset metadata.
+- Core modules are storage-agnostic. Only a local storage backend exists in Milestone 1.
+- Detector and tracker implementation are deliberately deferred until official-data inspection
+  succeeds.
+- Agent handoff files never supersede official competition files and must not contain secrets or
+  private raw data.
+
+## Current handoff
+
+- Run `biohub-track inspect --competition-root data/competition` after adding the Kaggle download.
+- Commit the generated inspection report or summarize verified facts here before starting
+  Milestone 2.
+
