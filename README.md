@@ -1,16 +1,44 @@
 # Biohub – Cell Tracking During Development
 
-Local-first, cloud-ready infrastructure for inspecting the official competition data and producing
-strict node-and-edge Kaggle submissions. This repository currently implements **Milestone 0** and
-**Milestone 1** only. Detection, tracking, and division inference are intentionally not yet
-implemented.
+Local-first infrastructure for inspecting the official competition data and producing strict
+node-and-edge Kaggle submissions. Includes a **public-test baseline**: blob detection + greedy
+nearest-neighbour linking with an optional division post-pass.
+
+## Public-test baseline
+
+Process all 4 public test Zarr videos, save detections/tracks/visualizations, and write a validated
+submission:
+
+```bash
+.venv/bin/python scripts/run_public_test_baseline.py \
+  --input-dir data/competition \
+  --output-dir outputs/public_test_baseline \
+  --config configs/baseline.yaml
+```
+
+Optional: `--video-id NAME`, `--start-frame N`, `--end-frame N`, `--no-save-visualizations`.
+
+Outputs:
+
+```text
+outputs/public_test_baseline/
+  detections/<video>.csv
+  tracks/<video>.csv
+  visualizations/<video>/frame_XXXX.png   # MIP overlays with cell_id
+  diagnostics/<video>.json
+  submission/submission.csv
+  baseline_report.json
+```
+
+Internal tracking uses persistent `cell_id` values. The competition export uses per-detection
+`node_id` rows plus continuation/lineage `edge` rows (see sample submission). Division children
+store `parent_id` (= parent `cell_id`) and export as two outgoing edges from the parent node.
+Toggle via `tracking.division_enabled` in `configs/baseline.yaml`.
 
 ## Current authoritative-data status
 
-Inspection on 2026-08-02 found no downloaded competition files in this workspace or the common
-local download/data folders that were checked. Consequently, this project does **not** claim an
-actual Zarr shape, axis order, voxel spacing, annotation schema, or sample-submission dtype yet.
-Place the unmodified Kaggle download under `data/competition` and run the inspection commands below.
+Official volumes are Zarr v3 with axes `(t,z,y,x)` and spacing `(1.625, 0.40625, 0.40625)` µm.
+Training labels are `.geff` graphs. Place the Kaggle download under `data/competition`.
 
 Expected inputs are discovered, not assumed:
 

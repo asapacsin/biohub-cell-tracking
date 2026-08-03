@@ -1,0 +1,8 @@
+id,dataset,row_type,node_id,t,z,y,x,source_id,target_id
+0,tiny,node,1,0,2,10,10,-1,-1
+1,tiny,node,2,0,3,20,20,-1,-1
+2,tiny,node,3,1,2,11,10,-1,-1
+3,tiny,node,4,1,3,21,20,-1,-1
+4,tiny,node,5,2,2,12,9,-1,-1
+5,tiny,node,6,2,2,12,12,-1,-1
+6,tiny,node,7,2,3,22,20,-1,-1

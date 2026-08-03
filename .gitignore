@@ -14,4 +14,5 @@ data/cache/*
 outputs/*
 !outputs/.gitkeep
 *.parquet
+.kaggle/
 

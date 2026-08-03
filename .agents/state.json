@@ -1,27 +1,28 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-02T13:40:30+08:00",
+  "updated_at": "2026-08-03T10:10:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Milestone 0 and Milestone 1",
+  "active_milestone": "Tuned division + validated public-test submission",
   "status": "in_progress",
+  "host": "linux",
   "completed": [
-    "Milestone 1 infrastructure verified against the deterministic competition fixture"
+    "Division post-pass end-to-end (tracker + graph export + tracks CSV)",
+    "GEFF-based threshold tune: require_matched_daughter, min separation, mid-point geometry, 1 div/frame",
+    "Public-test retune from saved detections: 38077 nodes + 32917 edges, 302 divisions, validation passed",
+    "Unit tests: test_division + NN + observations_to_graph (14 passed)"
   ],
-  "in_progress": [
-    "Milestone 0 authoritative competition-data inspection"
-  ],
-  "blocked": [
-    {
-      "item": "Authoritative competition-data inspection",
-      "reason": "sample_submission.csv, test .zarr datasets, training images, and annotations were not found in the workspace, Administrator Downloads/Desktop, D:\\Downloads, or D:\\桌面"
-    }
-  ],
+  "in_progress": [],
+  "blocked": [],
   "last_verified_commands": [
-    ".venv\\Scripts\\python.exe -m pytest -q (30 passed)",
-    ".venv\\Scripts\\python.exe -m ruff check --no-cache .",
-    ".venv\\Scripts\\python.exe -m ruff format --check --no-cache .",
-    ".venv\\Scripts\\python.exe -m mypy --no-incremental --cache-dir %TEMP%\\biohub_cell_tracking_mypy src",
-    "biohub-track inspect/validate-data/validate-submission against a fresh deterministic fixture"
+    ".venv/bin/python -m pytest -q tests/test_division.py tests/test_nearest_neighbor.py tests/test_observations_to_graph.py --cache-clear (14 passed)",
+    ".venv/bin/biohub-track validate-submission --submission outputs/public_test_baseline/submission/submission.csv --competition-root data/competition"
   ],
-  "next_action": "Place downloaded competition files under data/competition and run biohub-track inspect"
+  "next_action": "Optional: compare predicted divisions to train GEFF more carefully / Kaggle submit",
+  "needs_human": [],
+  "artifacts": {
+    "submission": "outputs/public_test_baseline/submission/submission.csv",
+    "report": "outputs/public_test_baseline/BASELINE_REPORT.md",
+    "baseline_report_json": "outputs/public_test_baseline/baseline_report.json",
+    "config": "configs/baseline.yaml"
+  }
 }

@@ -6,7 +6,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from biohub_tracker.annotation_reader import discover_annotation_files, inspect_table
+from biohub_tracker.annotation_reader import (
+    STORE_SUFFIXES,
+    discover_annotation_files,
+    inspect_table,
+)
 from biohub_tracker.models import CompetitionLayout
 from biohub_tracker.zarr_reader import VolumeDatasetReader, discover_zarr_stores
 
@@ -28,7 +32,9 @@ def discover_competition_layout(root: str | Path) -> CompetitionLayout:
             for path in sorted(competition_root.rglob("*"))
             if path.is_file()
             and path.resolve() not in excluded
-            and not any(parent.suffix.lower() == ".zarr" for parent in path.parents)
+            and path.suffix.lower() not in {".zip", ".partial"}
+            and not path.name.endswith(".kaggle-partial")
+            and not any(parent.suffix.lower() in STORE_SUFFIXES for parent in path.parents)
         )
         if competition_root.exists()
         else ()

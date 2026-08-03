@@ -17,6 +17,7 @@ dependencies = [
   "typer>=0.12",
   "PyYAML>=6.0",
   "zarr>=2.18,<4",
+  "pillow>=10.0",
 ]
 
 [project.optional-dependencies]
