@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-05T00:55:00+08:00",
+  "updated_at": "2026-08-05T01:14:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Kaggle notebook submit (classical baseline) + learned pipeline ready to train",
+  "active_milestone": "Learned pipeline hardening before GPU training (see docs/NEED_TO_DO.md)",
   "status": "in_progress",
   "host": "linux-login01",
   "completed": [
@@ -10,34 +10,37 @@
     "Validated local submission: 38077 nodes + 32917 edges + 302 divisions",
     "GitHub main pushed (baseline + division work)",
     "Kaggle code competition path understood: notebook-only submit, Internet must be off",
-    "Kaggle datasets attached by user: biohub-code, wheels (py3-none-any), linux-wheel (manylinux numcodecs/crc32c)",
-    "Offline Kaggle install pattern proven: pip install --no-deps pure wheels + manylinux numcodecs, then run baseline on competition test/",
-    "Learned architecture implemented (Windows session): U-Net detector, association scorer, ILP optimizer, training CLIs (58 tests there)"
+    "Offline Kaggle install pattern proven for classical baseline",
+    "Learned architecture code present (U-Net, association, ILP); unit tests ≠ detection accuracy",
+    "Association scorer trained once from GEFF: artifacts/association/model.json (14 features)",
+    "Captured learned-pipeline gap note: docs/NEED_TO_DO.md"
   ],
   "in_progress": [
-    "Finish Kaggle Save Version with Internet off and Submit to Competition using offline wheels notebook"
+    "Finish Kaggle Save Version (Internet off) + Submit classical baseline if not already scored",
+    "Execute NEED_TO_DO order: detector CV metrics → data pipeline → anisotropic U-Net → OOF association → node rejection"
   ],
-  "blocked": [],
+  "blocked": [
+    "Full U-Net fitting needs PyTorch + GPU; login01 has no torch/GPU"
+  ],
   "last_verified_commands": [
-    "Local: submission.csv exists (70995 lines) under outputs/public_test_baseline/submission/",
-    "Kaggle (user): installed zarr 3.3.0 + numcodecs 0.16.5 from datasets; started 44b6_0113de3b with shape (100,64,256,256)",
-    "Windows prior session: 58 pytest + ruff + mypy on learned pipeline (see prior state)"
+    "Local: submission.csv exists under outputs/public_test_baseline/submission/",
+    "biohub-track train-association → artifacts/association/model.json (14 features, exit 0)",
+    "blob+handcrafted+ILP run may still be in background (outputs/architecture_blob_ilp); not a substitute for detector CV"
   ],
-  "next_action": "On Kaggle: confirm /kaggle/working/submission.csv ~38077 nodes / 32917 edges, Save Version Internet off, Submit. In parallel on GPU host: train-detector-ensemble + train-association when ready.",
+  "next_action": "Implement data-pipeline fixes from docs/NEED_TO_DO.md (frame cache, stochastic aug, neg patches) before GPU rental; in parallel finish Kaggle classical submit.",
   "needs_human": [
-    "Complete Kaggle Submit click after successful offline notebook version",
-    "GPU host with PyTorch + train stores for full learned fitting (Windows checkout lacked them; login01 has competition data)"
+    "Complete Kaggle Submit if LB score not yet recorded",
+    "GPU host for detector CV and anisotropic U-Net experiments"
   ],
   "artifacts": {
+    "need_to_do": "docs/NEED_TO_DO.md",
     "architecture": "docs/ARCHITECTURE.md",
     "training_config": "configs/training.yaml",
     "learned_config": "configs/architecture.yaml",
+    "blob_ilp_config": "configs/architecture_blob_ilp.yaml",
+    "blob_learned_config": "configs/architecture_blob_learned.yaml",
+    "association_artifact": "artifacts/association/model.json",
     "baseline_config": "configs/baseline.yaml",
-    "validated_baseline_submission": "outputs/public_test_baseline/submission/submission.csv",
-    "baseline_report": "outputs/public_test_baseline/BASELINE_REPORT.md",
-    "kaggle_code_dataset": "/kaggle/input/datasets/asapacsinfarland/biohub-code/biohub-cell-tracking",
-    "kaggle_pure_wheels": "/kaggle/input/datasets/asapacsinfarland/wheels",
-    "kaggle_linux_wheels": "/kaggle/input/datasets/asapacsinfarland/linux-wheel",
-    "kaggle_competition": "/kaggle/input/competitions/biohub-cell-tracking-during-development"
+    "validated_baseline_submission": "outputs/public_test_baseline/submission/submission.csv"
   }
 }

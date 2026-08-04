@@ -93,6 +93,22 @@
   copy to `/kaggle/working/submission.csv`. Expected classical counts ~38077 nodes / 32917 edges.
 - Cursor Cloud / My Machines is a poor fit for campus-only HPC; work on `login01` or Kaggle.
 
+## Learned pipeline gaps (2026-08-05)
+
+- Authoritative need-to-do note: `docs/NEED_TO_DO.md`.
+- Unit tests ≠ detector accuracy; no recorded detector CV or learned LB yet.
+- Priority order locked in that note: (1) video-fold detector metrics at 2/4/6 µm,
+  (2) frame cache + nodes-by-time + stochastic aug + 60/20/20 pos/random/hard-neg,
+  (3) anisotropic vs isotropic U-Net ablations, (4) association from OOF detections
+  not perfect GEFF, (5) node rejection after calibration.
+- Known concrete bugs/gaps called out there: deterministic per-index RNG (same
+  jitter every epoch), isotropic Conv3d/MaxPool on anisotropic voxels, association
+  features zeroed under GEFF-centroid training, ILP selects edges not nodes,
+  dense-frame percentile threshold + plateau NMS duplicates.
+- Do data-pipeline caching/augmentation before renting a powerful GPU.
+- `artifacts/association/model.json` exists from GEFF-only training (14 features);
+  treat as geometric baseline only until OOF retrain.
+
 ## Current handoff
 
 - Host `login01` has official `data/competition/test` (4 zarrs) and local validated
@@ -104,9 +120,9 @@
   (`require_matched_daughter`, min/max daughter separation, mid-point cap, ≤1 div/frame).
 - Learned modular pipeline also exists (`docs/ARCHITECTURE.md`, `configs/training.yaml`,
   `configs/architecture.yaml`): heatmap U-Net, sparse candidates, learned association, ILP.
-  Full GPU fitting still needs a host with PyTorch + train stores.
-- Immediate human action: finish Kaggle Save Version (Internet off) + Submit using the
-  offline wheels notebook cell; then optionally train learned models.
+  Full GPU fitting still needs a host with PyTorch + train stores; follow `docs/NEED_TO_DO.md`.
+- Immediate human action: finish Kaggle Save Version (Internet off) + Submit classical
+  baseline if needed; next engineering work starts from the need-to-do order above.
 - Linux `.venv` on login01: `.venv/bin/python` / `.venv/bin/biohub-track`.
 
 ## Verified Milestone 1 foundation
