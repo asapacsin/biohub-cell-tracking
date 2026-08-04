@@ -1,0 +1,51 @@
+# Architecture experiment without U-Net: blob detections + sparse graph + ILP.
+runtime:
+  seed: 42
+
+preprocessing:
+  lower_percentile: 1.0
+  upper_percentile: 99.8
+  clip: true
+
+detection:
+  method: blob
+  lower_percentile: 1.0
+  upper_percentile: 99.8
+  gaussian_sigma_um: 1.5
+  threshold: 0.08
+  minimum_separation_um: 4.0
+
+association:
+  candidate_graph:
+    max_neighbors: 8
+    max_gap: 2
+    max_speed_um_per_frame: 15.0
+    divisions_enabled: true
+    max_division_children: 6
+    max_daughter_separation_um: 16.0
+  scorer:
+    kind: handcrafted
+    link_bias: 15.0
+    distance_weight: 1.0
+    confidence_weight: 4.0
+    gap_penalty: 2.0
+    appearance_weight: 0.0
+    intensity_weight: 0.0
+    volume_weight: 0.0
+    temporal_context_weight: 0.0
+    division_bias: 18.0
+    division_midpoint_weight: 1.5
+    division_separation_weight: 0.2
+  optimizer:
+    method: ilp
+    minimum_score: 0.0
+    time_limit_seconds: 120.0
+
+postprocessing:
+  minimum_track_length: 1
+  remove_isolated_short_tracks: false
+
+submission:
+  node_id_start: 1
+  sort_rows: true
+  strict_validation: true

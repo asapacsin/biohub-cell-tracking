@@ -1,0 +1,18 @@
+---
+description: Agent handoff protocol — read/update .agents state and memory
+alwaysApply: true
+---
+
+# Agent handoff
+
+Before changing this repository, read `.agents/state.json` and `.agents/memory.md`.
+
+After a meaningful work session:
+
+1. Update `.agents/state.json` (milestone, verified commands, blockers, next action).
+2. Append only durable facts/decisions to `.agents/memory.md`.
+3. Never record secrets, credentials, private dataset contents, or speculative facts.
+4. Keep official-data findings traceable to an inspection command and source path.
+5. Do not mark a milestone complete unless its listed verification has passed.
+
+Official competition files and `sample_submission.csv` are the source of truth. Agent memory is a handoff aid, not the competition spec.

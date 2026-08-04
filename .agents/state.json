@@ -1,41 +1,43 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-04T23:13:10+08:00",
+  "updated_at": "2026-08-05T00:55:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Concrete learned training and inference pipeline",
-  "status": "complete",
-  "host": "windows",
+  "active_milestone": "Kaggle notebook submit (classical baseline) + learned pipeline ready to train",
+  "status": "in_progress",
+  "host": "linux-login01",
   "completed": [
-    "Preserved the validated classical public-test baseline as a fallback",
-    "Implemented same-stem training Zarr/GEFF discovery and validated GEFF graph loading",
-    "Implemented lazy positive-centered 3D training patches with physical Gaussian targets",
-    "Implemented an encoder-decoder 3D U-Net, BCE-plus-Dice fitting, dataset-level validation splits, best-checkpoint retention, and TorchScript/manifest export",
-    "Implemented multi-seed detector ensemble training and overlapping sliding-window inference with flip TTA",
-    "Implemented sparse continuation, gap, and atomic division candidates with geometry, motion, confidence, appearance, intensity, volume, and temporal-context features",
-    "Implemented class-balanced learned association fitting, portable JSON artifacts, and runtime learned scoring",
-    "Implemented ILP lineage optimization with single-parent and single-event constraints plus greedy fallback",
-    "Added train-detector, train-detector-ensemble, train-association, and learned run CLI paths",
-    "Documented training and inference commands and kept artifact outputs gitignored",
-    "Verified 58 tests, Ruff, strict mypy, learned-branch inference, artifact round trips, CLI discovery, and config parsing"
+    "Classical public-test baseline: blob + greedy NN + GEFF-tuned division post-pass",
+    "Validated local submission: 38077 nodes + 32917 edges + 302 divisions",
+    "GitHub main pushed (baseline + division work)",
+    "Kaggle code competition path understood: notebook-only submit, Internet must be off",
+    "Kaggle datasets attached by user: biohub-code, wheels (py3-none-any), linux-wheel (manylinux numcodecs/crc32c)",
+    "Offline Kaggle install pattern proven: pip install --no-deps pure wheels + manylinux numcodecs, then run baseline on competition test/",
+    "Learned architecture implemented (Windows session): U-Net detector, association scorer, ILP optimizer, training CLIs (58 tests there)"
   ],
-  "in_progress": [],
+  "in_progress": [
+    "Finish Kaggle Save Version with Internet off and Submit to Competition using offline wheels notebook"
+  ],
   "blocked": [],
   "last_verified_commands": [
-    ".venv\\Scripts\\python.exe -m pytest -q --basetemp outputs\\pytest_tmp (58 passed)",
-    ".venv\\Scripts\\python.exe -m ruff check . (passed)",
-    ".venv\\Scripts\\python.exe -m mypy src (42 source files, no issues)",
-    ".venv\\Scripts\\python.exe -m biohub_tracker.cli --help (training and inference commands listed)",
-    ".venv\\Scripts\\python.exe -c \"from biohub_tracker.config import load_config; from biohub_tracker.training.config import load_training_config; c=load_config('configs/architecture.yaml'); t=load_training_config('configs/training.yaml'); print(c.detection_method, c.association_scorer_kind, t.detector_seeds)\" (learned learned_linear (42, 137))"
+    "Local: submission.csv exists (70995 lines) under outputs/public_test_baseline/submission/",
+    "Kaggle (user): installed zarr 3.3.0 + numcodecs 0.16.5 from datasets; started 44b6_0113de3b with shape (100,64,256,256)",
+    "Windows prior session: 58 pytest + ruff + mypy on learned pipeline (see prior state)"
   ],
-  "next_action": "On a host with the official training stores and PyTorch/GPU, run train-detector-ensemble and train-association, then validate the learned submission against the preserved baseline",
+  "next_action": "On Kaggle: confirm /kaggle/working/submission.csv ~38077 nodes / 32917 edges, Save Version Internet off, Submit. In parallel on GPU host: train-detector-ensemble + train-association when ready.",
   "needs_human": [
-    "This Windows checkout currently has no data/competition/train directory and no PyTorch installation, so full fitting was not executed here"
+    "Complete Kaggle Submit click after successful offline notebook version",
+    "GPU host with PyTorch + train stores for full learned fitting (Windows checkout lacked them; login01 has competition data)"
   ],
   "artifacts": {
     "architecture": "docs/ARCHITECTURE.md",
     "training_config": "configs/training.yaml",
     "learned_config": "configs/architecture.yaml",
+    "baseline_config": "configs/baseline.yaml",
     "validated_baseline_submission": "outputs/public_test_baseline/submission/submission.csv",
-    "baseline_report": "outputs/public_test_baseline/BASELINE_REPORT.md"
+    "baseline_report": "outputs/public_test_baseline/BASELINE_REPORT.md",
+    "kaggle_code_dataset": "/kaggle/input/datasets/asapacsinfarland/biohub-code/biohub-cell-tracking",
+    "kaggle_pure_wheels": "/kaggle/input/datasets/asapacsinfarland/wheels",
+    "kaggle_linux_wheels": "/kaggle/input/datasets/asapacsinfarland/linux-wheel",
+    "kaggle_competition": "/kaggle/input/competitions/biohub-cell-tracking-during-development"
   }
 }

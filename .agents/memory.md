@@ -70,22 +70,44 @@
 - Cursor project rules live under `.cursor/rules/` and summarize the same handoff contract for the
   IDE agent; they do not replace `.agents/state.json` / `.agents/memory.md`.
 
+## Kaggle code-competition submit (2026-08-04/05)
+
+- This competition is **notebook-only**. Internet must be **Off** for Submit.
+- Competition data mount:
+  `/kaggle/input/competitions/biohub-cell-tracking-during-development` (`test/*.zarr`).
+- User code dataset:
+  `/kaggle/input/datasets/asapacsinfarland/biohub-code/biohub-cell-tracking`
+  (do **not** point `COMP_ROOT` at `data/sample` / `tiny.zarr` inside that zip).
+- Offline package installs: Kaggle cold start often lacks `zarr` / sometimes `numcodecs`.
+  - Pure wheels dataset: `/kaggle/input/datasets/asapacsinfarland/wheels`
+    (`donfig`, `packaging`, `typing_extensions`, `zarr-*-py3-none-any.whl`).
+  - Linux wheels dataset: `/kaggle/input/datasets/asapacsinfarland/linux-wheel`
+    (`numcodecs-*-manylinux*.whl`, `google_crc32c` / `crc32c` manylinux).
+  - Install with `pip install --no-deps <exact.whl>`; never `--find-links` the Win
+    `win_amd64` wheels in the pure folder (pip may try them and fail).
+- Warm editor sessions can show `import zarr` succeeding without install; **Submit is cold**.
+  Always verify after Restart + Internet Off.
+- Node rows correctly use `source_id=target_id=-1`; edge rows carry real IDs. Sorting puts
+  all nodes before edges — previewing the CSV head is misleading.
+- Proven Kaggle path: offline install → `run_public_test_baseline(COMP_ROOT, ...)` →
+  copy to `/kaggle/working/submission.csv`. Expected classical counts ~38077 nodes / 32917 edges.
+- Cursor Cloud / My Machines is a poor fit for campus-only HPC; work on `login01` or Kaggle.
+
 ## Current handoff
 
-- Public-test baseline:
+- Host `login01` has official `data/competition/test` (4 zarrs) and local validated
+  `outputs/public_test_baseline/submission/submission.csv` (~38077 nodes / 32917 edges / 302 divisions).
+- Classical baseline command:
   `scripts/run_public_test_baseline.py --input-dir data/competition --output-dir outputs/public_test_baseline --config configs/baseline.yaml`
-- Division post-pass is wired end-to-end (`DivisionConfig` from YAML → tracker →
-  `observations_to_graph` parent→daughter edges; tracks CSV includes `division_score`).
-- `configs/baseline.yaml` has `division_enabled: true` with GEFF-tuned knobs
+- Division post-pass is end-to-end (`DivisionConfig` from YAML → tracker →
+  `observations_to_graph` parent→daughter edges). Knobs in `configs/baseline.yaml`
   (`require_matched_daughter`, min/max daughter separation, mid-point cap, ≤1 div/frame).
-- Validated tuned submission: **38077 nodes + 32917 edges**; **302** divisions
-  (all branching parents out-degree exactly 2). Earlier over-accept: 3278 → 569 → 302.
-- Train GEFF labeled rate is ~0.8 divisions/video (sparse labels); 302 across 4 test videos
-  is still a geometric heuristic upper bound, not GT.
-- Artifacts under `outputs/public_test_baseline/`.
-- Next: optional Kaggle submit or GEFF precision audit.
-- Linux `.venv` is ready; use `.venv/bin/python` / `.venv/bin/biohub-track`.
-- Cursor Cloud / My Machines is a poor fit for campus-only HPC; use local Agent on `login01`.
+- Learned modular pipeline also exists (`docs/ARCHITECTURE.md`, `configs/training.yaml`,
+  `configs/architecture.yaml`): heatmap U-Net, sparse candidates, learned association, ILP.
+  Full GPU fitting still needs a host with PyTorch + train stores.
+- Immediate human action: finish Kaggle Save Version (Internet off) + Submit using the
+  offline wheels notebook cell; then optionally train learned models.
+- Linux `.venv` on login01: `.venv/bin/python` / `.venv/bin/biohub-track`.
 
 ## Verified Milestone 1 foundation
 
@@ -110,7 +132,7 @@
 - Milestone 0: discover/inspect official competition layout without loading full volumes.
 - Milestone 1: typed models, Zarr metadata reader, annotation discovery, submission writer +
   strict validator, deterministic tiny fixture, guarded `run` pipeline.
-- Milestone 2+: classical detector (`detection/`), then tracker (`tracking/`); `pipeline.run_prediction_pipeline` currently raises `NotImplementedError`.
+- Milestone 2+: classical detector + greedy NN + division baseline; learned detector/association/ILP path also present.
 - Submission columns (fixed order): `id,dataset,row_type,node_id,t,z,y,x,source_id,target_id`.
 - Nodes are per-detection; edges encode continuation/lineage; division = one parent, two outgoing edges; target never inherits source `node_id`.
-- YAML config numeric values are unconfirmed hypotheses until tuned on real training data.
+- YAML config numeric values remain hypotheses until scored / GEFF-validated.

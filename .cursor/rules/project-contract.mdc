@@ -1,0 +1,29 @@
+---
+description: Biohub cell-tracking milestones, graph contract, and gates
+alwaysApply: true
+---
+
+# Project contract
+
+Local-first Kaggle cell-tracking infrastructure. Milestones 0–1 only are implemented.
+
+## What exists
+
+- CLI `biohub-track`: `inspect`, `validate-data`, `validate-submission`, `run` (Milestone 2 detection).
+- Metadata-first Zarr reader; GEFF annotation discovery; strict submission writer/validator.
+- Milestone 2: blob detector produces node-only graphs. Tracker/division are Milestone 3.
+
+## Graph / submission
+
+- Every detection is its own `node_id` (unique per dataset; may restart next dataset).
+- Continuity and divisions are directed edges only; division = one source, two outgoing edges.
+- Columns: `id,dataset,row_type,node_id,t,z,y,x,source_id,target_id`.
+- Node coords are integer voxels `(z,y,x)`; distances use physical coords from metadata spacing.
+- Numeric submission columns must be NumPy `int64`.
+
+## Hard gates
+
+- Do not invent Zarr shapes, axes, spacing, annotation schema, or dtypes — discover via `inspect`.
+- Do not start Milestone 2 detector until `validate-data` passes on the official download under `data/competition`.
+- YAML numeric params are hypotheses until tuned on training data.
+- Synthetic fixture under `data/sample` is for infrastructure tests only.
