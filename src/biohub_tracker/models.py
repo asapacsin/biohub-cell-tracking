@@ -69,6 +69,8 @@ class DetectionCandidate:
     score: float
     volume: float | None = None
     intensity: float | None = None
+    appearance_embedding: tuple[float, ...] | None = None
+    annotation_id: int | None = None
 
 
 @dataclass(slots=True)
@@ -105,3 +107,22 @@ class FileTableInspection:
     dtypes: dict[str, str]
     row_count: int | None
     sample_rows: tuple[dict[str, Any], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class LineageNode:
+    node_id: int
+    t: int
+    z: float
+    y: float
+    x: float
+
+    @property
+    def position_zyx(self) -> tuple[float, float, float]:
+        return self.z, self.y, self.x
+
+
+@dataclass(frozen=True, slots=True)
+class LineageGraph:
+    nodes: tuple[LineageNode, ...]
+    edges: frozenset[tuple[int, int]]

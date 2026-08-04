@@ -1,5 +1,41 @@
 # Durable project memory
 
+## Modular learned architecture (2026-08-04)
+
+- The primary `pipeline.run_prediction_pipeline` composition is now detector -> sparse temporal
+  candidates -> replaceable scorer -> global optimizer -> post-processing -> submission graph.
+- Learned detection uses the framework-neutral `HeatmapPredictor` contract; the included runtime
+  adapter loads TorchScript heatmap models and supports model/seed ensembling plus axis-flip TTA.
+- The heatmap decoder performs adaptive thresholding, physical-unit anisotropic 3D NMS, and local
+  subvoxel refinement. The classical blob detector remains a selectable fallback and enters the
+  same downstream graph pipeline.
+- Sparse association candidates include one-frame links, configurable gap links, and atomic paired
+  division events. Edge features carry geometry/motion/confidence plus optional appearance,
+  intensity, volume, and temporal-density context.
+- The included reference scorer is deterministic and replaceable through `CandidateGraphScorer`.
+  The concrete learned scorer is a class-balanced logistic event model with a portable JSON
+  artifact; richer Trackastra/HOCT-style adapters can use the same scorer contract.
+- The ILP optimizer enforces at most one incoming parent and at most one outgoing event per node;
+  division events produce two edges atomically. It falls back to a constraint-aware greedy solver
+  if MILP fails or is explicitly selected.
+- Training now includes same-stem Zarr/GEFF pairing, lazy positive-centred 3D patches, physical-unit
+  Gaussian targets, an encoder-decoder 3D U-Net, BCE-plus-Dice fitting, dataset-level validation
+  splits, best-checkpoint retention, TorchScript export, and multi-seed ensemble commands.
+- Learned full-frame inference uses overlapping patch windows before model/seed and flip-TTA
+  averaging, so patch-trained U-Nets are not applied to the entire volume in one allocation.
+- Sparse candidate labels still use `-1` for detections without an explicit GEFF-node match. The
+  learned association trainer fits known edge and atomic-division event labels only.
+- Target design: `docs/ARCHITECTURE.md`; training config: `configs/training.yaml`; learned inference
+  config: `configs/architecture.yaml`.
+- Windows verification on 2026-08-04: 58 pytest tests passed using a repository-local basetemp;
+  Ruff passed; strict mypy passed for 42 source files. The local basetemp avoids an unrelated access
+  denial in `%TEMP%/pytest-of-Administrator`.
+- This Windows checkout had neither PyTorch nor `data/competition/train` on 2026-08-04. The model
+  training code and artifact paths were verified structurally and with data/artifact unit tests,
+  but full GPU fitting must run on the host that holds the official stores. Earlier memory saying
+  the full dataset is under `data/competition` refers to the previously inspected host, not this
+  checkout.
+
 ## Sources of truth
 
 - The local `sample_submission.csv`, test `.zarr` stores, training images, annotations, and Zarr

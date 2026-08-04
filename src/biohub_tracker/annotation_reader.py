@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from biohub_tracker.models import FileTableInspection
+from biohub_tracker.models import FileTableInspection, LineageGraph, LineageNode
 
 TABLE_SUFFIXES = {".csv", ".tsv", ".parquet", ".json", ".jsonl"}
 STORE_SUFFIXES = {".zarr", ".geff"}
@@ -116,6 +116,50 @@ def inspect_geff(path: str | Path, sample_rows: int = 5) -> FileTableInspection:
         row_count=n_nodes + int(edge_ids.shape[0]),
         sample_rows=tuple(sample),
     )
+
+
+def read_geff_graph(path: str | Path) -> LineageGraph:
+    """Read the labeled nodes and directed edges from one GEFF lineage store."""
+    try:
+        import zarr
+    except ImportError as exc:  # pragma: no cover - environment error
+        raise RuntimeError("GEFF support requires the 'zarr' package") from exc
+
+    source = Path(path)
+    root: Any = zarr.open_group(str(source), mode="r")
+    attrs = dict(root.attrs) if hasattr(root.attrs, "keys") else {}
+    geff = attrs.get("geff")
+    if not isinstance(geff, dict):
+        raise ValueError(f"GEFF store {source} is missing attributes.geff metadata")
+    if geff.get("directed") is False:
+        raise ValueError(f"GEFF lineage graph must be directed: {source}")
+
+    node_group: Any = root["nodes"]
+    props: Any = node_group["props"]
+    ids = np.asarray(node_group["ids"])
+    values = {name: np.asarray(props[name]["values"]) for name in ("t", "z", "y", "x")}
+    if any(array.shape != ids.shape for array in values.values()):
+        raise ValueError(f"GEFF node properties do not align with node IDs in {source}")
+    edge_ids = np.asarray(root["edges"]["ids"])
+    if edge_ids.ndim != 2 or edge_ids.shape[1] != 2:
+        raise ValueError(f"GEFF edges/ids must have shape (N, 2); got {edge_ids.shape}")
+
+    nodes = tuple(
+        LineageNode(
+            node_id=int(ids[index]),
+            t=int(values["t"][index]),
+            z=float(values["z"][index]),
+            y=float(values["y"][index]),
+            x=float(values["x"][index]),
+        )
+        for index in range(len(ids))
+    )
+    node_ids = {node.node_id for node in nodes}
+    edges = frozenset((int(row[0]), int(row[1])) for row in edge_ids)
+    dangling = {node_id for edge in edges for node_id in edge if node_id not in node_ids}
+    if dangling:
+        raise ValueError(f"GEFF edges reference missing node IDs: {sorted(dangling)[:10]}")
+    return LineageGraph(nodes=nodes, edges=edges)
 
 
 def inspect_table(path: str | Path, sample_rows: int = 5) -> FileTableInspection:

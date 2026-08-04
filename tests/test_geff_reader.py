@@ -5,7 +5,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from biohub_tracker.annotation_reader import discover_annotation_files, inspect_geff
+from biohub_tracker.annotation_reader import (
+    discover_annotation_files,
+    inspect_geff,
+    read_geff_graph,
+)
 
 
 def _write_tiny_geff(path: Path) -> None:
@@ -45,3 +49,6 @@ def test_discover_and_inspect_geff(tmp_path: Path) -> None:
     assert report.dtypes["estimated_number_of_nodes"] == "10"
     assert report.sample_rows[0]["node_id"] == 1
     assert report.sample_rows[-1]["target_id"] == 3
+    graph = read_geff_graph(geff)
+    assert [node.node_id for node in graph.nodes] == [1, 2, 3]
+    assert graph.edges == {(1, 2), (2, 3)}

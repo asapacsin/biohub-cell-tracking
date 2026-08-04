@@ -32,7 +32,7 @@ def link_consecutive_frames(
 ) -> tuple[list[TrackObservation], int, dict[str, float | int]]:
     """Greedy one-to-one nearest-neighbour linking, optional division post-pass."""
     if not current_detections:
-        stats = {
+        empty_stats = {
             "matched_links": 0,
             "new_detections": 0,
             "ended_tracks": len(previous_observations),
@@ -43,7 +43,7 @@ def link_consecutive_frames(
             "division_candidates": 0,
             "continuations_revoked": 0,
         }
-        return [], next_cell_id, stats
+        return [], next_cell_id, empty_stats
 
     if not previous_observations:
         initial = [
@@ -61,7 +61,7 @@ def link_consecutive_frames(
             )
             for index, detection in enumerate(current_detections)
         ]
-        stats = {
+        initial_stats = {
             "matched_links": 0,
             "new_detections": len(initial),
             "ended_tracks": 0,
@@ -72,7 +72,7 @@ def link_consecutive_frames(
             "division_candidates": 0,
             "continuations_revoked": 0,
         }
-        return initial, next_cell_id + len(initial), stats
+        return initial, next_cell_id + len(initial), initial_stats
 
     previous_points = _physical_points(
         [obs.centroid_zyx for obs in previous_observations], voxel_spacing_zyx

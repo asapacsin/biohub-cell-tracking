@@ -29,6 +29,7 @@ dev = [
   "types-PyYAML>=6.0",
 ]
 parquet = ["pyarrow>=17"]
+ml = ["torch>=2.5"]
 
 [project.scripts]
 biohub-track = "biohub_tracker.cli:app"

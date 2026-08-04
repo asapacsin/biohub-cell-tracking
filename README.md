@@ -1,8 +1,12 @@
 # Biohub – Cell Tracking During Development
 
-Local-first infrastructure for inspecting the official competition data and producing strict
-node-and-edge Kaggle submissions. Includes a **public-test baseline**: blob detection + greedy
-nearest-neighbour linking with an optional division post-pass.
+Local-first learned cell-detection and lineage-tracking architecture for the Biohub competition.
+It combines anisotropy-aware 3D detection, sparse temporal candidates, replaceable association
+scoring, globally constrained lineage optimization, and strict node/edge submission validation.
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the complete target design and package
+contracts. The validated classical public-test baseline remains available as a reproducible fallback
+while learned model artifacts are trained.
 
 ## Public-test baseline
 
@@ -35,6 +39,15 @@ Internal tracking uses persistent `cell_id` values. The competition export uses 
 store `parent_id` (= parent `cell_id`) and export as two outgoing edges from the parent node.
 Toggle via `tracking.division_enabled` in `configs/baseline.yaml`.
 
+## Modular inference pipeline
+
+The primary `biohub-track run` path composes metadata validation, physical-unit preprocessing,
+learned heatmap ensembling (or the blob fallback), adaptive decoding, sparse link/gap/division
+candidates, replaceable scoring, global ILP selection, graph cleanup, and strict submission export.
+
+Use `configs/local_baseline.yaml` for a dependency-light smoke test. The learned configuration is
+`configs/architecture.yaml`; update its explicit model artifact paths before running it.
+
 ## Current authoritative-data status
 
 Official volumes are Zarr v3 with axes `(t,z,y,x)` and spacing `(1.625, 0.40625, 0.40625)` µm.
@@ -61,6 +74,12 @@ py -3.12 -m venv .venv
 python -m pip install -e ".[dev]"
 ```
 
+Detector training additionally requires the ML extra:
+
+```powershell
+python -m pip install -e ".[dev,ml]"
+```
+
 ## Commands
 
 ```powershell
@@ -69,15 +88,19 @@ biohub-track validate-data --competition-root data/competition
 biohub-track validate-submission `
   --submission outputs/baseline/submission.csv `
   --competition-root data/competition
+biohub-track train-detector-ensemble --competition-root data/competition --config configs/training.yaml
+biohub-track train-association --competition-root data/competition --config configs/training.yaml
+biohub-track run --competition-root data/competition --config configs/architecture.yaml
 ```
 
 `inspect` reads group/array metadata and small table samples but never loads a full image volume. It
 writes `outputs/inspection_report.json`. `validate-data` fails if an authoritative input is missing
 or its metadata cannot be interpreted without guessing.
 
-The `run` command is present as a stable interface but raises an explicit `NotImplementedError` in
-Milestones 0–1. That guard prevents an empty or invented tracker from being mistaken for a working
-baseline.
+`train-detector` fits one 3D U-Net; `train-detector-ensemble` fits every configured seed. Each writes
+a checkpoint, TorchScript heatmap predictor, and JSON training manifest. `train-association` fits the
+sparse-event scorer and writes its portable JSON artifact. `run` loads those artifacts and executes
+the globally optimized inference pipeline.
 
 ## Competition graph contract
 
@@ -115,8 +138,7 @@ It contains nodes 1–7 and edges `1→3`, `2→4`, `3→5`, `3→6`, `4→7`, i
 ```python
 from biohub_tracker.submission import build_submission, validate_submission
 
-# Available after later milestones implement the guarded pipeline:
-# graphs = run_prediction_pipeline(competition_root, config)
+graphs = run_prediction_pipeline(competition_root, config)
 submission = build_submission(graphs)
 validate_submission(submission, competition_root)
 ```
@@ -131,13 +153,18 @@ notebooks/                   guarded future Kaggle adapter
 scripts/                     inspection and fixture entry points
 src/biohub_tracker/
   annotation_reader.py       table discovery and schema samples
+  association/               sparse candidates, scoring, global optimization
   coordinates.py             centralized voxel/physical conversions
+  detection/                 blob fallback and learned heatmap inference/decoding
   inspection.py              competition discovery and JSON reporting
   models.py                  typed data and graph models
+  preprocessing.py           metadata checks and robust intensity normalization
+  postprocessing.py          graph cleanup and optional short-track filtering
   storage.py                 local storage abstraction
   zarr_reader.py             lazy metadata-first frame reader
   submission/                exact writer and strict validator
-tests/                       Milestone 0–1 unit/integration tests
+  training/                  Zarr/GEFF datasets, targets, labels, and model trainers
+tests/                       unit and integration tests
 .agents/                     persistent handoff state and durable memory
 ```
 
@@ -149,6 +176,6 @@ raw private data, or silently promote guesses to facts.
 
 ## Next milestone gate
 
-Do not begin the classical detector until `validate-data` passes on the official download and the
-resulting report has been reviewed. All numerical values in the YAML files are unconfirmed starting
-hypotheses and must be tuned on training data.
+Run cross-validation on the official training stores, retain immutable artifact manifests, and
+compare the learned submission against the validated public-test baseline. Numerical values in the
+YAML files remain starting hypotheses until that evaluation is recorded.
