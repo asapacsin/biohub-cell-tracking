@@ -1,36 +1,39 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-06T09:45:00+08:00",
+  "updated_at": "2026-08-06T15:10:33+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "I/O training fixes landed; GPU job 4556 still running old code",
-  "status": "in_progress",
-  "host": "linux-login01",
+  "active_milestone": "Clean public V106 local migration and tracked legacy cleanup complete",
+  "status": "complete",
+  "host": "windows-local",
   "completed": [
-    "Kaggle-ready classical submission: outputs/kaggle_submission/submission.csv (38077 nodes / 32917 edges)",
-    "Architecture blob CSVs under outputs/kaggle_submission/",
-    "Documented and implemented detector I/O fixes (frame-grouped batches, Zarr open cache, anchor empty crops, AMP/checkpoints/resume)",
-    "Zarr chunk audit: all 199 train stores chunks=(1,64,256,256) whole-frame — Fix5 deferred"
+    "Selected Yusuke Togashi clean notebook Version 106 (public 0.908; best 0.908 V96; Apache-2.0)",
+    "Preserved exact notebook SHA-256 5adc99aef3b61f2d8c5da5253eb1df13262986e8879bf6f630b5c1b5fa345d9d",
+    "Added configurable biohub_pipeline package, CLI, dry-run, submission validation, exact vendored postprocessing and official-spec-lite utilities",
+    "Removed audited tracked blob, nearest-neighbour, custom training, old configuration, test, script, log, and documentation paths",
+    "Post-cleanup verification: 11 pytest tests passed; compileall passed; Ruff passed; CLI help and dry-run passed"
   ],
-  "in_progress": [
-    "srun job 4556 still training with pre-fix code on um-gpu01 (do not cancel unless wall budget insufficient)",
-    "Next GPU submit should use updated configs/training.yaml + remote_train_only.sh (epochs=3, batch=8, frame_grouped)"
-  ],
+  "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "pytest: 71 passed",
-    "chunk audit: Counter({(1, 64, 256, 256): 199})"
+    "python scripts/vendor_clean_v106.py",
+    "python -m compileall -q src/biohub_pipeline scripts/vendor_clean_v106.py tests",
+    "python -m pytest -q --basetemp outputs/pytest_clean_final (11 passed)",
+    "ruff check src scripts tests",
+    "python -m biohub_pipeline.run --config configs/clean_v106.yaml --dry-run"
   ],
-  "next_action": "After job 4556 finishes or times out, resubmit stage+train with I/O fixes; fetch learned CSV if any.",
+  "next_action": "Obtain the exact support artifact and competition data, then run dry-run with paths before any reviewed full GPU inference.",
   "needs_human": [
-    "Kaggle submit classical outputs/kaggle_submission/submission.csv anytime; learned CSV only after a successful GPU run with new code"
+    "Provide pilkwang/biohub-tracking-support-pack-50ep-v1 and official competition stores for real inference or CV"
   ],
   "artifacts": {
-    "kaggle_submission": "outputs/kaggle_submission/submission.csv",
-    "io_fix_note": "docs/TRAINING_IO_FIXES.md",
-    "stage_and_train_log": "logs/slurm/stage_and_train.log"
+    "upstream_notebook": "upstream_clean_v106/clean-approach-lightweight-local-cv-no-hack.ipynb",
+    "config": "configs/clean_v106.yaml",
+    "entry_point": "python -m biohub_pipeline.run",
+    "source_record": "upstream_clean_v106/SOURCE.md",
+    "removal_record": "docs/REMOVALS.md"
   },
   "notes": [
-    "login01 /home is local disk; GPU nodes mount different NFS /home",
-    "Job 4556 has no intermediate checkpoints — cancel discards progress"
+    "No training, full inference, real submission generation, or leaderboard reproduction was performed.",
+    "Data, outputs, weights, credentials, submissions, Git history, and the legacy_baseline tag were preserved."
   ]
 }

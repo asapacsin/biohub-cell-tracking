@@ -1,181 +1,76 @@
-# Biohub – Cell Tracking During Development
+# Biohub clean V106 pipeline
 
-Local-first learned cell-detection and lineage-tracking architecture for the Biohub competition.
-It combines anisotropy-aware 3D detection, sparse temporal candidates, replaceable association
-scoring, globally constrained lineage optimization, and strict node/edge submission validation.
+This repository packages the strongest accessible clean public baseline selected under the
+project's no-hacking rules: Yusuke Togashi's **“Clean Approach + Lightweight Local CV | No Hack,”
+Version 106**. Kaggle reports a public score of **0.908** for V106 and a best score of **0.908 at
+V96**. V106 was selected because it is the newest complete accessible source tied at that clean
+best score and includes fixed-8 local validation. The score has **not** been reproduced locally.
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the complete target design and package
-contracts. The validated classical public-test baseline remains available as a reproducible fallback
-while learned model artifacts are trained.
+Source: <https://www.kaggle.com/code/yusuketogashi/clean-approach-lightweight-local-cv-no-hack>
 
-## Public-test baseline
+The preserved notebook is under `upstream_clean_v106/`. Its SHA-256 is
+`5adc99aef3b61f2d8c5da5253eb1df13262986e8879bf6f630b5c1b5fa345d9d`. The notebook and the
+vendored notebook-owned functions are Apache-2.0 licensed; see `LICENSE` and the source record.
 
-Process all 4 public test Zarr videos, save detections/tracks/visualizations, and write a validated
-submission:
+## What the pipeline uses
 
-```bash
-.venv/bin/python scripts/run_public_test_baseline.py \
-  --input-dir data/competition \
-  --output-dir outputs/public_test_baseline \
-  --config configs/baseline.yaml
-```
+- an external 3D U-Net detector and node-transformer edge scorer from
+  `pilkwang/biohub-tracking-support-pack-50ep-v1`;
+- `weights/unet_transformer/split_0/edge_predictor_best.pth`;
+- spatial D4 detector test-time augmentation;
+- ILP graph construction with the upstream appearance/disappearance/division weights;
+- motion relinking, one-frame gap repair, density-adaptive gating, safe divisions, isolated-node
+  pruning, six-node minimum component filtering, conservative five-node rescue, and line-fit
+  smoothing;
+- GEFF-to-submission conversion and the notebook's official-spec-lite evaluation utilities.
 
-Optional: `--video-id NAME`, `--start-frame N`, `--end-frame N`, `--no-save-visualizations`.
+No replacement detector, fake weights, training path, or independently designed tracker is
+included.
 
-Outputs:
-
-```text
-outputs/public_test_baseline/
-  detections/<video>.csv
-  tracks/<video>.csv
-  visualizations/<video>/frame_XXXX.png   # MIP overlays with cell_id
-  diagnostics/<video>.json
-  submission/submission.csv
-  baseline_report.json
-```
-
-Internal tracking uses persistent `cell_id` values. The competition export uses per-detection
-`node_id` rows plus continuation/lineage `edge` rows (see sample submission). Division children
-store `parent_id` (= parent `cell_id`) and export as two outgoing edges from the parent node.
-Toggle via `tracking.division_enabled` in `configs/baseline.yaml`.
-
-## Modular inference pipeline
-
-The primary `biohub-track run` path composes metadata validation, physical-unit preprocessing,
-learned heatmap ensembling (or the blob fallback), adaptive decoding, sparse link/gap/division
-candidates, replaceable scoring, global ILP selection, graph cleanup, and strict submission export.
-
-Use `configs/local_baseline.yaml` for a dependency-light smoke test. The learned configuration is
-`configs/architecture.yaml`; update its explicit model artifact paths before running it.
-
-## Current authoritative-data status
-
-Official volumes are Zarr v3 with axes `(t,z,y,x)` and spacing `(1.625, 0.40625, 0.40625)` µm.
-Training labels are `.geff` graphs. Place the Kaggle download under `data/competition`.
-
-Expected inputs are discovered, not assumed:
-
-- exactly one `sample_submission.csv` anywhere below the competition root;
-- test stores below `test/**/*.zarr`;
-- training image stores below `train/**/*.zarr`, with their metadata inspected separately;
-- table-like training annotations discovered by name/location.
-
-The reader accepts axis definitions only from OME-NGFF `multiscales.axes`, `_ARRAY_DIMENSIONS`, or
-Zarr `dimension_names`. It requires coordinate scale metadata and refuses to guess either axes or
-voxel spacing.
-
-## Setup
-
-Python 3.12 is the primary target.
+## Local setup and validation
 
 ```powershell
-py -3.12 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
+python -m venv .venv
+.venv\Scripts\python -m pip install -e ".[dev]"
+.venv\Scripts\python -m biohub_pipeline.run --help
+.venv\Scripts\python -m biohub_pipeline.run --config configs\clean_v106.yaml --dry-run
+.venv\Scripts\python -m pytest -q
 ```
 
-Detector training additionally requires the ML extra:
+Dry-run validates the configuration, paths, and dependency availability without loading a model.
+It succeeds when the real data and weights are absent and reports exactly what is missing.
+
+## Future Kaggle/server execution
+
+After obtaining the competition test stores and the exact support artifact:
 
 ```powershell
-python -m pip install -e ".[dev,ml]"
+python -m biohub_pipeline.run `
+  --data-dir D:\path\to\competition\test `
+  --weights-dir D:\path\to\support-artifact `
+  --support-dir D:\path\to\support-artifact `
+  --config configs\clean_v106.yaml `
+  --output submission.csv
 ```
 
-## Commands
+Install the `runtime` extra or use the support artifact's offline wheels. Full inference requires
+CUDA. This local migration did not run training, full inference, or create a competition
+submission.
 
-```powershell
-biohub-track inspect --competition-root data/competition
-biohub-track validate-data --competition-root data/competition
-biohub-track validate-submission `
-  --submission outputs/baseline/submission.csv `
-  --competition-root data/competition
-biohub-track train-detector-ensemble --competition-root data/competition --config configs/training.yaml
-biohub-track train-association --competition-root data/competition --config configs/training.yaml
-biohub-track run --competition-root data/competition --config configs/architecture.yaml
-```
+## Repository layout
 
-`inspect` reads group/array metadata and small table samples but never loads a full image volume. It
-writes `outputs/inspection_report.json`. `validate-data` fails if an authoritative input is missing
-or its metadata cannot be interpreted without guessing.
+- `upstream_clean_v106/`: preserved notebook, source conversion, attribution, and fingerprint.
+- `src/biohub_pipeline/`: configuration, artifact checks, inference adapter, exact notebook graph
+  postprocessing, submission validation, and local evaluation utilities.
+- `configs/clean_v106.yaml`: upstream V106 defaults.
+- `tests/test_clean_*.py`: source, CLI, configuration, graph, submission, and evaluation tests.
+- `docs/HISTORICAL_BASELINE.md`: short record of the removed approximately 0.543 classical baseline.
+- `docs/REMOVALS.md`: tracked cleanup inventory and reasons.
 
-`train-detector` fits one 3D U-Net; `train-detector-ensemble` fits every configured seed. Each writes
-a checkpoint, TorchScript heatmap predictor, and JSON training manifest. `train-association` fits the
-sparse-event scorer and writes its portable JSON artifact. `run` loads those artifacts and executes
-the globally optimized inference pipeline.
+## Unverified without external assets
 
-## Competition graph contract
-
-Every detection at every time point is its own node. Node IDs are unique within a dataset and may
-restart in the next dataset. Continuation and lineage relationships are directed edges; a division
-is one source node with two outgoing edges. A target node never inherits its source node ID.
-
-Submission columns are fixed in this order:
-
-```text
-id,dataset,row_type,node_id,t,z,y,x,source_id,target_id
-```
-
-Node coordinates are integer voxel coordinates in `(z, y, x)`. Physical-space calculations use
-`voxel_spacing_zyx` read from that dataset's metadata. The strict validator checks schema, integer
-dtypes, sentinels, row IDs, dataset names, node/edge integrity, bounds, time, single parentage,
-forward-time edges, duplicates, and cycles. It also compares the generated schema with the local
-sample submission.
-
-## Synthetic fixture
-
-The deterministic fixture is for infrastructure tests only; it is not evidence that detection or
-tracking works.
-
-```powershell
-python scripts/generate_tiny_fixture.py data/sample
-biohub-track inspect --competition-root data/sample
-biohub-track validate-data --competition-root data/sample
-```
-
-It contains nodes 1–7 and edges `1→3`, `2→4`, `3→5`, `3→6`, `4→7`, including a division at node 3.
-
-## Python API
-
-```python
-from biohub_tracker.submission import build_submission, validate_submission
-
-graphs = run_prediction_pipeline(competition_root, config)
-submission = build_submission(graphs)
-validate_submission(submission, competition_root)
-```
-
-## Repository map
-
-```text
-configs/                     hypothesis-only runtime settings
-data/competition/            ignored authoritative Kaggle files
-data/sample/                 optional deterministic fixture
-notebooks/                   guarded future Kaggle adapter
-scripts/                     inspection and fixture entry points
-src/biohub_tracker/
-  annotation_reader.py       table discovery and schema samples
-  association/               sparse candidates, scoring, global optimization
-  coordinates.py             centralized voxel/physical conversions
-  detection/                 blob fallback and learned heatmap inference/decoding
-  inspection.py              competition discovery and JSON reporting
-  models.py                  typed data and graph models
-  preprocessing.py           metadata checks and robust intensity normalization
-  postprocessing.py          graph cleanup and optional short-track filtering
-  storage.py                 local storage abstraction
-  zarr_reader.py             lazy metadata-first frame reader
-  submission/                exact writer and strict validator
-  training/                  Zarr/GEFF datasets, targets, labels, and model trainers
-tests/                       unit and integration tests
-.agents/                     persistent handoff state and durable memory
-```
-
-## Agent handoff memory
-
-Future agents must read `AGENTS.md`, `.agents/state.json`, and `.agents/memory.md`. These files store
-verified progress, blockers, decisions, and next actions. They never replace official files, contain
-raw private data, or silently promote guesses to facts.
-
-## Next milestone gate
-
-Run cross-validation on the official training stores, retain immutable artifact manifests, and
-compare the learned submission against the validated public-test baseline. Numerical values in the
-YAML files remain starting hypotheses until that evaluation is recorded.
+- support-artifact manifest and weight checksum;
+- detector and learned-edge prediction equality;
+- GEFF counts for the hidden test set;
+- fixed-8 CV score and runtime;
+- submission equality and the reported 0.908 public score.
