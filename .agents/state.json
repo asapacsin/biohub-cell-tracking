@@ -1,39 +1,38 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-06T15:10:33+08:00",
+  "updated_at": "2026-08-06T16:02:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Clean public V106 local migration and tracked legacy cleanup complete",
+  "active_milestone": "Clean V106 public-test submission ready",
   "status": "complete",
-  "host": "windows-local",
+  "host": "linux-login01",
   "completed": [
-    "Selected Yusuke Togashi clean notebook Version 106 (public 0.908; best 0.908 V96; Apache-2.0)",
-    "Preserved exact notebook SHA-256 5adc99aef3b61f2d8c5da5253eb1df13262986e8879bf6f630b5c1b5fa345d9d",
-    "Added configurable biohub_pipeline package, CLI, dry-run, submission validation, exact vendored postprocessing and official-spec-lite utilities",
-    "Removed audited tracked blob, nearest-neighbour, custom training, old configuration, test, script, log, and documentation paths",
-    "Post-cleanup verification: 11 pytest tests passed; compileall passed; Ruff passed; CLI help and dry-run passed"
+    "No prior GPU job to cancel (queue empty)",
+    "Downloaded support pack pilkwang/biohub-tracking-support-pack-50ep-v1 to data/support",
+    "GPU job 4708: V106 inference on 4 public test zarrs succeeded",
+    "Fixed absolute data paths + clamp slightly-negative coords like upstream notebook",
+    "submission_v106.csv validated: 120246 nodes / 115957 edges / 4 datasets"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "python scripts/vendor_clean_v106.py",
-    "python -m compileall -q src/biohub_pipeline scripts/vendor_clean_v106.py tests",
-    "python -m pytest -q --basetemp outputs/pytest_clean_final (11 passed)",
-    "ruff check src scripts tests",
-    "python -m biohub_pipeline.run --config configs/clean_v106.yaml --dry-run"
+    "pytest: 12 passed",
+    "validate_submission_file(submission_v106.csv) -> rows=236203",
+    "V106_OK in logs/slurm/v106_infer.log"
   ],
-  "next_action": "Obtain the exact support artifact and competition data, then run dry-run with paths before any reviewed full GPU inference.",
+  "next_action": "Kaggle notebook submit with outputs/kaggle_submission/submission_v106.csv (Internet Off)",
   "needs_human": [
-    "Provide pilkwang/biohub-tracking-support-pack-50ep-v1 and official competition stores for real inference or CV"
+    "Upload/submit V106 CSV on Kaggle; classical submission.csv remains historical ~0.543 fallback"
   ],
   "artifacts": {
-    "upstream_notebook": "upstream_clean_v106/clean-approach-lightweight-local-cv-no-hack.ipynb",
+    "v106_submission": "outputs/kaggle_submission/submission_v106.csv",
+    "classical_submission": "outputs/kaggle_submission/submission.csv",
+    "support": "data/support",
     "config": "configs/clean_v106.yaml",
-    "entry_point": "python -m biohub_pipeline.run",
-    "source_record": "upstream_clean_v106/SOURCE.md",
-    "removal_record": "docs/REMOVALS.md"
+    "v106_log": "logs/slurm/v106_infer.log",
+    "nfs": "~/biohub-outputs/v106/"
   },
   "notes": [
-    "No training, full inference, real submission generation, or leaderboard reproduction was performed.",
-    "Data, outputs, weights, credentials, submissions, Git history, and the legacy_baseline tag were preserved."
+    "Legacy learned U-Net (submission_learned.csv, 5528 nodes) is not competitive with V106",
+    "V106 is denser than classical blob baseline (120k vs 38k nodes) as expected for 0.908 public pipeline"
   ]
 }

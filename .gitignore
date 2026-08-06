@@ -17,3 +17,5 @@ artifacts/
 *.parquet
 .kaggle/
 
+data/support/
+logs/

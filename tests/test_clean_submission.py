@@ -44,3 +44,14 @@ def test_multiple_parents_are_rejected() -> None:
         validate_graph(
             "video", nodes, [{"source_id": 10, "target_id": 11}, {"source_id": 13, "target_id": 11}]
         )
+
+
+def test_slightly_negative_floats_are_clamped_like_upstream() -> None:
+    nodes = {
+        1: {"node_id": 1, "t": 0, "z": -0.4, "y": 1.0, "x": 2.0},
+        2: {"node_id": 2, "t": 1, "z": 0.2, "y": 1.0, "x": 2.0},
+    }
+    edges = [{"source_id": 1, "target_id": 2}]
+    rows = graph_rows("video_b", nodes, edges)
+    assert rows[0]["z"] == 0
+    assert rows[1]["z"] == 0

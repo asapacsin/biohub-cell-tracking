@@ -23,3 +23,32 @@
   Ruff all passed.
 - No full data, model training, full inference, real submission, local accuracy validation, or
   leaderboard reproduction has been performed.
+
+## HPC V106 experiment start (2026-08-06 login01)
+
+- No Slurm job was running when asked to cancel; queue was empty.
+- Legacy I/O-fixed train job had already finished earlier: NFS `~/biohub-outputs/DONE`
+  with `seed_42.ts` and `submission_learned.csv` (5528 nodes / 4672 edges) — far sparser
+  than classical 38077/32917; fetched to `outputs/kaggle_submission/submission_learned.csv`.
+- Active experiment is clean V106: downloaded
+  `pilkwang/biohub-tracking-support-pack-50ep-v1` into `data/support` (340M; weights present).
+- Dry-run reports `ready_for_full_inference: true` with 4 test zarrs; login `.venv` lacks
+  runtime modules (torch/tracksdata/…); GPU conda `biohub` has torch 2.6.0+cu124.
+- Job 4699 (`scripts/slurm/run_v106_infer.sh`) stages ~1.8G test + support to `/tmp` on
+  um-gpu02 and runs `python -m biohub_pipeline.run` with `configs/clean_v106.yaml`.
+
+## V106 public-test experiment (2026-08-06 login01)
+
+- Support artifact downloaded to `data/support` from
+  `pilkwang/biohub-tracking-support-pack-50ep-v1` (weights
+  `weights/unet_transformer/split_0/edge_predictor_best.pth` present).
+- GPU inference via `scripts/slurm/run_v106_infer.sh` (slim stage: test 1.8G + support
+  340M to `/tmp`; conda env `biohub` + support wheels; `PYTHONPATH=src`).
+- Bugs fixed during first runs: (1) relative `--data-dir` broke under `cwd=repo/` —
+  resolve paths in `biohub_pipeline.run`; (2) `validate_graph` rejected slightly negative
+  float coords — clamp with `max(0, int(round(...)))` before checks, matching upstream
+  notebook write path.
+- Result: `outputs/kaggle_submission/submission_v106.csv` — 120246 nodes / 115957 edges /
+  4 datasets; `validate_submission_file` passed. NFS copy under `~/biohub-outputs/v106/`.
+- Reported upstream public score for this notebook version is 0.908 (not re-verified on
+  Kaggle from this host yet).

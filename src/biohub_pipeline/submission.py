@@ -48,11 +48,20 @@ def graph_rows(
     edges: list[dict[str, Any]],
     start_id: int = 0,
 ) -> list[dict[str, Any]]:
-    validate_graph(dataset, nodes, edges)
+    # Match upstream V106: clamp after round before integrity checks / CSV write.
+    clamped: dict[int, dict[str, Any]] = {}
+    for node_id, node in nodes.items():
+        clamped[node_id] = {
+            **node,
+            "z": max(0, int(round(float(node["z"])))),
+            "y": max(0, int(round(float(node["y"])))),
+            "x": max(0, int(round(float(node["x"])))),
+        }
+    validate_graph(dataset, clamped, edges)
     rows: list[dict[str, Any]] = []
     row_id = start_id
-    for node_id in sorted(nodes):
-        node = nodes[node_id]
+    for node_id in sorted(clamped):
+        node = clamped[node_id]
         rows.append(
             {
                 "id": row_id,
@@ -60,9 +69,9 @@ def graph_rows(
                 "row_type": "node",
                 "node_id": int(node_id),
                 "t": int(node["t"]),
-                "z": max(0, round(float(node["z"]))),
-                "y": max(0, round(float(node["y"]))),
-                "x": max(0, round(float(node["x"]))),
+                "z": int(node["z"]),
+                "y": int(node["y"]),
+                "x": int(node["x"]),
                 "source_id": -1,
                 "target_id": -1,
             }
