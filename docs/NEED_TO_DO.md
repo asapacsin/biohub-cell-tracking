@@ -15,46 +15,31 @@ submission results. A GPU host is still required for full learned fitting.
 - 58 unit tests passing ≠ model detects cells accurately
 - Need detection metrics on held-out complete videos, not only BCE/Dice
 
-### 2. Training receives almost no data variation
+### 2. Training receives almost no data variation — DONE (2026-08-05)
 
-In `CentroidPatchDataset`, the RNG is recreated as:
+Was: deterministic `default_rng(seed + index)` every epoch; positives only.
 
-```python
-rng = np.random.default_rng(self.seed + index)
-```
+**Implemented in `CentroidPatchDataset`:**
 
-Sample 500 therefore gets the same jitter every epoch. Missing training-time:
+- `set_epoch(epoch)` + SeedSequence RNG so samples vary across epochs
+- Patch mix **80% positive / 15% near-miss / 5% empty** (`PatchMixConfig`)
+- Near-miss: center clear of `positive_center_radius_um`; source preferred in
+  40-70% XY annulus; all-zero target
+- Empty: no centroid in crop ± `empty_exclusion_margin_um`; all-zero target
+- Train-only XY flips / rot90 + intensity scale/shift, noise, blur
+- Eval / `DatasetView(..., train=False)`: positives only, deterministic
 
-- flips, rotations
-- intensity transforms, noise, blur, elastic
-- random negative patches
+Later: mine false-positive patches from model predictions (more valuable than
+random empty backgrounds). Elastic deform still deferred.
 
-Every sample is centred on an annotated cell. Background exists inside the
-patch, but the model rarely sees cell-free or hard false-positive regions →
-likely unnecessary detections on unfamiliar background.
+### 3. Data loader wastes CPU / GPU time — DONE (2026-08-05)
 
-**Fix**
+**Implemented:**
 
-- Stochastic sampling across epochs
-- Patch mix ≈ 60% positive-centred / 20% random / 20% hard-negative
-- XY rotations/flips, mild intensity scaling, noise, blur
+- LRU frame cache: `(dataset, t) → normalized frame` (`frame_cache_size`, default 4)
+- `nodes_by_time`: `(dataset, t) → centroid list` (no per-getitem full graph scan)
 
-### 3. Data loader wastes CPU / GPU time
-
-One dataset sample per annotated node. For each sample the loader:
-
-1. Reads the full 3D frame
-2. Normalizes that full frame
-3. Scans all graph nodes for cells at that time
-4. Extracts one patch
-
-A frame with 100 annotated cells may be loaded/normalized ~100× per epoch.
-Full node-list scans repeat. Expensive GPU can sit waiting on CPU/Zarr I/O.
-
-**Fix (before renting a powerful GPU)**
-
-- Frame cache: `(dataset, t) → normalized frame` (even MRU 2–4 frames helps)
-- `nodes_by_time`: `(dataset, t) → centroid list`
+Config knobs live in `configs/training.yaml` under `training.detector`.
 
 ### 4. U-Net pooling ignores voxel anisotropy
 
@@ -140,13 +125,11 @@ Use complete videos as folds. Report:
 
 Do **not** evaluate only BCE/Dice.
 
-### Second: improve the data pipeline
+### Second: improve the data pipeline — mostly DONE (2026-08-05)
 
-- Frame caching + `nodes_by_time`
-- Stochastic augmentation
-- Negative and hard-negative patches
-- Mixed-precision training
-- Training resume / checkpoints
+Done: frame caching, `nodes_by_time`, stochastic aug, 80/15/5 pos/near-miss/empty.
+
+Still open: mixed-precision training; training resume / checkpoints.
 
 ### Third: test anisotropic U-Net variants
 

@@ -8,6 +8,7 @@ import yaml
 
 from biohub_tracker.association import CandidateGraphConfig
 from biohub_tracker.training.association import AssociationTrainingConfig
+from biohub_tracker.training.data import AugmentationConfig, PatchMixConfig
 from biohub_tracker.training.detector import DetectorTrainingConfig, UNet3DConfig
 
 
@@ -24,6 +25,12 @@ def _tuple3(raw: Any, *, name: str) -> tuple[int, int, int]:
     return int(raw[0]), int(raw[1]), int(raw[2])
 
 
+def _tuple2_float(raw: Any, *, name: str) -> tuple[float, float]:
+    if not isinstance(raw, list) or len(raw) != 2:
+        raise ValueError(f"{name} must be a two-item list")
+    return float(raw[0]), float(raw[1])
+
+
 def load_training_config(path: str | Path) -> TrainingConfig:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
     if not isinstance(raw, dict):
@@ -38,6 +45,16 @@ def load_training_config(path: str | Path) -> TrainingConfig:
     unet_raw = detector_raw.get("unet", {})
     if not isinstance(unet_raw, dict):
         raise ValueError("training.detector.unet must be a mapping")
+    mix_raw = detector_raw.get("patch_mix", {})
+    if mix_raw is None:
+        mix_raw = {}
+    if not isinstance(mix_raw, dict):
+        raise ValueError("training.detector.patch_mix must be a mapping")
+    aug_raw = detector_raw.get("augmentation", {})
+    if aug_raw is None:
+        aug_raw = {}
+    if not isinstance(aug_raw, dict):
+        raise ValueError("training.detector.augmentation must be a mapping")
     detector = DetectorTrainingConfig(
         patch_shape_zyx=_tuple3(
             detector_raw.get("patch_shape_zyx", [32, 128, 128]),
@@ -56,6 +73,32 @@ def load_training_config(path: str | Path) -> TrainingConfig:
         num_workers=int(detector_raw.get("num_workers", 0)),
         seed=int(detector_raw.get("seed", 42)),
         device=str(detector_raw.get("device", "cuda")),
+        frame_cache_size=int(detector_raw.get("frame_cache_size", 4)),
+        patch_mix=PatchMixConfig(
+            positive=float(mix_raw.get("positive", 0.80)),
+            near_miss=float(mix_raw.get("near_miss", 0.15)),
+            empty=float(mix_raw.get("empty", 0.05)),
+        ),
+        positive_center_radius_um=float(detector_raw.get("positive_center_radius_um", 6.0)),
+        empty_exclusion_margin_um=float(detector_raw.get("empty_exclusion_margin_um", 4.0)),
+        augmentation=AugmentationConfig(
+            enabled=bool(aug_raw.get("enabled", True)),
+            flip_prob=float(aug_raw.get("flip_prob", 0.5)),
+            rot90_prob=float(aug_raw.get("rot90_prob", 0.5)),
+            intensity_scale=_tuple2_float(
+                aug_raw.get("intensity_scale", [0.9, 1.1]),
+                name="training.detector.augmentation.intensity_scale",
+            ),
+            intensity_shift=_tuple2_float(
+                aug_raw.get("intensity_shift", [-0.05, 0.05]),
+                name="training.detector.augmentation.intensity_shift",
+            ),
+            noise_std=float(aug_raw.get("noise_std", 0.02)),
+            blur_sigma_px=_tuple2_float(
+                aug_raw.get("blur_sigma_px", [0.0, 0.8]),
+                name="training.detector.augmentation.blur_sigma_px",
+            ),
+        ),
         unet=UNet3DConfig(
             in_channels=int(unet_raw.get("in_channels", 1)),
             out_channels=int(unet_raw.get("out_channels", 1)),

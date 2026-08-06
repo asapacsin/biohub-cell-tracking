@@ -1,46 +1,35 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-05T01:14:00+08:00",
+  "updated_at": "2026-08-05T18:42:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Learned pipeline hardening before GPU training (see docs/NEED_TO_DO.md)",
+  "active_milestone": "Kaggle CSV ready; GPU stage+train running on um-gpu01",
   "status": "in_progress",
   "host": "linux-login01",
   "completed": [
-    "Classical public-test baseline: blob + greedy NN + GEFF-tuned division post-pass",
-    "Validated local submission: 38077 nodes + 32917 edges + 302 divisions",
-    "GitHub main pushed (baseline + division work)",
-    "Kaggle code competition path understood: notebook-only submit, Internet must be off",
-    "Offline Kaggle install pattern proven for classical baseline",
-    "Learned architecture code present (U-Net, association, ILP); unit tests ≠ detection accuracy",
-    "Association scorer trained once from GEFF: artifacts/association/model.json (14 features)",
-    "Captured learned-pipeline gap note: docs/NEED_TO_DO.md"
+    "Kaggle-ready classical submission: outputs/kaggle_submission/submission.csv (38077 nodes / 32917 edges)",
+    "Architecture blob CSVs also under outputs/kaggle_submission/",
+    "Slurm combined stage+train launched (local /tmp on GPU node)"
   ],
   "in_progress": [
-    "Finish Kaggle Save Version (Internet off) + Submit classical baseline if not already scored",
-    "Execute NEED_TO_DO order: detector CV metrics → data pipeline → anisotropic U-Net → OOF association → node rejection"
+    "srun job unpacking ~80G to /tmp on um-gpu01 then conda+torch train (8 epochs seed 42) + learned inference",
+    "Results will land on NFS ~/biohub-outputs then be fetched to outputs/kaggle_submission/submission_learned.csv"
   ],
-  "blocked": [
-    "Full U-Net fitting needs PyTorch + GPU; login01 has no torch/GPU"
-  ],
+  "blocked": [],
   "last_verified_commands": [
-    "Local: submission.csv exists under outputs/public_test_baseline/submission/",
-    "biohub-track train-association → artifacts/association/model.json (14 features, exit 0)",
-    "blob+handcrafted+ILP run may still be in background (outputs/architecture_blob_ilp); not a substitute for detector CV"
+    "validate_submission outputs/kaggle_submission/submission.csv",
+    "squeue: gpu_batch job running stage_and_train"
   ],
-  "next_action": "Implement data-pipeline fixes from docs/NEED_TO_DO.md (frame cache, stochastic aug, neg patches) before GPU rental; in parallel finish Kaggle classical submit.",
+  "next_action": "Await LEARNED_OK / NFS biohub-outputs/DONE; then use submission_learned.csv or classical for Kaggle.",
   "needs_human": [
-    "Complete Kaggle Submit if LB score not yet recorded",
-    "GPU host for detector CV and anisotropic U-Net experiments"
+    "Kaggle: attach code/wheels datasets, Internet Off, write /kaggle/working/submission.csv from outputs/kaggle_submission/submission.csv (classical) or submission_learned.csv when ready, then Submit"
   ],
   "artifacts": {
-    "need_to_do": "docs/NEED_TO_DO.md",
-    "architecture": "docs/ARCHITECTURE.md",
-    "training_config": "configs/training.yaml",
-    "learned_config": "configs/architecture.yaml",
-    "blob_ilp_config": "configs/architecture_blob_ilp.yaml",
-    "blob_learned_config": "configs/architecture_blob_learned.yaml",
-    "association_artifact": "artifacts/association/model.json",
-    "baseline_config": "configs/baseline.yaml",
-    "validated_baseline_submission": "outputs/public_test_baseline/submission/submission.csv"
-  }
+    "kaggle_submission": "outputs/kaggle_submission/submission.csv",
+    "stage_and_train_log": "logs/slurm/stage_and_train.log",
+    "slurm_scripts": "scripts/slurm/"
+  },
+  "notes": [
+    "login01 /home is local disk; GPU nodes mount different NFS /home — cannot see login biohub-cell-tracking directly",
+    "GPU /data is not writable for this user; training uses node-local /tmp"
+  ]
 }

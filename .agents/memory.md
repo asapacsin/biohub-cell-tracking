@@ -97,15 +97,17 @@
 
 - Authoritative need-to-do note: `docs/NEED_TO_DO.md`.
 - Unit tests ≠ detector accuracy; no recorded detector CV or learned LB yet.
-- Priority order locked in that note: (1) video-fold detector metrics at 2/4/6 µm,
-  (2) frame cache + nodes-by-time + stochastic aug + 60/20/20 pos/random/hard-neg,
-  (3) anisotropic vs isotropic U-Net ablations, (4) association from OOF detections
-  not perfect GEFF, (5) node rejection after calibration.
-- Known concrete bugs/gaps called out there: deterministic per-index RNG (same
-  jitter every epoch), isotropic Conv3d/MaxPool on anisotropic voxels, association
+- Priority order: (1) video-fold detector metrics at 2/4/6 µm,
+  (2) data pipeline, (3) anisotropic vs isotropic U-Net ablations, (4) association
+  from OOF detections not perfect GEFF, (5) node rejection after calibration.
+- Data-pipeline hardening landed 2026-08-05 in `CentroidPatchDataset`:
+  LRU frame cache, `nodes_by_time`, `set_epoch` stochasticity, patch mix
+  80% positive / 15% near-miss / 5% empty, train-only XY flip/rot90 + photometric
+  aug, `DatasetView` for eval-safe validation. Config: `configs/training.yaml`.
+  Still open from that step: AMP and resume/checkpoints; FP mining later.
+- Known remaining gaps: isotropic Conv3d/MaxPool on anisotropic voxels, association
   features zeroed under GEFF-centroid training, ILP selects edges not nodes,
   dense-frame percentile threshold + plateau NMS duplicates.
-- Do data-pipeline caching/augmentation before renting a powerful GPU.
 - `artifacts/association/model.json` exists from GEFF-only training (14 features);
   treat as geometric baseline only until OOF retrain.
 
@@ -113,16 +115,17 @@
 
 - Host `login01` has official `data/competition/test` (4 zarrs) and local validated
   `outputs/public_test_baseline/submission/submission.csv` (~38077 nodes / 32917 edges / 302 divisions).
+- Architecture modular pipeline now has validated public-test submissions without U-Net:
+  - blob + handcrafted: `outputs/architecture_blob_ilp/submission.csv` (37266 / 34101 / 2)
+  - blob + learned linear: `outputs/architecture_blob_learned/submission.csv` (35771 / 30833 / 0)
+  - Summary: `outputs/ARCHITECTURE_RESULTS.md`
+- Optimizer: sparse COO incidence matrix; greedy fallback when events > `ilp_event_limit` (40k).
+- Architecture configs drop isolated tracks (`minimum_track_length=2`).
+- Classical baseline still has the tuned division post-pass (302 divisions); architecture
+  atomic-division path is under-firing and needs calibration / OOF association.
 - Classical baseline command:
   `scripts/run_public_test_baseline.py --input-dir data/competition --output-dir outputs/public_test_baseline --config configs/baseline.yaml`
-- Division post-pass is end-to-end (`DivisionConfig` from YAML → tracker →
-  `observations_to_graph` parent→daughter edges). Knobs in `configs/baseline.yaml`
-  (`require_matched_daughter`, min/max daughter separation, mid-point cap, ≤1 div/frame).
-- Learned modular pipeline also exists (`docs/ARCHITECTURE.md`, `configs/training.yaml`,
-  `configs/architecture.yaml`): heatmap U-Net, sparse candidates, learned association, ILP.
-  Full GPU fitting still needs a host with PyTorch + train stores; follow `docs/NEED_TO_DO.md`.
-- Immediate human action: finish Kaggle Save Version (Internet off) + Submit classical
-  baseline if needed; next engineering work starts from the need-to-do order above.
+- Full GPU fitting still needs a host with PyTorch + train stores; follow `docs/NEED_TO_DO.md`.
 - Linux `.venv` on login01: `.venv/bin/python` / `.venv/bin/biohub-track`.
 
 ## Verified Milestone 1 foundation

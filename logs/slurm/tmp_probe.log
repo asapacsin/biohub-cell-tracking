@@ -1,0 +1,5 @@
+[2026-08-05T10:39:25.016] error: couldn't chdir to `/home/mc46451/biohub-cell-tracking': No such file or directory: going to /tmp instead
+[2026-08-05T10:39:25.017] error: couldn't chdir to `/home/mc46451/biohub-cell-tracking': No such file or directory: going to /tmp instead
+Filesystem                         Size  Used Avail Use% Mounted on
+/dev/mapper/ubuntu--vg-ubuntu--lv  1.8T   24G  1.7T   2% /
+TMP_OK

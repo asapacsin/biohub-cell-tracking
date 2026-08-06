@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -30,6 +31,10 @@ from biohub_tracker.models import (
 from biohub_tracker.postprocessing import postprocess_prediction_graph
 from biohub_tracker.preprocessing import normalize_frame, validate_volume_metadata
 from biohub_tracker.zarr_reader import VolumeDatasetReader
+
+
+def _log(message: str) -> None:
+    print(message, file=sys.stderr, flush=True)
 
 
 def _load_predictors(config: ProjectConfig) -> list[HeatmapPredictor]:
@@ -71,6 +76,8 @@ def _detect_video(
 
     detections: list[DetectionCandidate] = []
     for t in range(metadata.time_points):
+        if t == 0 or (t + 1) % 10 == 0 or t + 1 == metadata.time_points:
+            _log(f"  detect {dataset} t={t + 1}/{metadata.time_points}")
         frame = reader.read_frame(dataset, t)
         if config.detection_method == "blob":
             detections.extend(
@@ -112,16 +119,33 @@ def run_prediction_pipeline(
     reader = VolumeDatasetReader(competition_root, split="test")
     active_scorer = scorer or _load_scorer(config)
     graphs: list[PredictionGraph] = []
-    for dataset in reader.dataset_names():
+    datasets = list(reader.dataset_names())
+    for dataset_index, dataset in enumerate(datasets, start=1):
+        _log(f"[{dataset_index}/{len(datasets)}] dataset={dataset}")
         metadata = reader.metadata(dataset)
         detections = _detect_video(reader, dataset, config, predictors)
+        _log(f"  detections={len(detections)}")
         candidates = build_candidate_graph(
             detections,
             voxel_spacing_zyx=metadata.voxel_spacing_zyx,
             config=config.candidate_graph,
         )
+        _log(
+            f"  candidates nodes={len(candidates.nodes)} "
+            f"events={len(candidates.edges)}"
+        )
         active_scorer.score(candidates)
+        event_count = len(candidates.edges) + len(candidates.divisions)
+        if (
+            config.optimizer.method == "ilp"
+            and event_count > config.optimizer.ilp_event_limit
+        ):
+            _log(
+                f"  optimize via greedy fallback "
+                f"(events={event_count} > ilp_event_limit={config.optimizer.ilp_event_limit})"
+            )
         selected = optimize_candidate_graph(candidates, config.optimizer)
+        _log(f"  selected_edges={len(selected)}")
 
         allocator = NodeIdAllocator(next_id=config.submission.node_id_start)
         nodes: list[PredictedNode] = []
@@ -143,9 +167,9 @@ def run_prediction_pipeline(
             )
             for source, target in selected
         ]
-        graphs.append(
-            postprocess_prediction_graph(
-                PredictionGraph(nodes=nodes, edges=edges), config.postprocessing
-            )
+        graph = postprocess_prediction_graph(
+            PredictionGraph(nodes=nodes, edges=edges), config.postprocessing
         )
+        _log(f"  postprocess nodes={len(graph.nodes)} edges={len(graph.edges)}")
+        graphs.append(graph)
     return graphs

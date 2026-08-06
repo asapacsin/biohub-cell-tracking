@@ -1,0 +1,12 @@
+[2026-08-05T10:36:17.188] error: couldn't chdir to `/home/mc46451/biohub-cell-tracking': No such file or directory: going to /tmp instead
+[2026-08-05T10:36:17.189] error: couldn't chdir to `/home/mc46451/biohub-cell-tracking': No such file or directory: going to /tmp instead
+host=um-gpu01
+Filesystem                         Size  Used Avail Use% Mounted on
+10.113.182.131:/data01              80T   40T   41T  49% /data
+10.113.182.132:/data02              48T   19T   29T  40% /home
+/dev/mapper/ubuntu--vg-ubuntu--lv  1.8T   24G  1.7T   2% /
+mkdir: cannot create directory ‘/data/mc46451’: Permission denied
+mkdir: cannot create directory ‘/data/mc46451’: Permission denied
+srun: Job step aborted: Waiting up to 122 seconds for job step to finish.
+[2026-08-05T10:39:22.820] error: *** STEP 4553.0 ON um-gpu01 CANCELLED AT 2026-08-05T10:39:22 DUE to SIGNAL Terminated ***
+srun: error: um-gpu01: task 0: Terminated

@@ -170,6 +170,7 @@ def load_config(path: str | Path) -> ProjectConfig:
         method=str(optimizer_raw.get("method", "ilp")),
         minimum_score=float(optimizer_raw.get("minimum_score", 0.0)),
         time_limit_seconds=float(optimizer_raw.get("time_limit_seconds", 120.0)),
+        ilp_event_limit=int(optimizer_raw.get("ilp_event_limit", 40_000)),
     )
 
     post_raw = _mapping(raw, "postprocessing")

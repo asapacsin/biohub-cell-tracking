@@ -2,14 +2,19 @@ from __future__ import annotations
 
 import json
 import random
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from biohub_tracker.preprocessing import PreprocessingConfig
-from biohub_tracker.training.data import CentroidPatchDataset
+from biohub_tracker.training.data import (
+    AugmentationConfig,
+    CentroidPatchDataset,
+    DatasetView,
+    PatchMixConfig,
+)
 
 
 def _torch() -> Any:
@@ -47,7 +52,12 @@ class DetectorTrainingConfig:
     num_workers: int = 0
     seed: int = 42
     device: str = "cuda"
-    unet: UNet3DConfig = UNet3DConfig()
+    frame_cache_size: int = 4
+    patch_mix: PatchMixConfig = field(default_factory=PatchMixConfig)
+    positive_center_radius_um: float = 6.0
+    empty_exclusion_margin_um: float = 4.0
+    augmentation: AugmentationConfig = field(default_factory=AugmentationConfig)
+    unet: UNet3DConfig = field(default_factory=UNet3DConfig)
 
     def __post_init__(self) -> None:
         divisor = 2**self.unet.depth
@@ -59,6 +69,10 @@ class DetectorTrainingConfig:
             raise ValueError("validation_fraction must be in [0, 1)")
         if self.positive_weight <= 0 or self.sigma_um <= 0 or self.num_workers < 0:
             raise ValueError("training weights/sigma must be positive and workers non-negative")
+        if self.frame_cache_size < 1:
+            raise ValueError("frame_cache_size must be positive")
+        if self.positive_center_radius_um <= 0 or self.empty_exclusion_margin_um < 0:
+            raise ValueError("positive_center_radius_um must be > 0 and margin >= 0")
 
 
 def build_unet3d(config: UNet3DConfig) -> Any:
@@ -152,9 +166,16 @@ def train_detector(
         preprocessing=preprocessing or PreprocessingConfig(),
         jitter_voxels_zyx=config.jitter_voxels_zyx,
         seed=config.seed,
+        frame_cache_size=config.frame_cache_size,
+        patch_mix=config.patch_mix,
+        positive_center_radius_um=config.positive_center_radius_um,
+        empty_exclusion_margin_um=config.empty_exclusion_margin_um,
+        augmentation=config.augmentation,
     )
     if not len(dataset):
         raise ValueError("No labeled GEFF nodes are available for detector training")
+    train_view = DatasetView(dataset, train=True)
+    eval_view = DatasetView(dataset, train=False)
     generator = torch.Generator().manual_seed(config.seed)
     dataset_names = sorted({dataset_name for dataset_name, _ in dataset.samples})
     split_rng = random.Random(config.seed)
@@ -176,16 +197,24 @@ def train_detector(
             for index, (dataset_name, _) in enumerate(dataset.samples)
             if dataset_name in validation_datasets
         ]
-        training_data = torch.utils.data.Subset(dataset, training_indices)
-        validation_data = torch.utils.data.Subset(dataset, validation_indices)
+        training_data = torch.utils.data.Subset(train_view, training_indices)
+        validation_data = torch.utils.data.Subset(eval_view, validation_indices)
     else:
         validation_size = round(len(dataset) * config.validation_fraction)
         if len(dataset) > 1 and config.validation_fraction > 0:
             validation_size = min(max(1, validation_size), len(dataset) - 1)
         training_size = len(dataset) - validation_size
-        training_data, validation_data = torch.utils.data.random_split(
-            dataset, [training_size, validation_size], generator=generator
+        training_split, validation_split = torch.utils.data.random_split(
+            train_view, [training_size, validation_size], generator=generator
         )
+        # Rebuild validation against eval_view so metrics stay deterministic.
+        if validation_size:
+            validation_indices = list(validation_split.indices)
+            validation_data = torch.utils.data.Subset(eval_view, validation_indices)
+            training_data = torch.utils.data.Subset(train_view, list(training_split.indices))
+        else:
+            training_data = training_split
+            validation_data = validation_split
         training_datasets = set(dataset_names)
         validation_datasets = set(dataset_names) if validation_size else set()
     training_size = len(training_data)
@@ -210,6 +239,7 @@ def train_detector(
     best_validation = float("inf")
     best_state: dict[str, Any] | None = None
     for epoch in range(config.epochs):
+        dataset.set_epoch(epoch)
         model.train()
         training_losses: list[float] = []
         for images, targets in training_loader:

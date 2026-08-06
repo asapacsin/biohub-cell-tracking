@@ -4,7 +4,13 @@ from biohub_tracker.training.association import (
     AssociationTrainingConfig,
     train_association_model,
 )
-from biohub_tracker.training.data import CentroidPatchDataset, discover_training_pairs
+from biohub_tracker.training.data import (
+    AugmentationConfig,
+    CentroidPatchDataset,
+    DatasetView,
+    PatchMixConfig,
+    discover_training_pairs,
+)
 from biohub_tracker.training.detector import (
     DetectorTrainingConfig,
     UNet3DConfig,
@@ -16,9 +22,12 @@ from biohub_tracker.training.targets import generate_centroid_heatmap
 
 __all__ = [
     "AssociationTrainingConfig",
+    "AugmentationConfig",
     "CandidateLabels",
     "CentroidPatchDataset",
+    "DatasetView",
     "DetectorTrainingConfig",
+    "PatchMixConfig",
     "UNet3DConfig",
     "build_unet3d",
     "discover_training_pairs",
