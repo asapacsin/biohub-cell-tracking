@@ -3,16 +3,21 @@ training:
     patch_shape_zyx: [32, 128, 128]
     sigma_um: 2.0
     jitter_voxels_zyx: [2, 8, 8]
-    epochs: 20
-    batch_size: 2
+    # Next-run recipe (docs/TRAINING_IO_FIXES.md): short turnaround + frame-grouped I/O.
+    epochs: 3
+    batch_size: 8
     learning_rate: 0.001
     validation_fraction: 0.1
     positive_weight: 20.0
     num_workers: 4
     seed: 42
-    seeds: [42, 137]
+    seeds: [42]
     device: cuda
-    frame_cache_size: 4
+    frame_cache_size: 2
+    frame_grouped_batches: true
+    use_amp: true
+    resume: true
+    log_every: 200
     patch_mix:
       positive: 0.80
       near_miss: 0.15
@@ -25,8 +30,8 @@ training:
       rot90_prob: 0.5
       intensity_scale: [0.9, 1.1]
       intensity_shift: [-0.05, 0.05]
-      noise_std: 0.02
-      blur_sigma_px: [0.0, 0.8]
+      noise_std: 0.0
+      blur_sigma_px: [0.0, 0.0]
     unet:
       in_channels: 1
       out_channels: 1

@@ -120,5 +120,5 @@ def test_training_configuration_loads_without_torch() -> None:
     config = load_training_config("configs/training.yaml")
     assert config.detector.patch_shape_zyx == (32, 128, 128)
     assert config.detector.unet.depth == 3
-    assert config.detector_seeds == (42, 137)
+    assert config.detector_seeds == (42,)
     assert config.association.candidate_graph.max_gap == 2

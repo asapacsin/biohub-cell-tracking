@@ -52,3 +52,24 @@ def test_reader_can_inspect_training_split(tmp_path) -> None:
     reader = VolumeDatasetReader(tmp_path, split="train")
     assert reader.dataset_names() == ["tiny"]
     assert reader.metadata("tiny").spatial_shape_zyx == (3, 4, 5)
+
+
+def test_reader_reuses_open_handles(tmp_path, monkeypatch) -> None:
+    create_test_store(tmp_path)
+    reader = VolumeDatasetReader(tmp_path)
+    opens = {"count": 0}
+    import zarr
+
+    real_open = zarr.open_group
+
+    def tracking_open(*args, **kwargs):
+        opens["count"] += 1
+        return real_open(*args, **kwargs)
+
+    monkeypatch.setattr(zarr, "open_group", tracking_open)
+    reader._open_cache.clear()
+    reader._metadata_cache.clear()
+    _ = reader.metadata("tiny")
+    _ = reader.read_frame("tiny", 0)
+    _ = reader.read_frame("tiny", 1)
+    assert opens["count"] == 1

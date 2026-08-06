@@ -408,7 +408,9 @@ class CentroidPatchDataset:
         elif kind == "near_miss":
             image, target = self._near_miss_sample(dataset_name, anchor, spacing, rng=rng)
         else:
-            image, target = self._empty_sample(rng=rng)
+            image, target = self._empty_sample(
+                rng=rng, dataset_name=dataset_name, t=int(anchor.t)
+            )
 
         image = image[None]
         target = target[None]
@@ -493,24 +495,37 @@ class CentroidPatchDataset:
             rng=rng,
         )
         if start is None:
-            return self._empty_sample(rng=rng)
+            return self._empty_sample(rng=rng, dataset_name=dataset_name, t=int(anchor.t))
         frame = self._cached_frame(dataset_name, anchor.t)
         patch = _extract_patch(frame, start, self.patch_shape_zyx)
         target = np.zeros(self.patch_shape_zyx, dtype=np.float32)
         return patch, target
 
     def _empty_sample(
-        self, *, rng: np.random.Generator
+        self,
+        *,
+        rng: np.random.Generator,
+        dataset_name: str | None = None,
+        t: int | None = None,
     ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         if not self.frame_keys:
             raise RuntimeError("No labeled frames available for empty sampling")
+        candidates: list[tuple[str, int]] = []
+        if dataset_name is not None and t is not None:
+            preferred = (dataset_name, int(t))
+            if preferred in self.nodes_by_time or preferred in self.frame_keys:
+                candidates.append(preferred)
         for _ in range(16):
-            dataset_name, t = self.frame_keys[int(rng.integers(0, len(self.frame_keys)))]
-            metadata = self.reader.metadata(dataset_name)
-            frame = self._cached_frame(dataset_name, t)
+            if candidates:
+                frame_key = candidates.pop(0)
+            else:
+                frame_key = self.frame_keys[int(rng.integers(0, len(self.frame_keys)))]
+            frame_dataset, frame_t = frame_key
+            metadata = self.reader.metadata(frame_dataset)
+            frame = self._cached_frame(frame_dataset, frame_t)
             start = empty_crop_start(
                 frame_shape_zyx=(int(frame.shape[0]), int(frame.shape[1]), int(frame.shape[2])),
-                centroids_zyx=self.nodes_by_time.get((dataset_name, t), ()),
+                centroids_zyx=self.nodes_by_time.get((frame_dataset, frame_t), ()),
                 patch_shape_zyx=self.patch_shape_zyx,
                 voxel_spacing_zyx=metadata.voxel_spacing_zyx,
                 exclusion_margin_um=self.empty_exclusion_margin_um,

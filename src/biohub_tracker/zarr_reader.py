@@ -127,11 +127,16 @@ class VolumeDatasetReader:
                 f"{split.title()} Zarr dataset names must be unique after removing .zarr"
             )
         self._metadata_cache: dict[str, DatasetMetadata] = {}
+        # Per-process handle cache (empty in each DataLoader worker; filled lazily).
+        self._open_cache: dict[str, tuple[Any, Any, str, dict[str, Any]]] = {}
 
     def dataset_names(self) -> list[str]:
         return sorted(self._stores)
 
     def _open(self, dataset: str) -> tuple[Any, Any, str, dict[str, Any]]:
+        cached = self._open_cache.get(dataset)
+        if cached is not None:
+            return cached
         try:
             import zarr
         except ImportError as exc:  # pragma: no cover - environment error
@@ -156,7 +161,9 @@ class VolumeDatasetReader:
         array_map = dict(arrays)
         if array_path not in array_map:
             raise ValueError(f"Metadata references missing array {array_path!r} in {store}")
-        return root, array_map[array_path], array_path, multiscale
+        result = (root, array_map[array_path], array_path, multiscale)
+        self._open_cache[dataset] = result
+        return result
 
     def metadata(self, dataset: str) -> DatasetMetadata:
         if dataset in self._metadata_cache:

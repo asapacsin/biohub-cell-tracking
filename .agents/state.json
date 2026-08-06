@@ -1,35 +1,36 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-05T18:42:00+08:00",
+  "updated_at": "2026-08-06T09:45:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Kaggle CSV ready; GPU stage+train running on um-gpu01",
+  "active_milestone": "I/O training fixes landed; GPU job 4556 still running old code",
   "status": "in_progress",
   "host": "linux-login01",
   "completed": [
     "Kaggle-ready classical submission: outputs/kaggle_submission/submission.csv (38077 nodes / 32917 edges)",
-    "Architecture blob CSVs also under outputs/kaggle_submission/",
-    "Slurm combined stage+train launched (local /tmp on GPU node)"
+    "Architecture blob CSVs under outputs/kaggle_submission/",
+    "Documented and implemented detector I/O fixes (frame-grouped batches, Zarr open cache, anchor empty crops, AMP/checkpoints/resume)",
+    "Zarr chunk audit: all 199 train stores chunks=(1,64,256,256) whole-frame — Fix5 deferred"
   ],
   "in_progress": [
-    "srun job unpacking ~80G to /tmp on um-gpu01 then conda+torch train (8 epochs seed 42) + learned inference",
-    "Results will land on NFS ~/biohub-outputs then be fetched to outputs/kaggle_submission/submission_learned.csv"
+    "srun job 4556 still training with pre-fix code on um-gpu01 (do not cancel unless wall budget insufficient)",
+    "Next GPU submit should use updated configs/training.yaml + remote_train_only.sh (epochs=3, batch=8, frame_grouped)"
   ],
   "blocked": [],
   "last_verified_commands": [
-    "validate_submission outputs/kaggle_submission/submission.csv",
-    "squeue: gpu_batch job running stage_and_train"
+    "pytest: 71 passed",
+    "chunk audit: Counter({(1, 64, 256, 256): 199})"
   ],
-  "next_action": "Await LEARNED_OK / NFS biohub-outputs/DONE; then use submission_learned.csv or classical for Kaggle.",
+  "next_action": "After job 4556 finishes or times out, resubmit stage+train with I/O fixes; fetch learned CSV if any.",
   "needs_human": [
-    "Kaggle: attach code/wheels datasets, Internet Off, write /kaggle/working/submission.csv from outputs/kaggle_submission/submission.csv (classical) or submission_learned.csv when ready, then Submit"
+    "Kaggle submit classical outputs/kaggle_submission/submission.csv anytime; learned CSV only after a successful GPU run with new code"
   ],
   "artifacts": {
     "kaggle_submission": "outputs/kaggle_submission/submission.csv",
-    "stage_and_train_log": "logs/slurm/stage_and_train.log",
-    "slurm_scripts": "scripts/slurm/"
+    "io_fix_note": "docs/TRAINING_IO_FIXES.md",
+    "stage_and_train_log": "logs/slurm/stage_and_train.log"
   },
   "notes": [
-    "login01 /home is local disk; GPU nodes mount different NFS /home — cannot see login biohub-cell-tracking directly",
-    "GPU /data is not writable for this user; training uses node-local /tmp"
+    "login01 /home is local disk; GPU nodes mount different NFS /home",
+    "Job 4556 has no intermediate checkpoints — cancel discards progress"
   ]
 }

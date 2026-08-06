@@ -105,6 +105,10 @@ def load_training_config(path: str | Path) -> TrainingConfig:
             base_channels=int(unet_raw.get("base_channels", 16)),
             depth=int(unet_raw.get("depth", 3)),
         ),
+        frame_grouped_batches=bool(detector_raw.get("frame_grouped_batches", True)),
+        use_amp=bool(detector_raw.get("use_amp", True)),
+        resume=bool(detector_raw.get("resume", True)),
+        log_every=int(detector_raw.get("log_every", 200)),
     )
     seeds_raw = detector_raw.get("seeds", [detector.seed])
     if not isinstance(seeds_raw, list) or not seeds_raw:

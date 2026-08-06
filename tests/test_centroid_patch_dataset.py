@@ -256,10 +256,95 @@ def test_training_config_loads_patch_pipeline_fields() -> None:
     from biohub_tracker.training.config import load_training_config
 
     config = load_training_config("configs/training.yaml")
-    assert config.detector.frame_cache_size == 4
+    assert config.detector.frame_cache_size == 2
+    assert config.detector.batch_size == 8
+    assert config.detector.epochs == 3
+    assert config.detector.frame_grouped_batches is True
+    assert config.detector.use_amp is True
+    assert config.detector.augmentation.noise_std == pytest.approx(0.0)
+    assert config.detector.augmentation.blur_sigma_px == (0.0, 0.0)
     assert config.detector.patch_mix.positive == pytest.approx(0.80)
     assert config.detector.patch_mix.near_miss == pytest.approx(0.15)
     assert config.detector.patch_mix.empty == pytest.approx(0.05)
     assert config.detector.positive_center_radius_um == pytest.approx(6.0)
     assert config.detector.empty_exclusion_margin_um == pytest.approx(4.0)
     assert config.detector.augmentation.enabled is True
+
+
+def test_empty_sample_prefers_anchor_frame(tmp_path: Path) -> None:
+    _write_sparse_training_pair(tmp_path)
+    dataset = _dataset(
+        tmp_path,
+        patch_mix=PatchMixConfig(positive=0.0, near_miss=0.0, empty=1.0),
+        augmentation=AugmentationConfig(enabled=False),
+    )
+    original = dataset._cached_frame
+    seen: list[tuple[str, int]] = []
+
+    def tracked(dataset_name: str, t: int) -> np.ndarray:
+        seen.append((dataset_name, t))
+        return original(dataset_name, t)
+
+    dataset._cached_frame = tracked  # type: ignore[method-assign]
+    dataset.train()
+    dataset.set_epoch(0)
+    _ = dataset[0]
+    assert seen[0] == ("demo", 0)
+
+
+def test_frame_grouped_batch_sampler_keeps_single_frame(tmp_path: Path) -> None:
+    zarr = pytest.importorskip("zarr")
+    train = tmp_path / "train"
+    train.mkdir(parents=True)
+    image_group = zarr.open_group(str(train / "demo.zarr"), mode="w")
+    image = np.zeros((2, 8, 64, 64), dtype=np.uint16)
+    image_group.create_array("0", data=image, chunks=(1, 8, 64, 64))
+    image_group.attrs["multiscales"] = [
+        {
+            "axes": [{"name": axis} for axis in ("t", "z", "y", "x")],
+            "datasets": [
+                {
+                    "path": "0",
+                    "coordinateTransformations": [
+                        {"type": "scale", "scale": [1.0, 1.625, 0.40625, 0.40625]}
+                    ],
+                }
+            ],
+        }
+    ]
+    lineage = zarr.open_group(str(train / "demo.geff"), mode="w")
+    lineage.attrs["geff"] = {"geff_version": "1.1", "directed": True}
+    nodes = lineage.create_group("nodes")
+    # Three cells on t=0, two on t=1.
+    node_ids = [10, 11, 12, 13, 14]
+    nodes.create_array("ids", data=np.asarray(node_ids, dtype=np.uint64))
+    props = nodes.create_group("props")
+    for name, values in {
+        "t": [0, 0, 0, 1, 1],
+        "z": [3, 3, 3, 3, 3],
+        "y": [16, 20, 24, 16, 20],
+        "x": [16, 18, 20, 16, 18],
+    }.items():
+        prop = props.create_group(name)
+        prop.create_array("values", data=np.asarray(values, dtype=np.int64))
+    edges = lineage.create_group("edges")
+    edges.create_array("ids", data=np.asarray([[10, 13], [11, 14]], dtype=np.uint64))
+
+    from biohub_tracker.training.samplers import FrameGroupedBatchSampler
+
+    dataset = _dataset(tmp_path)
+    subset_indices = list(range(len(dataset)))
+    sampler = FrameGroupedBatchSampler(
+        dataset, subset_indices, batch_size=2, seed=0
+    )
+    sampler.set_epoch(0)
+    batches = list(sampler)
+    assert len(batches) == 3  # ceil(3/2)+ceil(2/2)
+    for batch in batches:
+        frames = {
+            int(dataset.nodes_by_id[dataset.samples[subset_indices[i]][0]][
+                dataset.samples[subset_indices[i]][1]
+            ].t)
+            for i in batch
+        }
+        assert len(frames) == 1

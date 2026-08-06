@@ -155,3 +155,17 @@
 - Submission columns (fixed order): `id,dataset,row_type,node_id,t,z,y,x,source_id,target_id`.
 - Nodes are per-detection; edges encode continuation/lineage; division = one parent, two outgoing edges; target never inherits source `node_id`.
 - YAML config numeric values remain hypotheses until scored / GEFF-validated.
+
+## Detector training I/O fixes (2026-08-06)
+
+- Root cause of slow GPU train: full-frame Zarr I/O under global shuffle (~133k
+  samples/epoch), not GPU compute (~1.5 GB VRAM used).
+- All 199 train Zarrs use chunks `(1, 64, 256, 256)` (whole frame). Direct patch
+  reads (Fix 5) would not reduce decompression; deferred.
+- Implemented: `FrameGroupedBatchSampler`, per-process `VolumeDatasetReader._open_cache`,
+  anchor-frame-first empty crops, disabled CPU noise/blur for turnaround runs,
+  per-epoch `*_last.pt` / `*_best.pt`, AMP, resume, batch progress logs.
+- Spec/note: `docs/TRAINING_IO_FIXES.md`. Next-run defaults in `configs/training.yaml`
+  and `scripts/slurm/remote_train_only.sh`: epochs=3, batch_size=8, frame_cache_size=2,
+  frame_grouped_batches=true.
+- Job 4556 (pre-fix code) left running; cancel would lose all progress (no mid-epoch ckpt).

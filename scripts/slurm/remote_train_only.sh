@@ -28,13 +28,27 @@ from pathlib import Path
 import yaml
 path = Path("configs/training.yaml")
 raw = yaml.safe_load(path.read_text())
-raw["training"]["detector"]["epochs"] = 8
-raw["training"]["detector"]["num_workers"] = 4
-raw["training"]["detector"]["batch_size"] = 2
-raw["training"]["detector"]["device"] = "cuda"
-raw["training"]["detector"]["seeds"] = [42]
+detector = raw["training"]["detector"]
+detector["epochs"] = 3
+detector["num_workers"] = 4
+detector["batch_size"] = 8
+detector["frame_cache_size"] = 2
+detector["frame_grouped_batches"] = True
+detector["use_amp"] = True
+detector["resume"] = True
+detector["log_every"] = 200
+detector["device"] = "cuda"
+detector["seeds"] = [42]
+aug = detector.setdefault("augmentation", {})
+aug["noise_std"] = 0.0
+aug["blur_sigma_px"] = [0.0, 0.0]
 path.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
-print("epochs", 8, "seeds", [42])
+print(
+    "epochs", detector["epochs"],
+    "batch", detector["batch_size"],
+    "frame_grouped", detector["frame_grouped_batches"],
+    "seeds", detector["seeds"],
+)
 PY
 
 echo "=== train detector ==="
