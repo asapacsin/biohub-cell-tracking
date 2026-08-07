@@ -94,3 +94,17 @@
   unchanged sigmoid/softmax, thresholds, ILP, and graph pipeline.
 - The patch was applied after D4 and compiled successfully against the actual support predictor.
   Local verification: 26 tests, Ruff, compileall, and diff check pass.
+
+## Public independent Seed 2 retrieved (2026-08-07)
+
+- Pilkwang Kim's public notebook `biohub-cell-tracking-two-seeds-logit-blend` attaches dataset
+  `pilkwang/biohub-temporal-unet3d-seed314159-v1` and pins its best checkpoint SHA-256 to
+  `9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f`.
+- The artifact manifest and training metadata record `base_seed=effective_seed=314159`, method
+  `unet_transformer_alltrain_seed314159_v1`, 400 captured epochs, and best epoch 381. Its checkpoint
+  hash differs from Seed 1 (`12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771`).
+- Seed 2 is staged without replacing Seed 1 at
+  `data/support/weights/unet_transformer/seed_314159/edge_predictor_best.pth`; required `config.json`
+  and provenance manifests are alongside it. `data/support` remains intentionally gitignored.
+- `configs/clean_v106_two_seed.yaml` enables this checkpoint at `ensemble_alpha: 0.5`; compared with
+  the baseline config, only `inference.ensemble_weights_relative` differs.

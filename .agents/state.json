@@ -1,41 +1,42 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-07T14:56:53+08:00",
+  "updated_at": "2026-08-07T15:21:23+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Opt-in two-seed raw-logit ensemble implemented",
-  "status": "implementation_complete_second_seed_required",
+  "active_milestone": "Legitimate two-seed fixed-8 experiment ready for HPC",
+  "status": "retrieval_and_configuration_complete",
   "host": "windows-local",
   "completed": [
     "Fixed-8 control remains reproduced exactly at 0.87892959136423",
-    "Inspected public support-pack predictor and complete checkpoint listing",
-    "Implemented opt-in detector-logit and edge-logit blending before activation/thresholding",
-    "Preserved byte-for-byte baseline prediction command when ensemble is disabled",
-    "Added checkpoint/alpha/architecture validation and CPU-only ensemble tests"
+    "Retrieved the public Seed 2 artifact pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "Verified the notebook-pinned Seed 2 checksum and independent seed-314159 training provenance",
+    "Staged Seed 1 unchanged and Seed 2 plus metadata under data/support",
+    "Added a two-seed experiment config with ensemble_alpha 0.5 and no other baseline-setting changes"
   ],
   "in_progress": [],
-  "blocked": [
-    "No legitimate independently trained second compatible checkpoint exists in the current support artifact"
-  ],
+  "blocked": [],
   "last_verified_commands": [
-    "pytest: 26 passed",
-    "ruff check .: passed",
-    "python -m compileall -q src: passed",
-    "D4 + ensemble patch applied to and py_compile-checked against real support predictor source"
+    "pytest -q --basetemp <workspace temp>: 26 passed",
+    "ruff check src tests: passed",
+    "python -m compileall -q src tests: passed",
+    "two-seed config dry-run: config_valid true",
+    "checkpoint distinctness and configured paths validated"
   ],
-  "next_action": "Obtain a provenance-backed independent compatible checkpoint, add its relative path to an experiment config, then run fixed-8 seed2-only and 50/50 blend",
-  "needs_human": [
-    "Provide or locate an independently trained second UNetNodeTransformer checkpoint plus matching config.json"
-  ],
+  "next_action": "Run fixed-8 on HPC with configs/clean_v106_two_seed.yaml and a new output directory",
+  "needs_human": [],
   "artifacts": {
     "fixed8_nfs": "~/biohub-outputs/fixed8/current_v106/",
     "control_git_commit": "3e6bf40982c7df3fa0a979ef1764bb95db68fb44",
-    "primary_checkpoint": "weights/unet_transformer/split_0/edge_predictor_best.pth",
-    "support_artifact": "pilkwang/biohub-tracking-support-pack-50ep-v1"
+    "primary_checkpoint": "data/support/weights/unet_transformer/split_0/edge_predictor_best.pth",
+    "primary_checkpoint_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
+    "secondary_checkpoint": "data/support/weights/unet_transformer/seed_314159/edge_predictor_best.pth",
+    "secondary_checkpoint_sha256": "9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f",
+    "secondary_support_artifact": "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "experiment_config": "configs/clean_v106_two_seed.yaml"
   },
   "notes": [
-    "ensemble_weights_relative=null retains exact single-model command and behavior",
-    "Support archive has only split_0 edge_predictor_best.pth and checkpoint_last.pth; checkpoint_last is from the same run and is not an independent seed",
-    "Primary checkpoint SHA256 is 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
-    "No evaluation, ILP, threshold, or postprocessing code was changed"
+    "The public notebook resolves Seed 2 by manifest checksum 9bac2fa0...e305f",
+    "Seed 2 metadata records base_seed and effective_seed 314159, method unet_transformer_alltrain_seed314159_v1, and best epoch 381",
+    "Primary and secondary config.json files are identical and the checkpoint hashes differ",
+    "No evaluation, fixed-8, ILP, threshold, or postprocessing code was changed during retrieval"
   ]
 }
