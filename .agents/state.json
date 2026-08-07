@@ -1,41 +1,32 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-07T13:57:31+08:00",
+  "updated_at": "2026-08-07T14:32:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Current V106 fixed-8 CV orchestration implemented",
-  "status": "implementation_complete_hpc_pending",
-  "host": "windows-local",
+  "active_milestone": "Fixed-8 V106 control REPRODUCED on HPC",
+  "status": "complete",
+  "host": "linux-login01",
   "completed": [
-    "Existing V106 public-test submission remains ready at outputs/kaggle_submission/submission_v106.csv on HPC",
-    "Added fixed8_cv CLI with exact eight-dataset validation, current V106 inference/postprocessing, existing official-spec-lite evaluation, and reproducibility outputs",
-    "Added fixed-8 Slurm script that stages only eight zarr/geff pairs plus code and support",
-    "Added synthetic fixed-8 tests; complete local suite passes"
+    "Verified exact eight train zarr/geff pairs + support checkpoint",
+    "Ran scripts/slurm/run_v106_fixed8_cv.sh (job 5044, um-gpu02, ~14 min)",
+    "Fixed-8 score exactly matched reference 0.87892959136423 (delta 0.0)"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "python -m pytest -q --basetemp <workspace-temp>: 19 passed",
-    "python -m ruff check .: passed",
-    "python -m compileall -q src: passed",
-    "bash -n scripts/slurm/run_v106_fixed8_cv.sh: passed",
-    "python -m biohub_pipeline.fixed8_cv --help: passed"
+    "bash scripts/slurm/run_v106_fixed8_cv.sh",
+    "cat ~/biohub-outputs/fixed8/current_v106/summary.json"
   ],
-  "next_action": "On login01 run: bash scripts/slurm/run_v106_fixed8_cv.sh",
-  "needs_human": [
-    "Run real fixed-8 CV on HPC because local checkout lacks the eight full train pairs, support pack, and production CUDA"
-  ],
+  "next_action": "Inspect support-pack predict_unet_transformer.py and public 0.911 two-seed logit-blend; implement minimal two-seed A/B vs this fixed-8 control",
+  "needs_human": [],
   "artifacts": {
-    "v106_submission": "outputs/kaggle_submission/submission_v106.csv",
-    "support": "data/support",
-    "config": "configs/clean_v106.yaml",
-    "fixed8_cli": "src/biohub_pipeline/fixed8_cv.py",
-    "fixed8_slurm": "scripts/slurm/run_v106_fixed8_cv.sh",
+    "fixed8_nfs": "~/biohub-outputs/fixed8/current_v106/",
+    "fixed8_login_copy": "outputs/fixed8/current_v106/",
     "fixed8_log": "logs/slurm/v106_fixed8_cv.log",
-    "fixed8_nfs": "~/biohub-outputs/fixed8/current_v106/"
+    "git_commit": "3e6bf40982c7df3fa0a979ef1764bb95db68fb44"
   },
   "notes": [
-    "Fixed-8 current V106 reproduction target is 0.87892959136423",
-    "Real fixed-8 score is not yet reproduced; HPC execution is required",
-    "Detector ensembling, logit caching, threshold sweeps, DeepCenter, and gap-2 changes remain explicitly out of scope"
+    "Control score adj_edge_jaccard=0.87892959136423 reproduced exactly",
+    "Worst edge FP+FN burden: 6bba_05db0fb1, 6bba_fc83837d, 44b6_e57ff5c6",
+    "No code changes required for this control run"
   ]
 }

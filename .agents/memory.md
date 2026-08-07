@@ -65,3 +65,17 @@
   support pack, and copies results to `~/biohub-outputs/fixed8/current_v106/`.
 - Local verification is 19 passing tests plus Ruff, compileall, Bash syntax, and CLI help. Real
   fixed-8 reproduction remains unrun because it requires HPC training data, support assets, and CUDA.
+
+## Fixed-8 current V106 control reproduced (2026-08-07 login01)
+
+- Commit `3e6bf40982c7df3fa0a979ef1764bb95db68fb44`; job 5044 on um-gpu02
+  (RTX 2080 Ti); `scripts/slurm/run_v106_fixed8_cv.sh`.
+- Score `adj_edge_jaccard=0.87892959136423` matches reference exactly
+  (`delta_vs_reference=0.0`, `reference_difference_material=false`).
+- Aggregates: edge TP/FP/FN = 3852/287/251; division TP/FP/FN = 0/6/7;
+  node_recall ≈ 0.9804; micro edge Jaccard ≈ 0.87745; division Jaccard = 0.0.
+- Outputs: NFS `~/biohub-outputs/fixed8/current_v106/` and login copy
+  `outputs/fixed8/current_v106/` (`summary.json`, `per_dataset.csv`,
+  `manifest.json`, `predictions/`, `DONE`).
+- Largest association error burden (edge FP+FN): `6bba_05db0fb1` (240),
+  `6bba_fc83837d` (181), `44b6_e57ff5c6` (78).
