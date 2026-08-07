@@ -1,32 +1,41 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-07T14:32:00+08:00",
+  "updated_at": "2026-08-07T14:56:53+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Fixed-8 V106 control REPRODUCED on HPC",
-  "status": "complete",
-  "host": "linux-login01",
+  "active_milestone": "Opt-in two-seed raw-logit ensemble implemented",
+  "status": "implementation_complete_second_seed_required",
+  "host": "windows-local",
   "completed": [
-    "Verified exact eight train zarr/geff pairs + support checkpoint",
-    "Ran scripts/slurm/run_v106_fixed8_cv.sh (job 5044, um-gpu02, ~14 min)",
-    "Fixed-8 score exactly matched reference 0.87892959136423 (delta 0.0)"
+    "Fixed-8 control remains reproduced exactly at 0.87892959136423",
+    "Inspected public support-pack predictor and complete checkpoint listing",
+    "Implemented opt-in detector-logit and edge-logit blending before activation/thresholding",
+    "Preserved byte-for-byte baseline prediction command when ensemble is disabled",
+    "Added checkpoint/alpha/architecture validation and CPU-only ensemble tests"
   ],
   "in_progress": [],
-  "blocked": [],
-  "last_verified_commands": [
-    "bash scripts/slurm/run_v106_fixed8_cv.sh",
-    "cat ~/biohub-outputs/fixed8/current_v106/summary.json"
+  "blocked": [
+    "No legitimate independently trained second compatible checkpoint exists in the current support artifact"
   ],
-  "next_action": "Inspect support-pack predict_unet_transformer.py and public 0.911 two-seed logit-blend; implement minimal two-seed A/B vs this fixed-8 control",
-  "needs_human": [],
+  "last_verified_commands": [
+    "pytest: 26 passed",
+    "ruff check .: passed",
+    "python -m compileall -q src: passed",
+    "D4 + ensemble patch applied to and py_compile-checked against real support predictor source"
+  ],
+  "next_action": "Obtain a provenance-backed independent compatible checkpoint, add its relative path to an experiment config, then run fixed-8 seed2-only and 50/50 blend",
+  "needs_human": [
+    "Provide or locate an independently trained second UNetNodeTransformer checkpoint plus matching config.json"
+  ],
   "artifacts": {
     "fixed8_nfs": "~/biohub-outputs/fixed8/current_v106/",
-    "fixed8_login_copy": "outputs/fixed8/current_v106/",
-    "fixed8_log": "logs/slurm/v106_fixed8_cv.log",
-    "git_commit": "3e6bf40982c7df3fa0a979ef1764bb95db68fb44"
+    "control_git_commit": "3e6bf40982c7df3fa0a979ef1764bb95db68fb44",
+    "primary_checkpoint": "weights/unet_transformer/split_0/edge_predictor_best.pth",
+    "support_artifact": "pilkwang/biohub-tracking-support-pack-50ep-v1"
   },
   "notes": [
-    "Control score adj_edge_jaccard=0.87892959136423 reproduced exactly",
-    "Worst edge FP+FN burden: 6bba_05db0fb1, 6bba_fc83837d, 44b6_e57ff5c6",
-    "No code changes required for this control run"
+    "ensemble_weights_relative=null retains exact single-model command and behavior",
+    "Support archive has only split_0 edge_predictor_best.pth and checkpoint_last.pth; checkpoint_last is from the same run and is not an independent seed",
+    "Primary checkpoint SHA256 is 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
+    "No evaluation, ILP, threshold, or postprocessing code was changed"
   ]
 }

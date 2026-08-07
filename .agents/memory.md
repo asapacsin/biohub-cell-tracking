@@ -79,3 +79,18 @@
   `manifest.json`, `predictions/`, `DONE`).
 - Largest association error burden (edge FP+FN): `6bba_05db0fb1` (240),
   `6bba_fc83837d` (181), `44b6_e57ff5c6` (78).
+
+## Two-seed raw-logit ensemble plumbing (2026-08-07)
+
+- Public support artifact `pilkwang/biohub-tracking-support-pack-50ep-v1` contains only
+  `weights/unet_transformer/split_0/edge_predictor_best.pth` (SHA-256
+  `12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771`) and a
+  `checkpoint_last.pth` from the same split/training run. No independent second seed was found.
+- Opt-in ensemble config is `ensemble_weights_relative` plus `ensemble_alpha`; null preserves the
+  exact original prediction command and single-model behavior. Duplicate-content checkpoints are
+  rejected even when stored at different paths.
+- The deterministic support-source patch wraps two compatible models. It blends raw detector
+  logits returned by `encode()` and raw edge logits returned by `predict_edges()` before the
+  unchanged sigmoid/softmax, thresholds, ILP, and graph pipeline.
+- The patch was applied after D4 and compiled successfully against the actual support predictor.
+  Local verification: 26 tests, Ruff, compileall, and diff check pass.

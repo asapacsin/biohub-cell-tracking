@@ -82,6 +82,18 @@ def validate_config(raw: object) -> PipelineConfig:
         raise ConfigError("inference.detection_threshold must be in (0, 1]")
     if int(inference["unet_batch_size"]) < 1:
         raise ConfigError("inference.unet_batch_size must be positive")
+    ensemble_relative = inference.get("ensemble_weights_relative")
+    if ensemble_relative is not None:
+        if not isinstance(ensemble_relative, str) or not ensemble_relative.strip():
+            raise ConfigError("inference.ensemble_weights_relative must be null or a relative path")
+        ensemble_path = Path(ensemble_relative)
+        if ensemble_path.is_absolute() or ".." in ensemble_path.parts:
+            raise ConfigError("inference.ensemble_weights_relative must be a safe relative path")
+    ensemble_alpha = inference.get("ensemble_alpha", 0.5)
+    if isinstance(ensemble_alpha, bool) or not isinstance(ensemble_alpha, (int, float)):
+        raise ConfigError("inference.ensemble_alpha must be numeric")
+    if not 0.0 <= float(ensemble_alpha) <= 1.0:
+        raise ConfigError("inference.ensemble_alpha must be between 0 and 1")
 
     scale = postprocessing.get("voxel_scale_um")
     if not isinstance(scale, list) or len(scale) != 3 or any(float(v) <= 0 for v in scale):

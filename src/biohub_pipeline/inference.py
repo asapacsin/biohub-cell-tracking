@@ -2,13 +2,50 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 from biohub_pipeline.config import PipelineConfig
+
+
+def validate_ensemble_alpha(alpha: float) -> None:
+    if not 0.0 <= alpha <= 1.0:
+        raise ValueError("ensemble_alpha must be between 0 and 1")
+
+
+def blend_logits(seed1: Any, seed2: Any, alpha: float) -> Any:
+    """Blend compatible raw-logit arrays/tensors before any activation or threshold."""
+    validate_ensemble_alpha(alpha)
+    shape1 = getattr(seed1, "shape", None)
+    shape2 = getattr(seed2, "shape", None)
+    if shape1 is not None and shape2 is not None and tuple(shape1) != tuple(shape2):
+        raise ValueError(f"cannot blend incompatible logit shapes: {shape1} != {shape2}")
+    return alpha * seed1 + (1.0 - alpha) * seed2
+
+
+def _checkpoint_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def validate_ensemble_checkpoints(primary: Path, secondary: Path, alpha: float) -> None:
+    validate_ensemble_alpha(alpha)
+    if not secondary.is_file():
+        raise FileNotFoundError(f"ensemble checkpoint is missing: {secondary}")
+    if not primary.is_file():
+        raise FileNotFoundError(f"primary checkpoint is missing: {primary}")
+    if primary.resolve() == secondary.resolve() or _checkpoint_sha256(primary) == _checkpoint_sha256(
+        secondary
+    ):
+        raise ValueError("ensemble requires two distinct independently trained checkpoints")
 
 
 def list_stems(data_dir: Path) -> list[str]:
@@ -70,6 +107,180 @@ def apply_spatial_d4_patch(repo_dir: Path, prediction_script: str) -> bool:
     raise RuntimeError("upstream detector TTA block does not match the V106 patch preimage")
 
 
+def apply_logit_ensemble_patch(repo_dir: Path, prediction_script: str) -> bool:
+    """Patch the support predictor with an opt-in raw detector/edge-logit blend wrapper."""
+    path = repo_dir / prediction_script
+    source = path.read_text(encoding="utf-8")
+    if "_V106_LOGIT_ENSEMBLE_PATCH = True" in source:
+        return False
+
+    replacements = [
+        (
+            "import contextlib\n",
+            "import contextlib\nimport hashlib\n",
+        ),
+        (
+            "def load_model(\n    weights_path: Path, device: torch.device,\n) -> tuple[UNetNodeTransformer, int, tuple[int, ...]]:\n",
+            '''_V106_LOGIT_ENSEMBLE_PATCH = True
+
+
+def _blend_raw_logits(seed1: torch.Tensor, seed2: torch.Tensor, alpha: float) -> torch.Tensor:
+    """Blend raw compatible logits before sigmoid/softmax or thresholding."""
+    if seed1.shape != seed2.shape:
+        raise ValueError(f"incompatible ensemble logit shapes: {seed1.shape} != {seed2.shape}")
+    return alpha * seed1 + (1.0 - alpha) * seed2
+
+
+class _EnsembleFeatures:
+    """Keep model-specific feature tensors aligned through existing indexing code."""
+
+    def __init__(self, seed1, seed2):
+        self.seed1 = seed1
+        self.seed2 = seed2
+
+    def __getitem__(self, key):
+        return _EnsembleFeatures(self.seed1[key], self.seed2[key])
+
+
+class _LogitBlendModel:
+    """Duck-typed predictor that blends both learned heads at their raw logits."""
+
+    def __init__(self, seed1, seed2, alpha: float):
+        self.seed1 = seed1
+        self.seed2 = seed2
+        self.alpha = alpha
+
+    def encode(self, imgs):
+        features1, detector1 = self.seed1.encode(imgs)
+        features2, detector2 = self.seed2.encode(imgs)
+        if len(detector1) != len(detector2):
+            raise ValueError("incompatible ensemble detector output counts")
+        detector = [
+            _blend_raw_logits(logits1, logits2, self.alpha)
+            for logits1, logits2 in zip(detector1, detector2)
+        ]
+        return _EnsembleFeatures(features1, features2), detector
+
+    def _index_features(self, features, *args, **kwargs):
+        return _EnsembleFeatures(
+            self.seed1._index_features(features.seed1, *args, **kwargs),
+            self.seed2._index_features(features.seed2, *args, **kwargs),
+        )
+
+    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        return _blend_raw_logits(logits1, logits2, self.alpha)
+
+
+def _checkpoint_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def load_model(
+    weights_path: Path, device: torch.device,
+) -> tuple[UNetNodeTransformer, int, tuple[int, ...]]:
+''',
+        ),
+        (
+            "\n\n# =============================================================================\n# Per-frame loading\n# =============================================================================\n",
+            '''
+
+def load_logit_ensemble(
+    primary_path: Path,
+    secondary_path: Path,
+    alpha: float,
+    device: torch.device,
+):
+    if not 0.0 <= alpha <= 1.0:
+        raise ValueError("ensemble alpha must be between 0 and 1")
+    if not secondary_path.is_file():
+        raise FileNotFoundError(f"ensemble checkpoint is missing: {secondary_path}")
+    if primary_path.resolve() == secondary_path.resolve() or _checkpoint_sha256(primary_path) == _checkpoint_sha256(secondary_path):
+        raise ValueError("ensemble requires two distinct independently trained checkpoints")
+
+    seed1, window_size, downsample = load_model(primary_path, device)
+    seed2, window_size2, downsample2 = load_model(secondary_path, device)
+    signature1 = [(name, tuple(value.shape)) for name, value in seed1.state_dict().items()]
+    signature2 = [(name, tuple(value.shape)) for name, value in seed2.state_dict().items()]
+    if window_size != window_size2 or downsample != downsample2 or signature1 != signature2:
+        raise ValueError("ensemble checkpoints are architecture-incompatible")
+    return _LogitBlendModel(seed1, seed2, alpha), window_size, downsample
+
+
+# =============================================================================
+# Per-frame loading
+# =============================================================================
+''',
+        ),
+        (
+            "    weights_path: Path,\n    cfg: PredictConfig,\n",
+            "    weights_path: Path,\n    cfg: PredictConfig,\n    ensemble_weights_path: Path | None = None,\n    ensemble_alpha: float = 0.5,\n",
+        ),
+        (
+            "    model, window_size, downsample = load_model(weights_path, device)\n",
+            '''    if ensemble_weights_path is None:
+        model, window_size, downsample = load_model(weights_path, device)
+    else:
+        model, window_size, downsample = load_logit_ensemble(
+            weights_path, ensemble_weights_path, ensemble_alpha, device,
+        )
+        print(
+            f"Raw-logit ensemble: secondary={ensemble_weights_path} alpha={ensemble_alpha}",
+            flush=True,
+        )
+''',
+        ),
+        (
+            '''    parser.add_argument("--weights", type=str, default=None,
+                        help="Path to weights file. "
+                             "Default: weights/{method}/split_{split}/edge_predictor_best.pth")
+''',
+            '''    parser.add_argument("--weights", type=str, default=None,
+                        help="Path to weights file. "
+                             "Default: weights/{method}/split_{split}/edge_predictor_best.pth")
+    parser.add_argument("--ensemble-weights", type=str, default=None,
+                        help="Optional independent compatible checkpoint for raw-logit blending.")
+    parser.add_argument("--ensemble-alpha", type=float, default=0.5,
+                        help="Primary-checkpoint raw-logit weight in [0, 1] (default: 0.5).")
+''',
+        ),
+        (
+            "            weights_path=weights_path,\n            cfg=cfg,\n",
+            '''            weights_path=weights_path,
+            cfg=cfg,
+            ensemble_weights_path=(
+                Path(args.ensemble_weights) if args.ensemble_weights else None
+            ),
+            ensemble_alpha=args.ensemble_alpha,
+''',
+        ),
+    ]
+
+    patched = source
+    for old, new in replacements:
+        if patched.count(old) != 1:
+            raise RuntimeError("support predictor does not match the V106 ensemble patch preimage")
+        patched = patched.replace(old, new, 1)
+    path.write_text(patched, encoding="utf-8")
+    return True
+
+
+def resolve_ensemble_weights(config: PipelineConfig, primary_weights: Path) -> Path | None:
+    relative = config.inference.get("ensemble_weights_relative")
+    if relative is None:
+        return None
+    primary_relative = Path(str(config.inference["weights_relative"]))
+    weights_root = primary_weights
+    for _ in primary_relative.parts:
+        weights_root = weights_root.parent
+    return (weights_root / Path(str(relative))).resolve()
+
+
 def build_predict_command(
     config: PipelineConfig,
     data_dir: Path,
@@ -83,6 +294,11 @@ def build_predict_command(
     )
     inf = config.inference
     relative_weights = os.path.relpath(weights_path, repo_dir)
+    ensemble_weights = resolve_ensemble_weights(config, weights_path)
+    if ensemble_weights is not None:
+        alpha = float(inf.get("ensemble_alpha", 0.5))
+        validate_ensemble_checkpoints(weights_path, ensemble_weights, alpha)
+        apply_logit_ensemble_patch(repo_dir, str(inf["prediction_script"]))
     command = [
         sys.executable,
         str(inf["prediction_script"]),
@@ -107,6 +323,15 @@ def build_predict_command(
         "--ilp-division-weight",
         str(inf["ilp_division_weight"]),
     ]
+    if ensemble_weights is not None:
+        command.extend(
+            [
+                "--ensemble-weights",
+                os.path.relpath(ensemble_weights, repo_dir),
+                "--ensemble-alpha",
+                str(inf.get("ensemble_alpha", 0.5)),
+            ]
+        )
     if inf["use_ilp"]:
         command.append("--use-ilp")
     return command, splits
