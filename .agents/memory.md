@@ -52,3 +52,16 @@
   4 datasets; `validate_submission_file` passed. NFS copy under `~/biohub-outputs/v106/`.
 - Reported upstream public score for this notebook version is 0.908 (not re-verified on
   Kaggle from this host yet).
+
+## Current V106 fixed-8 workflow (2026-08-07)
+
+- `python -m biohub_pipeline.fixed8_cv` validates and runs exactly the eight fixed upstream train
+  datasets; missing `.zarr` or `.geff` inputs are fatal and unrelated train datasets are ignored.
+- Fixed-8 prediction conversion uses the same `write_submission_from_geff` path as normal V106,
+  then evaluates through the existing `biohub_pipeline.evaluation` official-spec-lite functions.
+- Outputs are `per_dataset.csv`, `summary.json`, `manifest.json`, raw prediction GEFFs, and the
+  combined postprocessed prediction CSV. The current reference target is `0.87892959136423`.
+- `scripts/slurm/run_v106_fixed8_cv.sh` stages only the eight required zarr/geff pairs, code, and
+  support pack, and copies results to `~/biohub-outputs/fixed8/current_v106/`.
+- Local verification is 19 passing tests plus Ruff, compileall, Bash syntax, and CLI help. Real
+  fixed-8 reproduction remains unrun because it requires HPC training data, support assets, and CUDA.

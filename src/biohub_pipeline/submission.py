@@ -53,9 +53,9 @@ def graph_rows(
     for node_id, node in nodes.items():
         clamped[node_id] = {
             **node,
-            "z": max(0, int(round(float(node["z"])))),
-            "y": max(0, int(round(float(node["y"])))),
-            "x": max(0, int(round(float(node["x"])))),
+            "z": max(0, round(float(node["z"]))),
+            "y": max(0, round(float(node["y"]))),
+            "x": max(0, round(float(node["x"]))),
         }
     validate_graph(dataset, clamped, edges)
     rows: list[dict[str, Any]] = []

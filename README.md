@@ -57,6 +57,39 @@ Install the `runtime` extra or use the support artifact's offline wheels. Full i
 CUDA. This local migration did not run training, full inference, or create a competition
 submission.
 
+## Fixed-8 CV on HPC
+
+Fixed-8 CV runs the current V106 inference and postprocessing pipeline on the same eight labeled
+training datasets, then evaluates the predictions with the packaged official-spec-lite metric.
+Real execution requires CUDA and all eight matching train `.zarr` and `.geff` pairs.
+
+From the HPC repository checkout, run:
+
+```bash
+bash scripts/slurm/run_v106_fixed8_cv.sh
+```
+
+The script validates and stages only the required eight pairs, plus the code and support artifact;
+it does not copy the full training directory. Results are copied to
+`~/biohub-outputs/fixed8/current_v106/` and include `per_dataset.csv`, `summary.json`,
+`manifest.json`, and preserved raw and postprocessed predictions.
+
+The module can also be invoked directly in a prepared GPU environment:
+
+```bash
+python -m biohub_pipeline.fixed8_cv \
+  --data-dir /path/to/competition/train \
+  --weights-dir /path/to/support \
+  --support-dir /path/to/support \
+  --config configs/clean_v106.yaml \
+  --output-dir outputs/fixed8/current_v106
+```
+
+Fixed-8 CV does not improve the Kaggle score by itself. It provides a reproducible local
+measurement for deciding whether future changes such as detector ensembling or threshold
+calibration are actually better than the current V106 pipeline. The current reproduction target
+recorded upstream is approximately `0.87892959136423`.
+
 ## Repository layout
 
 - `upstream_clean_v106/`: preserved notebook, source conversion, attribution, and fingerprint.

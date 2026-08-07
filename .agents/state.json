@@ -1,38 +1,41 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-06T16:02:00+08:00",
+  "updated_at": "2026-08-07T13:57:31+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Clean V106 public-test submission ready",
-  "status": "complete",
-  "host": "linux-login01",
+  "active_milestone": "Current V106 fixed-8 CV orchestration implemented",
+  "status": "implementation_complete_hpc_pending",
+  "host": "windows-local",
   "completed": [
-    "No prior GPU job to cancel (queue empty)",
-    "Downloaded support pack pilkwang/biohub-tracking-support-pack-50ep-v1 to data/support",
-    "GPU job 4708: V106 inference on 4 public test zarrs succeeded",
-    "Fixed absolute data paths + clamp slightly-negative coords like upstream notebook",
-    "submission_v106.csv validated: 120246 nodes / 115957 edges / 4 datasets"
+    "Existing V106 public-test submission remains ready at outputs/kaggle_submission/submission_v106.csv on HPC",
+    "Added fixed8_cv CLI with exact eight-dataset validation, current V106 inference/postprocessing, existing official-spec-lite evaluation, and reproducibility outputs",
+    "Added fixed-8 Slurm script that stages only eight zarr/geff pairs plus code and support",
+    "Added synthetic fixed-8 tests; complete local suite passes"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "pytest: 12 passed",
-    "validate_submission_file(submission_v106.csv) -> rows=236203",
-    "V106_OK in logs/slurm/v106_infer.log"
+    "python -m pytest -q --basetemp <workspace-temp>: 19 passed",
+    "python -m ruff check .: passed",
+    "python -m compileall -q src: passed",
+    "bash -n scripts/slurm/run_v106_fixed8_cv.sh: passed",
+    "python -m biohub_pipeline.fixed8_cv --help: passed"
   ],
-  "next_action": "Kaggle notebook submit with outputs/kaggle_submission/submission_v106.csv (Internet Off)",
+  "next_action": "On login01 run: bash scripts/slurm/run_v106_fixed8_cv.sh",
   "needs_human": [
-    "Upload/submit V106 CSV on Kaggle; classical submission.csv remains historical ~0.543 fallback"
+    "Run real fixed-8 CV on HPC because local checkout lacks the eight full train pairs, support pack, and production CUDA"
   ],
   "artifacts": {
     "v106_submission": "outputs/kaggle_submission/submission_v106.csv",
-    "classical_submission": "outputs/kaggle_submission/submission.csv",
     "support": "data/support",
     "config": "configs/clean_v106.yaml",
-    "v106_log": "logs/slurm/v106_infer.log",
-    "nfs": "~/biohub-outputs/v106/"
+    "fixed8_cli": "src/biohub_pipeline/fixed8_cv.py",
+    "fixed8_slurm": "scripts/slurm/run_v106_fixed8_cv.sh",
+    "fixed8_log": "logs/slurm/v106_fixed8_cv.log",
+    "fixed8_nfs": "~/biohub-outputs/fixed8/current_v106/"
   },
   "notes": [
-    "Legacy learned U-Net (submission_learned.csv, 5528 nodes) is not competitive with V106",
-    "V106 is denser than classical blob baseline (120k vs 38k nodes) as expected for 0.908 public pipeline"
+    "Fixed-8 current V106 reproduction target is 0.87892959136423",
+    "Real fixed-8 score is not yet reproduced; HPC execution is required",
+    "Detector ensembling, logit caching, threshold sweeps, DeepCenter, and gap-2 changes remain explicitly out of scope"
   ]
 }
