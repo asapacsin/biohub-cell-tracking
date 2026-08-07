@@ -1014,6 +1014,8 @@ def add_safe_divisions_postlink(
     global_cap = max(1, int(round(max(1, len(edges)) * SAFE_DIV_GLOBAL_FRAC_CAP)))
     added: list[dict[str, object]] = []
     used_targets: set[int] = set()
+    # At most one safe-division child per parent (out-degree must never exceed 2).
+    used_sources: set[int] = set()
 
     for t in sorted(ids_by_t):
         child_frame_ids = ids_by_t.get(t + 1, [])
@@ -1072,6 +1074,8 @@ def add_safe_divisions_postlink(
                 break
             if added_this_frame >= frame_cap:
                 break
+            if source_id in used_sources:
+                continue
             if candidate_id in used_targets or candidate_id in incoming:
                 continue
             candidate = nodes_by_id[candidate_id]
@@ -1083,6 +1087,7 @@ def add_safe_divisions_postlink(
                 "safe_division": 1,
             })
             used_targets.add(candidate_id)
+            used_sources.add(source_id)
             added_this_frame += 1
 
     if added:

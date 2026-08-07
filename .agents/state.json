@@ -1,42 +1,34 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-07T15:21:23+08:00",
+  "updated_at": "2026-08-08T00:25:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Legitimate two-seed fixed-8 experiment ready for HPC",
-  "status": "retrieval_and_configuration_complete",
-  "host": "windows-local",
+  "active_milestone": "Two-seed fixed-8 alpha=0.5 scored after safe_division gate",
+  "status": "complete",
+  "host": "linux-login01",
   "completed": [
-    "Fixed-8 control remains reproduced exactly at 0.87892959136423",
-    "Retrieved the public Seed 2 artifact pilkwang/biohub-temporal-unet3d-seed314159-v1",
-    "Verified the notebook-pinned Seed 2 checksum and independent seed-314159 training provenance",
-    "Staged Seed 1 unchanged and Seed 2 plus metadata under data/support",
-    "Added a two-seed experiment config with ensemble_alpha 0.5 and no other baseline-setting changes"
+    "Applied used_sources gate in add_safe_divisions_postlink (at most one safe-division child per parent)",
+    "Unit test test_safe_divisions_add_at_most_one_child_per_parent passes",
+    "Re-converted saved two-seed GEFFs (no re-inference) and evaluated fixed-8",
+    "Score 0.8847464271589631 vs control 0.87892959136423 (delta +0.005816835795)"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "pytest -q --basetemp <workspace temp>: 26 passed",
-    "ruff check src tests: passed",
-    "python -m compileall -q src tests: passed",
-    "two-seed config dry-run: config_valid true",
-    "checkpoint distinctness and configured paths validated"
+    ".venv/bin/pytest tests/test_clean_postprocessing.py tests/test_clean_submission.py -q (7 passed)",
+    "srun scripts/rescore_two_seed_geffs.sh -> score 0.8847464271589631"
   ],
-  "next_action": "Run fixed-8 on HPC with configs/clean_v106_two_seed.yaml and a new output directory",
+  "next_action": "Decide next experiment (e.g. public-test submission, alpha sweep, or leave two-seed as local CV win)",
   "needs_human": [],
   "artifacts": {
-    "fixed8_nfs": "~/biohub-outputs/fixed8/current_v106/",
-    "control_git_commit": "3e6bf40982c7df3fa0a979ef1764bb95db68fb44",
-    "primary_checkpoint": "data/support/weights/unet_transformer/split_0/edge_predictor_best.pth",
-    "primary_checkpoint_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
-    "secondary_checkpoint": "data/support/weights/unet_transformer/seed_314159/edge_predictor_best.pth",
-    "secondary_checkpoint_sha256": "9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f",
-    "secondary_support_artifact": "pilkwang/biohub-temporal-unet3d-seed314159-v1",
-    "experiment_config": "configs/clean_v106_two_seed.yaml"
+    "summary_nfs": "~/biohub-outputs/fixed8/two_seed_alpha_0_5/summary.json",
+    "summary_login": "outputs/fixed8/two_seed_alpha_0_5/summary.json",
+    "raw_geff_nfs": "~/biohub-outputs/fixed8/two_seed_alpha_0_5/raw_geff/",
+    "rescore_log": "logs/slurm/two_seed_rescore.log",
+    "config": "configs/clean_v106_two_seed.yaml",
+    "control_summary": "outputs/fixed8/current_v106/summary.json"
   },
   "notes": [
-    "The public notebook resolves Seed 2 by manifest checksum 9bac2fa0...e305f",
-    "Seed 2 metadata records base_seed and effective_seed 314159, method unet_transformer_alltrain_seed314159_v1, and best epoch 381",
-    "Primary and secondary config.json files are identical and the checkpoint hashes differ",
-    "No evaluation, fixed-8, ILP, threshold, or postprocessing code was changed during retrieval"
+    "Repair is intentional local divergence from vendored V106 safe_division accept loop",
+    "Edges tp/fp/fn 3878/283/225 (control was 3852/287/251); divisions 0/15/7 (control 0/6/7)"
   ]
 }

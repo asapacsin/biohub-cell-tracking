@@ -108,3 +108,30 @@
   and provenance manifests are alongside it. `data/support` remains intentionally gitignored.
 - `configs/clean_v106_two_seed.yaml` enables this checkpoint at `ensemble_alpha: 0.5`; compared with
   the baseline config, only `inference.ensemble_weights_relative` differs.
+
+## Two-seed fixed-8 failure diagnosis (2026-08-07/08)
+
+- Job 5058 finished all 8 GEFF predictions then crashed in submission validation
+  (`ValueError: a node has more than two children`). No `summary.json` / score.
+- Raw GEFFs were later confirmed under
+  `~/biohub-outputs/fixed8/two_seed_alpha_0_5/predictions/raw_geff/` and copied to
+  top-level `~/biohub-outputs/fixed8/two_seed_alpha_0_5/raw_geff/` with `MANIFEST.json`.
+- Re-conversion of those saved GEFFs (no re-inference) found exactly one violating parent:
+  `6bba_05db0fb1` parent `24536` at `t=30` with 3 children at `t=31`:
+  ordinary edge `24536->25365` (prob≈0.538, dist_um=4.875) plus two `safe_division`
+  edges to `25345` and `25368`.
+- Root cause in vendored `add_safe_divisions_postlink`: parents with out-degree 1 are
+  eligible, but the accept loop does not mark a source as used after adding one
+  safe-division child, so multiple proposals for the same parent can all be added.
+- Persistence/diagnostics helpers now live in `fixed8_cv._copy_raw_predictions` and
+  `submission.collect_outdegree_violations`.
+- Fix applied in `add_safe_divisions_postlink`: track `used_sources` so a parent receives
+  at most one safe-division child (out-degree never exceeds 2). This is an intentional
+  local divergence from the vendored V106 accept loop; re-running `vendor_clean_v106.py`
+  would overwrite it unless upstream is updated too.
+- Re-conversion of saved two-seed GEFFs (no re-inference) scored
+  `adj_edge_jaccard=0.8847464271589631` vs control `0.87892959136423`
+  (`delta=+0.005816835794733133`). Aggregates: edge TP/FP/FN = 3878/283/225;
+  division TP/FP/FN = 0/15/7; node_recall ≈ 0.9847. Artifacts:
+  `~/biohub-outputs/fixed8/two_seed_alpha_0_5/` and login copy
+  `outputs/fixed8/two_seed_alpha_0_5/`.

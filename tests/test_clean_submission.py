@@ -55,3 +55,28 @@ def test_slightly_negative_floats_are_clamped_like_upstream() -> None:
     rows = graph_rows("video_b", nodes, edges)
     assert rows[0]["z"] == 0
     assert rows[1]["z"] == 0
+
+
+def test_outdegree_violation_diagnostics_include_children() -> None:
+    from biohub_pipeline.submission import collect_outdegree_violations, format_outdegree_violation_report
+
+    nodes = {
+        1: {"node_id": 1, "t": 0, "z": 1, "y": 1, "x": 1},
+        2: {"node_id": 2, "t": 1, "z": 1, "y": 1, "x": 1},
+        3: {"node_id": 3, "t": 1, "z": 1, "y": 2, "x": 1},
+        4: {"node_id": 4, "t": 1, "z": 1, "y": 3, "x": 1},
+    }
+    edges = [
+        {"source_id": 1, "target_id": 2, "edge_prob": 0.9, "distance_um": 1.0},
+        {"source_id": 1, "target_id": 3, "edge_prob": 0.8, "distance_um": 2.0},
+        {"source_id": 1, "target_id": 4, "edge_prob": 0.7, "distance_um": 3.0, "safe_division": 1},
+    ]
+    violations = collect_outdegree_violations("demo", nodes, edges, stage="after_postprocess")
+    assert len(violations) == 1
+    assert violations[0]["n_children"] == 3
+    assert violations[0]["children"][2]["inferred_source"] == "safe_division"
+    report = format_outdegree_violation_report(violations)
+    assert "parent=1" in report
+    assert "n_children=3" in report
+    with pytest.raises(ValueError, match="more than two children"):
+        validate_graph("demo", nodes, edges)

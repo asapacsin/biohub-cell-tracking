@@ -217,15 +217,55 @@ def evaluate_postprocessed_predictions(
     return rows, aggregate_metric_rows(rows)
 
 
-def _copy_raw_predictions(geffs: list[Path], output_dir: Path) -> None:
-    raw_dir = output_dir / "predictions" / "raw_geff"
-    raw_dir.mkdir(parents=True)
+def _copy_raw_predictions(
+    geffs: list[Path],
+    output_dir: Path,
+    *,
+    config_path: Path | None = None,
+) -> Path:
+    """Persist raw GEFF graphs before submission conversion can fail.
+
+    Writes both legacy ``predictions/raw_geff`` and top-level ``raw_geff`` (NFS-safe
+    durable path used by two-seed diagnostics).
+    """
+    legacy_dir = output_dir / "predictions" / "raw_geff"
+    raw_dir = output_dir / "raw_geff"
+    legacy_dir.mkdir(parents=True, exist_ok=True)
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    filenames: list[str] = []
     for source in geffs:
-        destination = raw_dir / source.name
-        if source.is_dir():
-            shutil.copytree(source, destination)
-        else:
-            shutil.copy2(source, destination)
+        name = source.name
+        filenames.append(name)
+        for destination_root in (legacy_dir, raw_dir):
+            destination = destination_root / name
+            if destination.exists():
+                if destination.is_dir():
+                    shutil.rmtree(destination)
+                else:
+                    destination.unlink()
+            if source.is_dir():
+                shutil.copytree(source, destination)
+            else:
+                shutil.copy2(source, destination)
+    manifest = {
+        "schema_version": 1,
+        "created_at_utc": datetime.now(UTC).isoformat(),
+        "geff_count": len(filenames),
+        "filenames": filenames,
+        "dataset_ids": [Path(name).stem for name in filenames],
+        "git_commit": _git_commit(),
+        "config_path": None if config_path is None else str(config_path.resolve()),
+        "raw_geff_dir": str(raw_dir),
+        "legacy_raw_geff_dir": str(legacy_dir),
+    }
+    (raw_dir / "MANIFEST.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print(
+        f"Persisted {len(filenames)} raw GEFF predictions to {raw_dir} "
+        f"(and {legacy_dir}) before submission conversion"
+    )
+    return raw_dir
 
 
 def _json_default(value: object) -> object:
@@ -326,7 +366,7 @@ def run_fixed8(
     started = time.perf_counter()
     run_prediction(command, repo_dir)
     geffs = find_fixed8_prediction_geffs(repo_dir, str(config.inference["method"]))
-    _copy_raw_predictions(geffs, output_dir)
+    _copy_raw_predictions(geffs, output_dir, config_path=config_path)
 
     prediction_csv = output_dir / "predictions" / "postprocessed_submission.csv"
     write_submission_from_geff(geffs, config, data_dir, prediction_csv)
@@ -366,6 +406,8 @@ def run_fixed8(
             "summary": "summary.json",
             "postprocessed_predictions": "predictions/postprocessed_submission.csv",
             "raw_predictions": "predictions/raw_geff",
+            "raw_geff": "raw_geff",
+            "raw_geff_manifest": "raw_geff/MANIFEST.json",
         },
     }
     write_metric_outputs(output_dir, rows, summary, manifest)

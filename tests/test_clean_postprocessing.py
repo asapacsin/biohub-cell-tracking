@@ -68,3 +68,35 @@ def test_low_confidence_short_track_is_removed() -> None:
     ]
     kept_nodes, _ = postprocessing.filter_short_track_components(nodes, edges, _stats())
     assert set(kept_nodes) == set(range(6))
+
+
+def test_safe_divisions_add_at_most_one_child_per_parent() -> None:
+    """Regression: frame/global caps alone must not allow out-degree > 2."""
+    config = load_config("configs/clean_v106.yaml")
+    settings = dict(config.postprocessing)
+    settings["output_safe_divisions"] = True
+    settings["safe_div_frame_frac_cap"] = 1.0
+    settings["safe_div_global_frac_cap"] = 1.0
+    settings["deepcenter_safe_div_veto"] = False
+    postprocessing.configure(settings)
+
+    # Parent 1 already has one child; two orphan candidates both qualify.
+    nodes = {
+        1: {"node_id": 1, "t": 0, "z": 0.0, "y": 0.0, "x": 0.0},
+        2: {"node_id": 2, "t": 1, "z": 0.0, "y": 2.0, "x": 0.0},
+        3: {"node_id": 3, "t": 1, "z": 0.0, "y": -2.0, "x": 0.0},
+        4: {"node_id": 4, "t": 1, "z": 0.0, "y": 4.0, "x": 0.0},
+    }
+    edges = [{"source_id": 1, "target_id": 2, "edge_prob": 0.9, "distance_um": 0.8}]
+    stats = {
+        "safe_division_candidates": 0,
+        "safe_divisions_added": 0,
+        "safe_division_skipped_cap": 0,
+    }
+    out = postprocessing.add_safe_divisions_postlink(nodes, edges, stats)
+    by_source: dict[int, list] = {}
+    for edge in out:
+        by_source.setdefault(int(edge["source_id"]), []).append(edge)
+    assert len(by_source[1]) == 2
+    assert stats["safe_divisions_added"] == 1
+    assert sum(1 for e in out if int(e.get("safe_division", 0) or 0) == 1) == 1
