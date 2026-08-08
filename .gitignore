@@ -22,3 +22,5 @@ data/tmp_*/
 *.pth
 *.whl
 logs/
+data/deepcenter/
+*.pt

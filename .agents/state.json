@@ -1,34 +1,38 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-08T00:25:00+08:00",
+  "updated_at": "2026-08-08T12:35:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Two-seed fixed-8 alpha=0.5 scored after safe_division gate",
+  "active_milestone": "Full generalization workflow (public recipe + holdout + final decision)",
   "status": "complete",
   "host": "linux-login01",
   "completed": [
-    "Applied used_sources gate in add_safe_divisions_postlink (at most one safe-division child per parent)",
-    "Unit test test_safe_divisions_add_at_most_one_child_per_parent passes",
-    "Re-converted saved two-seed GEFFs (no re-inference) and evaluated fixed-8",
-    "Score 0.8847464271589631 vs control 0.87892959136423 (delta +0.005816835795)"
+    "Phase1: audited public dual-seed recipe A (det=0.96875, low_margin_consensus); LB 0.911 unverified",
+    "Phase2: reproduced public recipe on fixed-8 → score 0.877745 (−0.010 vs local det960)",
+    "Phase3: holdout-8 det 0.960 vs 0.96875 → 0.96875 wins (7/8); classify REJECT for 0.960",
+    "Phase4: holdout safe-div OFF +0.000278 but regressions −0.014/−0.006 → do not promote",
+    "Phase5: error_taxonomy.md written; dominant association errors on 6bba dense sets",
+    "Phase6: public GEFFs × local postprocess +0.00040 vs public; gap is ensemble not PP",
+    "Final report: recommend recipe C α=0.5 det=0.96875 safe-div ON"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    ".venv/bin/pytest tests/test_clean_postprocessing.py tests/test_clean_submission.py -q (7 passed)",
-    "srun scripts/rescore_two_seed_geffs.sh -> score 0.8847464271589631"
+    "scripts/run_public_recipe_fixed8.sh → 0.877744529257",
+    "scripts/run_holdout8_thresh_and_safediv.sh → comparison.json",
+    "scripts/run_public_geffs_local_postprocess.sh → 0.878148302303"
   ],
-  "next_action": "Decide next experiment (e.g. public-test submission, alpha sweep, or leave two-seed as local CV win)",
+  "next_action": "Optional: build Kaggle submission from generalization-safe config (det=0.96875, safe-div ON)",
   "needs_human": [],
   "artifacts": {
-    "summary_nfs": "~/biohub-outputs/fixed8/two_seed_alpha_0_5/summary.json",
-    "summary_login": "outputs/fixed8/two_seed_alpha_0_5/summary.json",
-    "raw_geff_nfs": "~/biohub-outputs/fixed8/two_seed_alpha_0_5/raw_geff/",
-    "rescore_log": "logs/slurm/two_seed_rescore.log",
-    "config": "configs/clean_v106_two_seed.yaml",
-    "control_summary": "outputs/fixed8/current_v106/summary.json"
+    "public_recipe_audit": "outputs/audit/public_two_seed_recipe.md",
+    "public_fixed8": "outputs/fixed8/public_two_seed_exact/",
+    "holdout": "outputs/holdout8/comparison.json",
+    "error_taxonomy": "outputs/analysis/error_taxonomy.md",
+    "final_report": "outputs/analysis/final_experiment_report.md",
+    "phase6": "outputs/fixed8/public_geffs_local_postprocess/"
   },
   "notes": [
-    "Repair is intentional local divergence from vendored V106 safe_division accept loop",
-    "Edges tp/fp/fn 3878/283/225 (control was 3852/287/251); divisions 0/15/7 (control 0/6/7)"
+    "Login /home ≠ GPU NFS /home; durable GPU results under ~/biohub-outputs on compute nodes",
+    "Do not promote det=0.960 or safe-div OFF as primary despite better fixed-8 scores"
   ]
 }

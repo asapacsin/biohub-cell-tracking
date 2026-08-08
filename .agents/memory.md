@@ -135,3 +135,100 @@
   division TP/FP/FN = 0/15/7; node_recall ≈ 0.9847. Artifacts:
   `~/biohub-outputs/fixed8/two_seed_alpha_0_5/` and login copy
   `outputs/fixed8/two_seed_alpha_0_5/`.
+
+## Two-seed detection-threshold sweep (2026-08-08)
+
+- `detection_threshold` is applied in support `predict_unet_transformer.py`
+  `_detect_cells_pooled` (`sigmoid(logits) > det_threshold`) before edges/ILP/GEFF.
+  Existing raw GEFFs cannot be rescored at a new threshold; no cached det logits.
+  Cheapest valid sweep = full two-seed re-inference per threshold.
+- Sweep thresholds: 0.955, 0.960, 0.965, 0.96875, 0.9725, 0.975, 0.980.
+  Configs under `configs/sweeps/two_seed_det_thresh_*.yaml`. Baseline
+  `two_seed_alpha_0_5` left unchanged.
+- Best: **0.960 → 0.887978610299** (+0.003232 vs baseline 0.884746427159).
+  Edges 3885/273/218 (Δ +7/−10/−7 vs 3878/283/225); divisions unchanged 0/15/7.
+  Re-run at 0.96875 matched baseline score exactly.
+- Per-dataset vs baseline mixed (4 improved / 4 worsened); largest gains
+  `44b6_e57ff5c6` (+0.0174) and `44b6_341df25f` (+0.0133). Comparison:
+  `outputs/fixed8/two_seed_det_threshold_sweep/comparison.json` and NFS twin.
+
+## Gap-2 recovery ablation on two-seed det=0.960 (2026-08-08)
+
+- Config `configs/experiments/two_seed_det0_960_gap2.yaml`: same as det=0.960 two-seed
+  control with only `output_gap2_recovery: true`. DeepCenter vetoes remain false.
+- Cheapest path: re-convert NFS `two_seed_det_thresh_0_960/raw_geff` (no NN re-inference).
+  Control outputs left unmodified.
+- Result score `0.888140530150` vs control `0.887978610299` (Δ=+0.000162).
+  Edges 3888/273/215 (Δ +3/0/−3); divisions 0/14/7 (Δ 0/−1/0).
+  Datasets: 3 improved / 0 unchanged / 5 worsened. 280 gap-2 bridges, 840 edges.
+  Largest win `44b6_e57ff5c6` (+0.00514); largest loss `44b6_0b24845f` (−0.01860).
+- Decision: **REJECT** (Δ ≪ +0.001 and not broadly distributed).
+  Artifacts: `outputs/fixed8/two_seed_det0_960_gap2/` and NFS twin.
+
+## DeepCenter gating ablation on two-seed det=0.960 (2026-08-08)
+
+- Config `configs/experiments/two_seed_det0_960_deepcenter.yaml`: det=0.960 two-seed with
+  `use_deepcenter_veto/require/gap/safe_div` true; `output_gap2_recovery` false.
+  Checkpoint from Kaggle `pilkwang/biohub-deepcenter-unet3d-center-prior-v1` staged at
+  `data/deepcenter/` (gitignored). Postprocess-only on saved 0.960 raw GEFFs.
+- Score `0.888330075629` vs control `0.887978610299` (Δ=+0.000351).
+  Edges 3877/263/226 (Δ −8/−10/+8); divisions 0/0/7 (Δ 0/−15/0).
+  Datasets: 6 improved / 0 unchanged / 2 worsened; no regression < −0.005.
+  DeepCenter rejected 487/487 safe-div candidates; gap veto checked 0.
+  652 edges present in control submission absent after DeepCenter.
+- Decision: **CONSIDER** (positive Δ, clear FP drop, broad 6/8 gains) but not strong
+  promote (Δ < +0.001). Artifacts: `outputs/fixed8/two_seed_det0_960_deepcenter/`.
+
+## No-safe-div ablation on two-seed det=0.960 (2026-08-08)
+
+- Config `configs/experiments/two_seed_det0_960_no_safe_div.yaml`: only
+  `output_safe_divisions: false`; DeepCenter and gap2 remain off. Postprocess-only
+  on saved 0.960 raw GEFFs.
+- Score `0.888330075629` — **exact match to DeepCenter**. Δ vs control = +0.000351.
+  Edges 3877/263/226; divisions 0/0/7 (identical to DeepCenter aggregates).
+  Datasets: 6 improved / 0 unchanged / 2 worsened; no regression < −0.005.
+- Removed 487 control safe-div candidates / 431 added safe-div edges.
+  Ordinary edges are not bit-identical: after safe_div removal, short-track filtering
+  cascades and drops additional ordinary edges (221 unexpected removals total).
+- Conclusion: DeepCenter's observed benefit was entirely from suppressing false
+  safe divisions. Prefer `output_safe_divisions=false` over DeepCenter (same
+  score, no extra model). Artifacts: `outputs/fixed8/two_seed_det0_960_no_safe_div/`.
+
+## Late-strip safe-div ablation (2026-08-08)
+
+- Run full control postprocess (safe-div ON through short-track + linefit), then
+  remove only edges with `safe_division=1` before submission write. No second
+  short-track pass. Config/script:
+  `configs/experiments/two_seed_det0_960_late_strip_safe_div.yaml`,
+  `scripts/run_late_strip_safe_div_ablation_from_geffs.sh`.
+- Score `0.888208474399` (Δ=+0.000230 vs control). Edges 3878/264/225;
+  divisions 0/0/7. Stripped 431 safe-div edges.
+  **Ordinary non-safe-div edges are bit-identical to control** (no 221-edge
+  cascade). Datasets 3/2/3 improved/unchanged/worsened; no regression < −0.005.
+- Slightly below early no-safe-div (`0.888330`) because cascade side-effects are
+  absent; edge TP/FN shifts vs control are from removed safe-div edges only.
+  Artifacts: `outputs/fixed8/two_seed_det0_960_late_strip_safe_div/`.
+
+## Public recipe audit + generalization workflow (2026-08-08)
+
+- Public candidate recipe A is Pilkwang `biohub-cell-tracking-two-seeds-logit-blend`
+  tag `selected_101_dual_seed_near_balanced_center_confirmed_synthetic_gap`.
+  Verified: det=**0.96875**, det secondary weight **0.475**, edge weight **0.15**,
+  mode **`low_margin_consensus`**, edge τ=0.48, ILP disappearance **1.5**,
+  DeepCenter gap gate ON, safe-div ON, gap2 OFF. Literal LB 0.911: **unknown**.
+  Audit: `outputs/audit/public_two_seed_recipe.md`.
+- Local fixed-8 reproduction of recipe A: score **0.877744529257**
+  (edges 3863/298/240, div 0/10/7), Δ=−0.01023 vs local det=0.960 control.
+  Artifacts: `outputs/fixed8/public_two_seed_exact/`.
+- Phase-6 isolation (public GEFFs + local recipe-C postprocess): **0.878148**
+  (+0.00040 vs public exact). Public gap is almost entirely ensemble/inference.
+- Holdout-8 (unused for selecting 0.960): datasets
+  `44b6_0c582fdc, 44b6_0db75fae, 44b6_12dfb391, 44b6_144b256d,
+  6bba_062c8d37, 6bba_07477033, 6bba_07e24132, 6bba_085bf656`.
+  det=0.960 score 0.958371 (1/8 wins) vs det=0.96875 **0.959013** (7/8 wins).
+  **REJECT promoting 0.960.**
+- Holdout safe-div OFF on det=0.960 GEFFs: 0.958650 (+0.000278) but regressions
+  −0.0136 / −0.0061 on two 44b6 sets; zero div TP persists. **Do not promote OFF.**
+- Recommended generalization-safe Kaggle config: local recipe C α=0.5,
+  det=**0.96875**, safe-div ON, gap2 OFF, DeepCenter OFF.
+  Final report: `outputs/analysis/final_experiment_report.md`.
