@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Sequence
 import hashlib
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 from biohub_pipeline.fixed8_cv import FIXED8_DATASETS
 
@@ -234,7 +234,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.prepare_only:
         return 0
     if not gpu_ready:
-        raise RuntimeError("CUDA is unavailable; preparation completed but inference was not started")
+        raise RuntimeError(
+            "CUDA is unavailable; preparation completed but inference was not started"
+        )
     subprocess.run(command, cwd=repo_root, check=True)
     return 0
 
