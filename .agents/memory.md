@@ -232,3 +232,33 @@
 - Recommended generalization-safe Kaggle config: local recipe C α=0.5,
   det=**0.96875**, safe-div ON, gap2 OFF, DeepCenter OFF.
   Final report: `outputs/analysis/final_experiment_report.md`.
+
+## Association-density diagnostic (2026-08-09)
+
+- Added reusable CPU-only analysis in `src/biohub_pipeline/association_density.py`
+  and `scripts/run_association_density_diagnostic.py`; the production recipe was not
+  changed and no training, detector inference, submission, or GPU job was run.
+- Artifact coverage was limited to four public two-seed GEFFs that overlap competition
+  GT: `44b6_0113de3b`, `44b6_0b24845f`, `6bba_05b6850b`, and
+  `6bba_05db0fb1`. The graphs are pre-final-postprocessing and contain only selected
+  optimizer edges (`solution=True` throughout), so rejected candidate scores and true
+  best-minus-second margins are unavailable.
+- On 2,121 ordinary GT associations (division parents excluded), overall errors were
+  89 (4.196%); attributed counts were 44 wrong associations, 28 missing edges,
+  11 missed source nodes, and 6 missed target nodes. Overall node recall was 0.9950.
+- A fixed 15-micrometer next-frame neighborhood gave density quartiles at 3/9/13
+  predicted nodes. High-density error rate was 5.023% vs 2.177% at low density,
+  ratio 2.3075. Association-attributed errors outnumbered detection-attributed errors
+  72 to 17.
+- Family error rates were 4.303% for `6bba` (87/2,022) and 2.020% for `44b6`
+  (2/99); `6bba_05db0fb1` contributed 73 errors at 6.202%.
+- Decision: **B PARTIALLY VERIFIED**. Density and association-error dominance are
+  quantitatively supported, but the small-margin interaction and exact final fixed-8
+  behavior cannot be verified from the saved artifact.
+- Highest-value next experiment: on one already-planned inference/CV run, persist all
+  pre-ILP `(source_id, target_id, edge_prob, solution)` candidate edges keyed to final
+  node IDs, save exact final postprocessed fixed-8 graphs, and rerun this diagnostic.
+  Do not implement a new tracker before that measurement.
+- Outputs: `outputs/analysis/association_density_diagnostic.csv`,
+  `association_density_summary.csv`, `association_density_by_dataset.csv`, and
+  `association_density_report.md`.

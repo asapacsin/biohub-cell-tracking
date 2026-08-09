@@ -1,0 +1,5 @@
+group_type,group,associations,correct,errors,error_rate,edge_tp,edge_fp,edge_fn,edge_precision,edge_recall,edge_jaccard,source_node_missed,target_node_missed,wrong_association,missing_edge,mean_density,mean_candidate_count,median_candidate_count,mean_candidate_margin,median_candidate_margin,margin_available,dataset,num_pred_nodes,num_gt_nodes,matched_gt_nodes,node_recall,candidate_export_complete
+dataset,44b6_0113de3b,50,50,0,0.0,50,0,0,1.0,1.0,1.0,0,0,0,0,8.04,,,,,0,44b6_0113de3b,25696,52,52,1.0,False
+dataset,44b6_0b24845f,49,47,2,0.04081632653061224,47,0,2,1.0,0.9591836734693877,0.9591836734693877,0,0,0,2,3.9183673469387754,,,,,0,44b6_0b24845f,20269,51,51,1.0,False
+dataset,6bba_05b6850b,845,831,14,0.016568047337278107,831,7,14,0.9916467780429594,0.9834319526627219,0.9753521126760564,2,1,6,5,2.314792899408284,,,,,0,6bba_05b6850b,6389,861,859,0.9976771196283392,False
+dataset,6bba_05db0fb1,1177,1104,73,0.062022090059473234,1104,41,73,0.9641921397379912,0.9379779099405268,0.9064039408866995,9,5,38,21,12.311809685641462,,,,,0,6bba_05db0fb1,70489,1229,1220,0.9926769731489016,False

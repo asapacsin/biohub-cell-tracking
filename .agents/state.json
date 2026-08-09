@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-08T12:35:00+08:00",
+  "updated_at": "2026-08-09T13:17:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Full generalization workflow (public recipe + holdout + final decision)",
+  "active_milestone": "Association-density bottleneck diagnostic",
   "status": "complete",
-  "host": "linux-login01",
+  "host": "Codex desktop (Windows; Kaggle artifact cache)",
   "completed": [
     "Phase1: audited public dual-seed recipe A (det=0.96875, low_margin_consensus); LB 0.911 unverified",
     "Phase2: reproduced public recipe on fixed-8 → score 0.877745 (−0.010 vs local det960)",
@@ -21,7 +21,7 @@
     "scripts/run_holdout8_thresh_and_safediv.sh → comparison.json",
     "scripts/run_public_geffs_local_postprocess.sh → 0.878148302303"
   ],
-  "next_action": "Optional: build Kaggle submission from generalization-safe config (det=0.96875, safe-div ON)",
+  "next_action": "Export pre-ILP candidate edges during one already-planned inference/CV run, then rerun this diagnostic on exact final fixed-8 graphs; do not build a new tracker yet",
   "needs_human": [],
   "artifacts": {
     "public_recipe_audit": "outputs/audit/public_two_seed_recipe.md",
@@ -29,10 +29,29 @@
     "holdout": "outputs/holdout8/comparison.json",
     "error_taxonomy": "outputs/analysis/error_taxonomy.md",
     "final_report": "outputs/analysis/final_experiment_report.md",
-    "phase6": "outputs/fixed8/public_geffs_local_postprocess/"
+    "phase6": "outputs/fixed8/public_geffs_local_postprocess/",
+    "association_density_rows": "outputs/analysis/association_density_diagnostic.csv",
+    "association_density_summary": "outputs/analysis/association_density_summary.csv",
+    "association_density_by_dataset": "outputs/analysis/association_density_by_dataset.csv",
+    "association_density_report": "outputs/analysis/association_density_report.md"
   },
   "notes": [
     "Login /home ≠ GPU NFS /home; durable GPU results under ~/biohub-outputs on compute nodes",
     "Do not promote det=0.960 or safe-div OFF as primary despite better fixed-8 scores"
-  ]
+  ],
+  "association_density_diagnostic": {
+    "status": "complete",
+    "conclusion": "B PARTIALLY VERIFIED",
+    "coverage": "four available public two-seed/GT overlaps; pre-final-postprocessing",
+    "ordinary_associations": 2121,
+    "overall_error_rate": 0.041961338991041965,
+    "high_density_error_rate": 0.0502283105022831,
+    "low_density_error_rate": 0.02176696542893726,
+    "high_vs_low_error_ratio": 2.3075476766048886,
+    "association_errors": 72,
+    "detection_errors": 17,
+    "node_recall": 0.995,
+    "candidate_margins_available": false,
+    "limitation": "Saved GEFFs retain selected edges only and cover four of fixed-eight prediction datasets"
+  }
 }
