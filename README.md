@@ -107,3 +107,15 @@ recorded upstream is approximately `0.87892959136423`.
 - GEFF counts for the hidden test set;
 - fixed-8 CV score and runtime;
 - submission equality and the reported 0.908 public score.
+
+## Candidate-edge bottleneck experiment
+
+The current research iteration instruments the two-seed fixed-eight run to capture bounded pre-ILP
+edge scores without changing candidate construction, ILP, or postprocessing. Cloud/Kaggle input
+staging, pinned checkpoint validation, CUDA preflight, the exact run command, and expected outputs
+are documented in [docs/CANDIDATE_BOTTLENECK_GPU_RUN.md](docs/CANDIDATE_BOTTLENECK_GPU_RUN.md).
+
+Use `python -m biohub_pipeline.kaggle_candidate --prepare-only` for a non-inference preflight.
+The real experiment requires CUDA and must reproduce the historical control score exactly before
+its causal classification is interpreted.
+
