@@ -1,0 +1,18 @@
+{
+  "budget_count": 104,
+  "budget_fraction": 0.05,
+  "captured_errors": 13,
+  "classification": "D. HYPOTHESIS REJECTED",
+  "confidence_threshold": 0.6572641730308533,
+  "correctness_auroc": 0.7525426509186351,
+  "error_capture": 0.2708333333333333,
+  "error_prevalence": 0.023076923076923078,
+  "hypothesis_supported": false,
+  "intervention_precision": 0.125,
+  "min_correctness_auroc": 0.8,
+  "min_error_capture": 0.4,
+  "precision_lift_vs_random": 5.416666666666666,
+  "recommended_next_action": "Keep the production recipe unchanged and target edge-ranking quality rather than confidence-only calibration.",
+  "scored_associations": 2080,
+  "scored_errors": 48
+}

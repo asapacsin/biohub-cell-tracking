@@ -1,0 +1,10 @@
+{
+  "created_at_utc": "2026-08-09T13:11:28.406848+00:00",
+  "experiment": "selected_edge_calibration_v1",
+  "git_commit": "6f6b811db65ca9ac8f71d3d0226ebc53ad435c09",
+  "gpu_inference_required": false,
+  "production_recipe_changed": false,
+  "schema_version": 1,
+  "source": "D:\\\u684c\u9762\\biohub\\biohub-cell-tracking\\outputs\\analysis\\association_density_diagnostic.csv",
+  "source_rows": 2121
+}

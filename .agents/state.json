@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-09T13:17:00+08:00",
+  "updated_at": "2026-08-09T21:11:47+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Association-density bottleneck diagnostic",
+  "active_milestone": "Selected-edge confidence calibration",
   "status": "complete",
   "host": "Codex desktop (Windows; Kaggle artifact cache)",
   "completed": [
@@ -12,16 +12,19 @@
     "Phase4: holdout safe-div OFF +0.000278 but regressions −0.014/−0.006 → do not promote",
     "Phase5: error_taxonomy.md written; dominant association errors on 6bba dense sets",
     "Phase6: public GEFFs × local postprocess +0.00040 vs public; gap is ensemble not PP",
-    "Final report: recommend recipe C α=0.5 det=0.96875 safe-div ON"
+    "Final report: recommend recipe C α=0.5 det=0.96875 safe-div ON",
+    "Selected-edge confidence calibration: bottom 5% captured 13/48 errors; AUROC 0.7525; hypothesis rejected"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "scripts/run_public_recipe_fixed8.sh → 0.877744529257",
-    "scripts/run_holdout8_thresh_and_safediv.sh → comparison.json",
-    "scripts/run_public_geffs_local_postprocess.sh → 0.878148302303"
+    "PYTHONPATH=src pytest -q tests/test_selected_edge_calibration.py → 5 passed",
+    "PYTHONPATH=src pytest -q --basetemp work/pytest-full-20260809-2113 → 39 passed",
+    "ruff check scripts/run_selected_edge_calibration.py src/biohub_pipeline/selected_edge_calibration.py tests/test_selected_edge_calibration.py → passed",
+    "python -m compileall -q src scripts → passed",
+    "PYTHONPATH=src python scripts/run_selected_edge_calibration.py → D. HYPOTHESIS REJECTED"
   ],
-  "next_action": "Export pre-ILP candidate edges during one already-planned inference/CV run, then rerun this diagnostic on exact final fixed-8 graphs; do not build a new tracker yet",
+  "next_action": "Keep the production recipe unchanged and target edge-ranking quality rather than confidence-only calibration",
   "needs_human": [],
   "artifacts": {
     "public_recipe_audit": "outputs/audit/public_two_seed_recipe.md",
@@ -33,7 +36,8 @@
     "association_density_rows": "outputs/analysis/association_density_diagnostic.csv",
     "association_density_summary": "outputs/analysis/association_density_summary.csv",
     "association_density_by_dataset": "outputs/analysis/association_density_by_dataset.csv",
-    "association_density_report": "outputs/analysis/association_density_report.md"
+    "association_density_report": "outputs/analysis/association_density_report.md",
+    "selected_edge_calibration": "outputs/experiments/selected_edge_calibration/"
   },
   "notes": [
     "Login /home ≠ GPU NFS /home; durable GPU results under ~/biohub-outputs on compute nodes",
@@ -53,5 +57,18 @@
     "node_recall": 0.995,
     "candidate_margins_available": false,
     "limitation": "Saved GEFFs retain selected edges only and cover four of fixed-eight prediction datasets"
+  },
+  "selected_edge_calibration": {
+    "status": "complete",
+    "classification": "D. HYPOTHESIS REJECTED",
+    "coverage": "2080 scored ordinary associations across four labeled public two-seed overlaps",
+    "budget_fraction": 0.05,
+    "budget_count": 104,
+    "scored_errors": 48,
+    "captured_errors": 13,
+    "error_capture": 0.2708333333333333,
+    "intervention_precision": 0.125,
+    "correctness_auroc": 0.7525426509186351,
+    "production_recipe_changed": false
   }
 }

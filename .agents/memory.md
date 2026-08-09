@@ -262,3 +262,21 @@
 - Outputs: `outputs/analysis/association_density_diagnostic.csv`,
   `association_density_summary.csv`, `association_density_by_dataset.csv`, and
   `association_density_report.md`.
+
+## Selected-edge confidence calibration (2026-08-09)
+
+- Added a CPU-only, predeclared 5% intervention-budget diagnostic in
+  `src/biohub_pipeline/selected_edge_calibration.py` and
+  `scripts/run_selected_edge_calibration.py`; no neural inference or production change was made.
+- Of 2,121 ordinary associations in the source density diagnostic, 2,080 had a finite selected-edge
+  score. These included 48 scored errors (44 wrong associations and 4 target-node-missed rows).
+- The bottom-confidence 104 associations captured 13/48 errors (27.083% recall) at 12.50%
+  intervention precision, a 5.42x lift over the 2.31% error prevalence. Correctness AUROC was
+  0.752543. Both predeclared requirements failed: at least 40% error capture and AUROC at least 0.80.
+- `6bba_05db0fb1` contained 41/48 scored errors and had correctness AUROC 0.701617; its independent
+  bottom-5% budget captured 13/41 errors. `6bba_05b6850b` had 7 errors and AUROC 0.823620 but its
+  bottom-5% budget captured only 1/7. Neither `44b6` overlap contained a scored error.
+- Decision: **D. HYPOTHESIS REJECTED**. Selected-edge confidence is enriched for error but does not
+  capture enough of the remaining error burden to justify confidence-only calibration as the next
+  production lever. Keep the generalization-safe recipe unchanged and target edge-ranking quality.
+- Durable outputs are under `outputs/experiments/selected_edge_calibration/`.
