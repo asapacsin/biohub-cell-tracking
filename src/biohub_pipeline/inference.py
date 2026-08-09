@@ -42,9 +42,9 @@ def validate_ensemble_checkpoints(primary: Path, secondary: Path, alpha: float) 
         raise FileNotFoundError(f"ensemble checkpoint is missing: {secondary}")
     if not primary.is_file():
         raise FileNotFoundError(f"primary checkpoint is missing: {primary}")
-    if primary.resolve() == secondary.resolve() or _checkpoint_sha256(primary) == _checkpoint_sha256(
-        secondary
-    ):
+    if primary.resolve() == secondary.resolve() or _checkpoint_sha256(
+        primary
+    ) == _checkpoint_sha256(secondary):
         raise ValueError("ensemble requires two distinct independently trained checkpoints")
 
 
@@ -188,7 +188,7 @@ def load_model(
         ),
         (
             "\n\n# =============================================================================\n# Per-frame loading\n# =============================================================================\n",
-            '''
+            """
 
 def load_logit_ensemble(
     primary_path: Path,
@@ -215,7 +215,7 @@ def load_logit_ensemble(
 # =============================================================================
 # Per-frame loading
 # =============================================================================
-''',
+""",
         ),
         (
             "    weights_path: Path,\n    cfg: PredictConfig,\n",
@@ -223,7 +223,7 @@ def load_logit_ensemble(
         ),
         (
             "    model, window_size, downsample = load_model(weights_path, device)\n",
-            '''    if ensemble_weights_path is None:
+            """    if ensemble_weights_path is None:
         model, window_size, downsample = load_model(weights_path, device)
     else:
         model, window_size, downsample = load_logit_ensemble(
@@ -233,31 +233,31 @@ def load_logit_ensemble(
             f"Raw-logit ensemble: secondary={ensemble_weights_path} alpha={ensemble_alpha}",
             flush=True,
         )
-''',
+""",
         ),
         (
-            '''    parser.add_argument("--weights", type=str, default=None,
+            """    parser.add_argument("--weights", type=str, default=None,
                         help="Path to weights file. "
                              "Default: weights/{method}/split_{split}/edge_predictor_best.pth")
-''',
-            '''    parser.add_argument("--weights", type=str, default=None,
+""",
+            """    parser.add_argument("--weights", type=str, default=None,
                         help="Path to weights file. "
                              "Default: weights/{method}/split_{split}/edge_predictor_best.pth")
     parser.add_argument("--ensemble-weights", type=str, default=None,
                         help="Optional independent compatible checkpoint for raw-logit blending.")
     parser.add_argument("--ensemble-alpha", type=float, default=0.5,
                         help="Primary-checkpoint raw-logit weight in [0, 1] (default: 0.5).")
-''',
+""",
         ),
         (
             "            weights_path=weights_path,\n            cfg=cfg,\n",
-            '''            weights_path=weights_path,
+            """            weights_path=weights_path,
             cfg=cfg,
             ensemble_weights_path=(
                 Path(args.ensemble_weights) if args.ensemble_weights else None
             ),
             ensemble_alpha=args.ensemble_alpha,
-''',
+""",
         ),
     ]
 
@@ -265,6 +265,268 @@ def load_logit_ensemble(
     for old, new in replacements:
         if patched.count(old) != 1:
             raise RuntimeError("support predictor does not match the V106 ensemble patch preimage")
+        patched = patched.replace(old, new, 1)
+    path.write_text(patched, encoding="utf-8")
+    return True
+
+
+def apply_edge_diagnostic_patch(repo_dir: Path, prediction_script: str) -> bool:
+    """Add opt-in pre-gate edge-score capture without changing graph construction."""
+    path = repo_dir / prediction_script
+    source = path.read_text(encoding="utf-8")
+    if "_V106_EDGE_DIAGNOSTIC_PATCH = True" in source:
+        return False
+    if "_V106_LOGIT_ENSEMBLE_PATCH = True" not in source:
+        raise RuntimeError("edge diagnostics require the logit-ensemble support patch first")
+
+    replacements = [
+        (
+            "_V106_LOGIT_ENSEMBLE_PATCH = True\n",
+            '''_V106_LOGIT_ENSEMBLE_PATCH = True
+_V106_EDGE_DIAGNOSTIC_PATCH = True
+
+
+def _write_edge_diagnostic(
+    output_dir, t_src, t_tgt, idx_src, idx_tgt, raw, probs,
+    threshold, top_k, seed_components,
+):
+    """Persist a bounded union of local top-k pairs plus every gated candidate."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    n_src, n_tgt = probs.shape
+    k_src = min(int(top_k), n_tgt)
+    k_tgt = min(int(top_k), n_src)
+    source_top = torch.topk(probs, k_src, dim=1).indices
+    target_top = torch.topk(probs, k_tgt, dim=0).indices
+    source_pairs = torch.stack(
+        [
+            torch.arange(n_src, device=probs.device).repeat_interleave(k_src),
+            source_top.reshape(-1),
+        ],
+        dim=1,
+    )
+    target_pairs = torch.stack(
+        [
+            target_top.transpose(0, 1).reshape(-1),
+            torch.arange(n_tgt, device=probs.device).repeat_interleave(k_tgt),
+        ],
+        dim=1,
+    )
+    gated_pairs = torch.nonzero(probs > threshold, as_tuple=False)
+    pairs = torch.unique(torch.cat([source_pairs, target_pairs, gated_pairs]), dim=0)
+
+    pairs_cpu = pairs.cpu().numpy().astype(np.int32, copy=False)
+    source_rank_lookup = {
+        (int(i), int(j)): rank + 1
+        for i, targets in enumerate(source_top.cpu().numpy())
+        for rank, j in enumerate(targets)
+    }
+    target_rank_lookup = {
+        (int(i), int(j)): rank + 1
+        for j, sources in enumerate(target_top.transpose(0, 1).cpu().numpy())
+        for rank, i in enumerate(sources)
+    }
+    local_source = pairs_cpu[:, 0]
+    local_target = pairs_cpu[:, 1]
+    source_rank = np.array(
+        [source_rank_lookup.get((int(i), int(j)), k_src + 1) for i, j in pairs_cpu],
+        dtype=np.int16,
+    )
+    target_rank = np.array(
+        [target_rank_lookup.get((int(i), int(j)), k_tgt + 1) for i, j in pairs_cpu],
+        dtype=np.int16,
+    )
+    pair_index = (pairs[:, 0], pairs[:, 1])
+    blended_logit = raw[pair_index].float().cpu().numpy()
+    blended_prob = probs[pair_index].float().cpu().numpy()
+    above_threshold = (probs[pair_index] > threshold).cpu().numpy()
+
+    seed1_logit = np.full(len(pairs_cpu), np.nan, dtype=np.float32)
+    seed2_logit = np.full(len(pairs_cpu), np.nan, dtype=np.float32)
+    seed1_prob = np.full(len(pairs_cpu), np.nan, dtype=np.float32)
+    seed2_prob = np.full(len(pairs_cpu), np.nan, dtype=np.float32)
+    if seed_components is not None:
+        seed1, seed2 = seed_components
+        seed1_values = seed1[pair_index].float()
+        seed2_values = seed2[pair_index].float()
+        seed1_logit = seed1_values.cpu().numpy()
+        seed2_logit = seed2_values.cpu().numpy()
+        seed1_prob = torch.exp(
+            seed1_values - torch.logsumexp(seed1.float(), dim=0)[pairs[:, 1]]
+        ).cpu().numpy()
+        seed2_prob = torch.exp(
+            seed2_values - torch.logsumexp(seed2.float(), dim=0)[pairs[:, 1]]
+        ).cpu().numpy()
+
+    np.savez_compressed(
+        output_dir / f"t{int(t_src):03d}_to_t{int(t_tgt):03d}.npz",
+        source_id=np.asarray(idx_src, dtype=np.int64)[local_source],
+        target_id=np.asarray(idx_tgt, dtype=np.int64)[local_target],
+        blended_logit=blended_logit,
+        blended_prob=blended_prob,
+        seed1_logit=seed1_logit,
+        seed2_logit=seed2_logit,
+        seed1_prob=seed1_prob,
+        seed2_prob=seed2_prob,
+        source_rank=source_rank,
+        target_rank=target_rank,
+        above_threshold=above_threshold,
+    )
+''',
+        ),
+        (
+            """    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        return _blend_raw_logits(logits1, logits2, self.alpha)
+""",
+            """    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        blended = _blend_raw_logits(logits1, logits2, self.alpha)
+        if getattr(self, "_capture_edge_diagnostics", False):
+            self._last_edge_components = (logits1[0].detach(), logits2[0].detach())
+        return blended
+""",
+        ),
+        (
+            """    unet_batch_size: int = 4,
+    downsample: tuple[int, ...] = (1, 4, 4),
+) -> tuple[np.ndarray, list[tuple[int, int, float, float]]]:
+""",
+            """    unet_batch_size: int = 4,
+    downsample: tuple[int, ...] = (1, 4, 4),
+    edge_diagnostic_dir: Path | None = None,
+    edge_diagnostic_top_k: int = 16,
+) -> tuple[np.ndarray, list[tuple[int, int, float, float]]]:
+""",
+        ),
+        (
+            """            if cfg.edge_activation == "softmax":
+                probs = torch.softmax(raw, dim=0).cpu().numpy()
+            else:
+                probs = torch.sigmoid(raw).cpu().numpy()
+
+            candidates = sorted(
+""",
+            """            if cfg.edge_activation == "softmax":
+                probs_tensor = torch.softmax(raw, dim=0)
+            else:
+                probs_tensor = torch.sigmoid(raw)
+            if edge_diagnostic_dir is not None:
+                _write_edge_diagnostic(
+                    edge_diagnostic_dir, t_src, t_tgt, idx_src, idx_tgt,
+                    raw, probs_tensor, cfg.threshold, edge_diagnostic_top_k,
+                    getattr(model, "_last_edge_components", None),
+                )
+                if hasattr(model, "_last_edge_components"):
+                    del model._last_edge_components
+            probs = probs_tensor.cpu().numpy()
+
+            candidates = sorted(
+""",
+        ),
+        (
+            """    coords = coords.astype(np.int16)
+    return coords, all_edges
+""",
+            """    coords = coords.astype(np.int16)
+    if edge_diagnostic_dir is not None:
+        edge_diagnostic_dir.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            edge_diagnostic_dir / "nodes.npz",
+            node_id=np.arange(len(coords), dtype=np.int64),
+            t=coords[:, 0], z=coords[:, 1], y=coords[:, 2], x=coords[:, 3],
+        )
+        (edge_diagnostic_dir / "metadata.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "top_k": int(edge_diagnostic_top_k),
+                    "edge_threshold": float(cfg.threshold),
+                    "activation": cfg.edge_activation,
+                    "pairs": len(seen_pairs),
+                    "nodes": len(coords),
+                },
+                indent=2,
+                sort_keys=True,
+            ) + "\\n",
+            encoding="utf-8",
+        )
+    return coords, all_edges
+""",
+        ),
+        (
+            """    video_slice: slice | None = None,
+    evaluate: bool = False,
+) -> None:
+""",
+            """    video_slice: slice | None = None,
+    evaluate: bool = False,
+    edge_diagnostic_dir: Path | None = None,
+    edge_diagnostic_top_k: int = 16,
+) -> None:
+""",
+        ),
+        (
+            """        print(
+            f"Raw-logit ensemble: secondary={ensemble_weights_path} alpha={ensemble_alpha}",
+            flush=True,
+        )
+""",
+            """        print(
+            f"Raw-logit ensemble: secondary={ensemble_weights_path} alpha={ensemble_alpha}",
+            flush=True,
+        )
+    if edge_diagnostic_dir is not None:
+        model._capture_edge_diagnostics = True
+""",
+        ),
+        (
+            """                unet_batch_size=unet_batch_size,
+                downsample=downsample,
+            )
+""",
+            """                unet_batch_size=unet_batch_size,
+                downsample=downsample,
+                edge_diagnostic_dir=(
+                    edge_diagnostic_dir / name if edge_diagnostic_dir is not None else None
+                ),
+                edge_diagnostic_top_k=edge_diagnostic_top_k,
+            )
+""",
+        ),
+        (
+            """    parser.add_argument("--evaluate", action="store_true",
+                        help="Run evaluation against GT after saving predictions.")
+""",
+            """    parser.add_argument("--evaluate", action="store_true",
+                        help="Run evaluation against GT after saving predictions.")
+    parser.add_argument("--edge-diagnostic-dir", type=str, default=None,
+                        help="Opt-in directory for bounded pre-gate edge-score exports.")
+    parser.add_argument("--edge-diagnostic-top-k", type=int, default=16,
+                        help="Top-k per source and target retained by diagnostics.")
+""",
+        ),
+        (
+            """            video_slice=video_slice,
+            evaluate=args.evaluate,
+        )
+""",
+            """            video_slice=video_slice,
+            evaluate=args.evaluate,
+            edge_diagnostic_dir=(
+                Path(args.edge_diagnostic_dir) if args.edge_diagnostic_dir else None
+            ),
+            edge_diagnostic_top_k=args.edge_diagnostic_top_k,
+        )
+""",
+        ),
+    ]
+
+    patched = source
+    for old, new in replacements:
+        if patched.count(old) != 1:
+            raise RuntimeError("support predictor does not match edge diagnostic patch preimage")
         patched = patched.replace(old, new, 1)
     path.write_text(patched, encoding="utf-8")
     return True
