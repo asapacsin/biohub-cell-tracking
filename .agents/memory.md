@@ -280,3 +280,98 @@
   capture enough of the remaining error burden to justify confidence-only calibration as the next
   production lever. Keep the generalization-safe recipe unchanged and target edge-ranking quality.
 - Durable outputs are under `outputs/experiments/selected_edge_calibration/`.
+
+## Candidate-edge bottleneck GPU runs (2026-08-09)
+
+- Codex left `scripts/run_candidate_bottleneck_experiment.py` unrun. Executed on HPC with
+  launcher `scripts/slurm/run_candidate_bottleneck_fixed8.sh` using recipe C
+  (`configs/sweeps/two_seed_det_thresh_0_96875.yaml`).
+- Fixed-8 instrumented score **0.884746427159** (exact control match). Causal errors 193.
+  Shares: ranking 37.3%, postprocessing_removed 29.5%, threshold 16.1%, ILP 10.9%,
+  rematch 6.2%. Classification **D. HYPOTHESIS REJECTED**.
+- Holdout-8 repeat (same 8 unused sequences as prior thresh/safe-div holdout): score
+  **0.959013051622** (exact prior holdout match). Causal errors 67. Shares:
+  postprocessing_removed **34.3%**, ranking 32.8%, ILP 13.4%, threshold 11.9%, rematch 7.5%.
+  Classification **D. HYPOTHESIS REJECTED**; recommended next is one targeted
+  postprocessing retention change on saved GEFFs.
+- Do not retrain the edge scorer as the immediate next lever. Production recipe remains
+  recipe C α=0.5 det=0.96875 safe-div ON.
+- Artifacts: `outputs/experiments/candidate_edge_bottleneck_v1/`,
+  `outputs/experiments/candidate_edge_bottleneck_holdout8/`,
+  `outputs/analysis/candidate_bottleneck_synthesis.md`.
+
+## Short-track filter ablation (2026-08-09)
+
+- Postprocess-only on saved recipe-C det=0.96875 raw GEFFs (fixed-8 from
+  `candidate_edge_bottleneck_v1/raw_geff`, holdout from
+  `holdout8/det0_96875_safeon/raw_geff`). No re-inference / no scorer retrain.
+- Control reproduced exactly: fixed-8 **0.884746427159**, holdout **0.959013051622**.
+  Short-track removed 6637 / 6485 nodes respectively.
+- Filter OFF: fixed-8 **−0.003097**, holdout **−0.001159**. Less aggressive
+  `min_track_len` 4/3/2 also all negative on both sets. `min_len=2` ≡ filter OFF.
+- Per-dataset OFF helps `44b6_0113de3b` but regresses most `6bba_*` (net FP rise).
+- Decision: **KEEP CONTROL** short-track (`output_filter_short_tracks=true`,
+  `output_min_track_len=6`, adaptive rescue ON). Do not promote retaining short tracks.
+- Implication for bottleneck: `postprocessing_removed` is not a reason to disable
+  short-track; next should stage-attribute those removals or pursue other mechanisms
+  with short-track left ON.
+- Artifacts: `outputs/experiments/shorttrack_ablation_det0_96875/`,
+  `outputs/analysis/shorttrack_ablation_report.md`.
+
+## Postprocess stage attribution + motion-relink OFF (2026-08-09/10)
+
+- Traced `filter_output_graph` on bottleneck `postprocessing_removed` edges
+  (`src/biohub_pipeline/postprocess_stage_trace.py`). Fixed-8: motion_relink
+  46/57 (80.7%), short-track 11/57. Holdout: motion 13/23, short-track 10/23.
+  No other stage was first-loss.
+- Postprocess-only ablation: `output_motion_relink=false` → fixed-8
+  **0.906725 (+0.021979)**, holdout **0.960307 (+0.001294)** vs motion-ON
+  control 0.884746 / 0.959013. Mainly FP collapse (283→195 on fixed-8).
+  Single-parent OFF is score-identical. **PROMOTE motion-relink OFF**.
+- Historical baseline YAMLs with motion ON kept for reproducibility. Recommended
+  config starts at `configs/experiments/recipe_c_motion_relink_off_det0_96875.yaml`.
+- Artifacts: `outputs/experiments/postprocess_stage_attribution_v1/`,
+  `outputs/experiments/ppstage_ablation_det0_96875/`.
+
+## Edge-threshold lowering under motion OFF (2026-08-10)
+
+- Under motion OFF, remaining `postprocessing_removed` is **100% short-track**
+  (keep filter ON). Rediagnosis shifted burden toward ranking / candidate_threshold.
+- Added optional `inference.edge_threshold` + predictor CLI patch
+  (`apply_edge_threshold_cli_patch`). Default behavior unchanged when unset.
+- edge 0.45: fixed-8 **0.915193 (+0.00847)**, holdout **0.962739 (+0.00243)**
+  vs motion-OFF edge 0.5. **PROMOTE**.
+- edge 0.40: fixed-8 **0.918144 (+0.00295)**, holdout **0.964673 (+0.00193)**
+  vs edge 0.45. **PROMOTE**. Stop further blind threshold sweeps.
+- Cumulative vs original recipe C (motion ON, edge 0.5): fixed-8 **+0.03340**,
+  holdout **+0.00566**.
+- Current recommended recipe:
+  `configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml`
+  (α=0.5, det=0.96875, edge_threshold=0.40, motion_relink OFF, safe-div ON,
+  short-track ON). Do not silently overwrite
+  `configs/sweeps/two_seed_det_thresh_0_96875.yaml`.
+- Next major step: fresh candidate-edge capture on the promoted recipe before
+  ranking retrain or ILP changes. Report:
+  `outputs/analysis/autonomous_cycle_report.md`.
+
+## Edge-gate sweep under motion-relink OFF (2026-08-10/12)
+
+- Control: motion_relink OFF + edge_threshold=0.50 → fixed-8 **0.906725**, holdout **0.960307**.
+- Full sweep 0.50/0.45/0.40/0.35/0.30/0.25 (only gate changed). Reused prior GPU
+  results for 0.50–0.40; new GPU runs for 0.35–0.25 via
+  `scripts/slurm/run_edge_gate_lower_sweep.sh`.
+- Best robust gate: **0.40** → fixed **0.918144 (+0.01142)**, holdout **0.964673 (+0.00437)**.
+- 0.35 improves fixed (+0.00110 vs 0.40) but regresses holdout (−0.00078) → **do not promote**.
+- 0.30/0.25 worse than 0.40 on both sets; FP rise dominates.
+- Band diagnostic (top-k capture): precision_proxy falls from ~0.75% (0.45–0.50) to
+  ~0.19% (0.25–0.30). Useful recoverable signal concentrated in 0.40–0.50.
+- Bottleneck rediagnosis at edge 0.40: candidate_threshold collapses (48→13 fixed,
+  16→3 holdout). Ranking ~54%/50%. Remaining postprocessing_removed are 100%
+  missing-endpoint (short-track); do not disable short-track again.
+- Promoted config remains
+  `configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml`.
+  Historical motion-ON / edge-0.5 YAMLs unchanged.
+- Next: fresh candidate-edge capture on the promoted recipe before ranking retrain.
+- Artifacts: `outputs/experiments/edge_gate_sweep_motion_off_v1/`,
+  `outputs/experiments/bottleneck_rediagnose_edge_0_40_v1/`,
+  `outputs/analysis/edge_gate_sweep_report.md`.

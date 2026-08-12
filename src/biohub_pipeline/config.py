@@ -80,6 +80,12 @@ def validate_config(raw: object) -> PipelineConfig:
         raise ConfigError("source.license must remain Apache-2.0")
     if not 0.0 < float(inference["detection_threshold"]) <= 1.0:
         raise ConfigError("inference.detection_threshold must be in (0, 1]")
+    if "edge_threshold" in inference and inference["edge_threshold"] is not None:
+        edge_threshold = inference["edge_threshold"]
+        if not isinstance(edge_threshold, (int, float)) or isinstance(edge_threshold, bool):
+            raise ConfigError("inference.edge_threshold must be numeric or null")
+        if not 0.0 < float(edge_threshold) <= 1.0:
+            raise ConfigError("inference.edge_threshold must be in (0, 1]")
     if int(inference["unet_batch_size"]) < 1:
         raise ConfigError("inference.unet_batch_size must be positive")
     ensemble_relative = inference.get("ensemble_weights_relative")

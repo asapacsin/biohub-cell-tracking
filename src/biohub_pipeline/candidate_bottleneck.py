@@ -140,10 +140,12 @@ def analyze_dataset(
     scale: tuple[float, float, float] = (1.625, 0.40625, 0.40625),
     max_match_um: float = 7.0,
     density_radius_um: float = 15.0,
+    edge_threshold: float | None = None,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     detected = _load_capture_nodes(capture_dir)
     metadata = _capture_metadata(capture_dir)
     top_k = int(metadata["top_k"])
+    gate = float(metadata["edge_threshold"] if edge_threshold is None else edge_threshold)
     gt_nodes = ground_truth.nodes.loc[:, ["node_id", "t", "z", "y", "x"]]
     gt_edges = ground_truth.edges.loc[:, ["source_id", "target_id"]].drop_duplicates()
     _, detected_g2p, _ = _node_match(detected, gt_nodes, scale=scale, max_distance_um=max_match_um)
@@ -182,7 +184,12 @@ def analyze_dataset(
         record = candidate_records.get((ps, pt)) if ps is not None and pt is not None else None
         best = best_by_target.get(pt) if pt is not None else None
         final_correct = (gs, gt) in final_gt_edges
-        candidate_present = bool(record and record["above_threshold"])
+        if record is None:
+            candidate_present = False
+        elif edge_threshold is None:
+            candidate_present = bool(record["above_threshold"])
+        else:
+            candidate_present = float(record["blended_prob"]) > gate
         ilp_selected = bool(ps is not None and pt is not None and (ps, pt) in ilp_edges)
         final_pair_present = bool(ps is not None and pt is not None and (ps, pt) in final_edge_ids)
         target_rank = int(record["target_rank"]) if record else top_k + 1
@@ -254,7 +261,7 @@ def analyze_dataset(
         "detected_node_recall": len(detected_g2p) / len(gt_nodes) if len(gt_nodes) else 1.0,
         "final_node_recall": len(final_g2p) / len(gt_nodes) if len(gt_nodes) else 1.0,
         "top_k": top_k,
-        "edge_threshold": float(metadata["edge_threshold"]),
+        "edge_threshold": gate,
     }
     return frame, dataset_metadata
 
@@ -316,6 +323,10 @@ def summarize(
         for name, part in binned.groupby(column, observed=True, sort=False):
             rows.append(_summary_row(kind, str(name), part))
     metadata = pd.DataFrame(dataset_metadata)
+    # Avoid suffix collisions with summary columns (e.g. ordinary_associations).
+    overlap = [c for c in metadata.columns if c in {"ordinary_associations"}]
+    if overlap:
+        metadata = metadata.drop(columns=overlap)
     by_dataset = pd.DataFrame([row for row in rows if row["group_type"] == "dataset"])
     by_dataset = by_dataset.merge(metadata, left_on="group", right_on="dataset", how="left")
     return pd.DataFrame(rows), by_dataset

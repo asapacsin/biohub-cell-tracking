@@ -48,6 +48,23 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--work-dir", required=True, type=Path)
     parser.add_argument("--top-k", type=int, default=16)
+    parser.add_argument(
+        "--datasets",
+        nargs="*",
+        default=None,
+        help="Optional dataset stems (default: fixed-8). Use holdout-8 for independent validation.",
+    )
+    parser.add_argument(
+        "--control-score",
+        type=float,
+        default=None,
+        help="Optional control score override for report delta (default: fixed-8 0.96875 control).",
+    )
+    parser.add_argument(
+        "--skip-fixed8-validation",
+        action="store_true",
+        help="Skip validate_fixed8_inputs when running a non-fixed-8 dataset list.",
+    )
     return parser
 
 
@@ -61,9 +78,11 @@ def _sha256(path: Path) -> str:
 
 def _git_commit() -> str:
     result = subprocess.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False
     )
-    return result.stdout.strip()
+    if result.returncode == 0:
+        return result.stdout.strip()
+    return "unknown"
 
 
 def _json_safe(value: Any) -> Any:
@@ -104,6 +123,7 @@ def _write_report(
     summary: pd.DataFrame,
     by_dataset: pd.DataFrame,
     runtime_seconds: float,
+    control_score: float = CONTROL_SCORE,
 ) -> None:
     overall = summary[summary["group_type"] == "overall"].iloc[0]
     comparisons = summary[summary["group_type"].isin(["dataset_family", "density_bin"])][
@@ -123,16 +143,20 @@ def _write_report(
         ]
     ]
     dataset_columns = [
-        "group",
-        "ordinary_associations",
-        "errors",
-        "error_rate",
-        "scorer_ranking",
-        "candidate_threshold",
-        "ilp_global",
-        "postprocessing_removed",
-        "detected_node_recall",
-        "final_node_recall",
+        column
+        for column in [
+            "group",
+            "ordinary_associations",
+            "errors",
+            "error_rate",
+            "scorer_ranking",
+            "candidate_threshold",
+            "ilp_global",
+            "postprocessing_removed",
+            "detected_node_recall",
+            "final_node_recall",
+        ]
+        if column in by_dataset.columns
     ]
     report = f"""# Candidate-edge bottleneck experiment
 
@@ -148,12 +172,12 @@ next mechanism. Ranking below 40%, or any competing mechanism at 40% or more, re
 
 ## Control and experiment
 
-- Control: generalization-safe two-seed fixed-8, alpha=0.5, det=0.96875, safe divisions
-  ON, gap2 OFF, DeepCenter OFF; historical score `{CONTROL_SCORE:.12f}`.
+- Control: generalization-safe two-seed recipe C, alpha=0.5, det=0.96875, safe divisions
+  ON, gap2 OFF, DeepCenter OFF; reference score `{control_score:.12f}`.
 - Experiment: identical inference/postprocessing with opt-in top-16 pre-gate blended and
   per-seed score capture. Instrumentation does not alter candidate construction or ILP.
 - Instrumented score: `{float(score["score"]):.12f}`; delta from control
-  `{float(score["score"]) - CONTROL_SCORE:+.12f}`.
+  `{float(score["score"]) - control_score:+.12f}`.
 - Runtime: `{runtime_seconds / 60:.2f}` minutes.
 - GPU inference required: yes, one fixed-8 run.
 
@@ -193,6 +217,45 @@ See the machine-readable `decision.json` for the predeclared classification inpu
     (output / "report.md").write_text(report, encoding="utf-8")
 
 
+def _evaluate_custom(
+    prediction_csv: Path, data_dir: Path, config, datasets: list[str]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Official-spec evaluation for an arbitrary ordered dataset list."""
+    from biohub_pipeline.evaluation import official_spec_summarise
+    from biohub_pipeline.fixed8_cv import (
+        _estimated_total_nodes,
+        _read_graph_tables,
+        evaluate_tables,
+    )
+
+    predictions = pd.read_csv(prediction_csv)
+    found = sorted(predictions["dataset"].unique().tolist())
+    if found != sorted(datasets):
+        raise RuntimeError(f"predictions datasets {found} != expected {sorted(datasets)}")
+    scale = tuple(float(value) for value in config.postprocessing["voxel_scale_um"])
+    max_distance_um = float(config.local_cv["max_match_um"])
+    rows: list[dict[str, Any]] = []
+    for dataset in datasets:
+        part = predictions[predictions["dataset"] == dataset]
+        pred_nodes = part[part["row_type"] == "node"].loc[:, ["node_id", "t", "z", "y", "x"]]
+        pred_edges = part[part["row_type"] == "edge"].loc[:, ["source_id", "target_id"]]
+        gt_path = data_dir / f"{dataset}.geff"
+        gt_nodes, gt_edges = _read_graph_tables(gt_path)
+        rows.append(
+            evaluate_tables(
+                dataset,
+                pred_nodes,
+                pred_edges,
+                gt_nodes,
+                gt_edges,
+                _estimated_total_nodes(gt_path),
+                scale=scale,
+                max_distance_um=max_distance_um,
+            )
+        )
+    return rows, {**official_spec_summarise(rows), "datasets": list(datasets)}
+
+
 def main() -> None:
     args = _parser().parse_args()
     if args.top_k < 2:
@@ -202,7 +265,18 @@ def main() -> None:
     config_path = args.config.resolve()
     output = args.output_dir.resolve()
     work = args.work_dir.resolve()
-    validate_fixed8_inputs(data_dir)
+    datasets = list(args.datasets) if args.datasets else list(FIXED8_DATASETS)
+    control_score = CONTROL_SCORE if args.control_score is None else float(args.control_score)
+    if not args.skip_fixed8_validation and datasets == list(FIXED8_DATASETS):
+        validate_fixed8_inputs(data_dir)
+    else:
+        missing = [
+            name
+            for name in datasets
+            if not (data_dir / f"{name}.zarr").exists() or not (data_dir / f"{name}.geff").exists()
+        ]
+        if missing:
+            raise FileNotFoundError("missing dataset inputs: " + ", ".join(missing))
     if output.exists():
         raise FileExistsError(f"experiment output already exists: {output}")
     if work.exists():
@@ -218,7 +292,7 @@ def main() -> None:
         apply_spatial_d4_patch(repo_dir, str(config.inference["prediction_script"]))
     primary = support_dir / Path(str(config.inference["weights_relative"]))
     command, split_path = build_predict_command(
-        config, data_dir, repo_dir, primary, list(FIXED8_DATASETS)
+        config, data_dir, repo_dir, primary, datasets
     )
     apply_edge_diagnostic_patch(repo_dir, str(config.inference["prediction_script"]))
     capture_dir = output / "candidate_capture"
@@ -234,11 +308,18 @@ def main() -> None:
 
     started = time.perf_counter()
     run_prediction(command, repo_dir)
-    geffs = find_fixed8_prediction_geffs(repo_dir, str(config.inference["method"]))
+    geffs = find_fixed8_prediction_geffs(
+        repo_dir, str(config.inference["method"]), datasets
+    )
     raw_dir = _copy_raw_predictions(geffs, output, config_path=config_path)
     prediction_csv = output / "predictions" / "postprocessed_submission.csv"
     write_submission_from_geff(geffs, config, data_dir, prediction_csv)
-    metric_rows, score = evaluate_postprocessed_predictions(prediction_csv, data_dir, config)
+    if datasets == list(FIXED8_DATASETS):
+        metric_rows, score = evaluate_postprocessed_predictions(
+            prediction_csv, data_dir, config
+        )
+    else:
+        metric_rows, score = _evaluate_custom(prediction_csv, data_dir, config, datasets)
     runtime_seconds = time.perf_counter() - started
     pd.DataFrame(metric_rows).to_csv(output / "metric_by_dataset.csv", index=False)
     (output / "score_summary.json").write_text(
@@ -248,7 +329,7 @@ def main() -> None:
     final_predictions = pd.read_csv(prediction_csv)
     frames = []
     metadata = []
-    for dataset in FIXED8_DATASETS:
+    for dataset in datasets:
         frame, dataset_metadata = analyze_dataset(
             dataset,
             capture_dir / dataset,
@@ -276,7 +357,7 @@ def main() -> None:
         "created_at_utc": datetime.now(UTC).isoformat(),
         "experiment": "candidate_edge_bottleneck_v1",
         "git_commit": _git_commit(),
-        "datasets": list(FIXED8_DATASETS),
+        "datasets": list(datasets),
         "config": str(config_path),
         "config_sha256": _sha256(config_path),
         "primary_checkpoint": str(primary),
@@ -288,16 +369,24 @@ def main() -> None:
         ),
         "split_file": str(split_path),
         "top_k": args.top_k,
-        "control_score": CONTROL_SCORE,
+        "control_score": control_score,
         "experiment_score": score["score"],
         "runtime_seconds": runtime_seconds,
-        "prediction_equivalent_to_control": abs(float(score["score"]) - CONTROL_SCORE) < 1e-12,
+        "prediction_equivalent_to_control": abs(float(score["score"]) - control_score) < 1e-12,
     }
     (output / "metadata.json").write_text(
         json.dumps(_json_safe(metadata_doc), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    _write_report(output, score, decision, summary, by_dataset, runtime_seconds)
+    _write_report(
+        output,
+        score,
+        decision,
+        summary,
+        by_dataset,
+        runtime_seconds,
+        control_score=control_score,
+    )
     print(json.dumps(_json_safe({"score": score, "decision": decision}), indent=2))
 
 

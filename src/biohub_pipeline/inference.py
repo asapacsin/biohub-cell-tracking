@@ -532,6 +532,58 @@ def _write_edge_diagnostic(
     return True
 
 
+def apply_edge_threshold_cli_patch(repo_dir: Path, prediction_script: str) -> bool:
+    """Expose PredictConfig.threshold via an optional --edge-threshold CLI flag."""
+    path = repo_dir / prediction_script
+    source = path.read_text(encoding="utf-8")
+    replacements = (
+        (
+            """    parser.add_argument("--det-threshold", type=float, default=0.99,
+                        help="Min sigmoid probability for a detection peak to be kept. "
+                             "Default 0.99: the detector is poorly calibrated because the "
+                             "ground truth is sparse (only some cells annotated), so a high "
+                             "threshold keeps precision up. Sweep it for your model.")
+""",
+            """    parser.add_argument("--det-threshold", type=float, default=0.99,
+                        help="Min sigmoid probability for a detection peak to be kept. "
+                             "Default 0.99: the detector is poorly calibrated because the "
+                             "ground truth is sparse (only some cells annotated), so a high "
+                             "threshold keeps precision up. Sweep it for your model.")
+    parser.add_argument("--edge-threshold", type=float, default=0.5,
+                        help="Min edge probability admitted to the linker (default: 0.5).")
+""",
+        ),
+        (
+            """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+    )
+""",
+            """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+    )
+""",
+        ),
+    )
+    patched = source
+    for old, new in replacements:
+        if patched.count(old) != 1:
+            raise RuntimeError("support predictor does not match edge-threshold patch preimage")
+        patched = patched.replace(old, new, 1)
+    path.write_text(patched, encoding="utf-8")
+    return True
+
+
 def resolve_ensemble_weights(config: PipelineConfig, primary_weights: Path) -> Path | None:
     relative = config.inference.get("ensemble_weights_relative")
     if relative is None:
@@ -561,6 +613,9 @@ def build_predict_command(
         alpha = float(inf.get("ensemble_alpha", 0.5))
         validate_ensemble_checkpoints(weights_path, ensemble_weights, alpha)
         apply_logit_ensemble_patch(repo_dir, str(inf["prediction_script"]))
+    edge_threshold = inf.get("edge_threshold")
+    if edge_threshold is not None:
+        apply_edge_threshold_cli_patch(repo_dir, str(inf["prediction_script"]))
     command = [
         sys.executable,
         str(inf["prediction_script"]),
@@ -585,6 +640,8 @@ def build_predict_command(
         "--ilp-division-weight",
         str(inf["ilp_division_weight"]),
     ]
+    if edge_threshold is not None:
+        command.extend(["--edge-threshold", str(float(edge_threshold))])
     if ensemble_weights is not None:
         command.extend(
             [

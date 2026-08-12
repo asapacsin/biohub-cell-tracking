@@ -1,74 +1,43 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-09T21:11:47+08:00",
+  "updated_at": "2026-08-12T15:22:50+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Selected-edge confidence calibration",
+  "active_milestone": "Edge-gate sweep complete; keep edge_threshold=0.40",
   "status": "complete",
-  "host": "Codex desktop (Windows; Kaggle artifact cache)",
+  "host": "linux-login01",
   "completed": [
-    "Phase1: audited public dual-seed recipe A (det=0.96875, low_margin_consensus); LB 0.911 unverified",
-    "Phase2: reproduced public recipe on fixed-8 → score 0.877745 (−0.010 vs local det960)",
-    "Phase3: holdout-8 det 0.960 vs 0.96875 → 0.96875 wins (7/8); classify REJECT for 0.960",
-    "Phase4: holdout safe-div OFF +0.000278 but regressions −0.014/−0.006 → do not promote",
-    "Phase5: error_taxonomy.md written; dominant association errors on 6bba dense sets",
-    "Phase6: public GEFFs × local postprocess +0.00040 vs public; gap is ensemble not PP",
-    "Final report: recommend recipe C α=0.5 det=0.96875 safe-div ON",
-    "Selected-edge confidence calibration: bottom 5% captured 13/48 errors; AUROC 0.7525; hypothesis rejected"
+    "Motion-relink OFF promoted",
+    "Edge-gate sweep 0.50\u21920.25 complete under motion OFF",
+    "Band diagnostic: useful signal in 0.40\u20130.50; noise below 0.40",
+    "KEEP edge_threshold=0.40 (0.35 holdout regression vs 0.40)",
+    "Bottleneck rediagnosis at 0.40: threshold mostly fixed; ranking ~50\u201354%; remaining pp_removed=missing endpoints"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "PYTHONPATH=src pytest -q tests/test_selected_edge_calibration.py → 5 passed",
-    "PYTHONPATH=src pytest -q --basetemp work/pytest-full-20260809-2113 → 39 passed",
-    "ruff check scripts/run_selected_edge_calibration.py src/biohub_pipeline/selected_edge_calibration.py tests/test_selected_edge_calibration.py → passed",
-    "python -m compileall -q src scripts → passed",
-    "PYTHONPATH=src python scripts/run_selected_edge_calibration.py → D. HYPOTHESIS REJECTED"
+    "scripts/run_edge_gate_band_diagnostic.sh \u2192 DONE",
+    "scripts/slurm/run_edge_gate_lower_sweep.sh \u2192 DONE",
+    "scripts/run_rediagnose_edge_0_40.sh \u2192 DONE"
   ],
-  "next_action": "Keep the production recipe unchanged and target edge-ranking quality rather than confidence-only calibration",
+  "next_action": "Fresh candidate-edge capture on recipe_c_motion_off_edge_0_40 (fixed-8+holdout) before ranking retrain",
   "needs_human": [],
   "artifacts": {
-    "public_recipe_audit": "outputs/audit/public_two_seed_recipe.md",
-    "public_fixed8": "outputs/fixed8/public_two_seed_exact/",
-    "holdout": "outputs/holdout8/comparison.json",
-    "error_taxonomy": "outputs/analysis/error_taxonomy.md",
-    "final_report": "outputs/analysis/final_experiment_report.md",
-    "phase6": "outputs/fixed8/public_geffs_local_postprocess/",
-    "association_density_rows": "outputs/analysis/association_density_diagnostic.csv",
-    "association_density_summary": "outputs/analysis/association_density_summary.csv",
-    "association_density_by_dataset": "outputs/analysis/association_density_by_dataset.csv",
-    "association_density_report": "outputs/analysis/association_density_report.md",
-    "selected_edge_calibration": "outputs/experiments/selected_edge_calibration/"
+    "edge_gate_sweep": "outputs/experiments/edge_gate_sweep_motion_off_v1/",
+    "edge_gate_report": "outputs/analysis/edge_gate_sweep_report.md",
+    "rediagnose_0_40": "outputs/experiments/bottleneck_rediagnose_edge_0_40_v1/",
+    "promoted_config": "configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml",
+    "experiment_log": "outputs/analysis/experiment_log.md"
   },
   "notes": [
-    "Login /home ≠ GPU NFS /home; durable GPU results under ~/biohub-outputs on compute nodes",
-    "Do not promote det=0.960 or safe-div OFF as primary despite better fixed-8 scores"
+    "Do not promote edge 0.35/0.30/0.25",
+    "Do not reopen short-track OFF",
+    "Historical baseline YAMLs (motion ON / edge 0.5) preserved"
   ],
-  "association_density_diagnostic": {
-    "status": "complete",
-    "conclusion": "B PARTIALLY VERIFIED",
-    "coverage": "four available public two-seed/GT overlaps; pre-final-postprocessing",
-    "ordinary_associations": 2121,
-    "overall_error_rate": 0.041961338991041965,
-    "high_density_error_rate": 0.0502283105022831,
-    "low_density_error_rate": 0.02176696542893726,
-    "high_vs_low_error_ratio": 2.3075476766048886,
-    "association_errors": 72,
-    "detection_errors": 17,
-    "node_recall": 0.995,
-    "candidate_margins_available": false,
-    "limitation": "Saved GEFFs retain selected edges only and cover four of fixed-eight prediction datasets"
-  },
-  "selected_edge_calibration": {
-    "status": "complete",
-    "classification": "D. HYPOTHESIS REJECTED",
-    "coverage": "2080 scored ordinary associations across four labeled public two-seed overlaps",
-    "budget_fraction": 0.05,
-    "budget_count": 104,
-    "scored_errors": 48,
-    "captured_errors": 13,
-    "error_capture": 0.2708333333333333,
-    "intervention_precision": 0.125,
-    "correctness_auroc": 0.7525426509186351,
-    "production_recipe_changed": false
+  "best_local_scores": {
+    "fixed8": 0.9181439782806684,
+    "holdout8": 0.9646726188580379,
+    "recipe": "recipe_c_motion_off_edge_0_40_det0_96875",
+    "vs_motion_off_edge_0_5_fixed_delta": 0.01141872512170528,
+    "vs_motion_off_edge_0_5_holdout_delta": 0.0043655672363835
   }
 }
