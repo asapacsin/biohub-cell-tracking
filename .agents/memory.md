@@ -394,3 +394,16 @@
   Report: `outputs/analysis/fresh_candidate_capture_edge_0_40_report.md`.
 - Recommended next (not run): one targeted edge-scorer ranking improvement under
   frozen recipe; no further gate sweeps / short-track OFF.
+
+## Margin-gated distance rank REJECT (2026-08-12)
+
+- Rank-2 OA failures: GT ~2.3× farther than competitor (~88% GT farther); dense scenes;
+  softmax gap small vs successes. ILP has no distance term.
+- Intervention D: pre-softmax margin-gated `logit += 0.1*dist_um` when top1−top2 < 0.15 and
+  dens≥8 (15 µm). Frozen recipe unchanged (motion OFF, edge=0.40).
+- Offline capture fit overstated benefit; GPU fixed-8 **0.917136 (−0.00101)** and holdout
+  **0.964022 (−0.00065)** vs 0.918144 / 0.964673. Edge TP fell on both splits.
+- **REJECT.** Keep promoted config without `margin_gated_dist_*`. Opt-in code retained for
+  reproducibility only.
+- Next: learned pairwise / hard-neg ranking under the same frozen recipe — not another
+  hand-crafted distance bonus.

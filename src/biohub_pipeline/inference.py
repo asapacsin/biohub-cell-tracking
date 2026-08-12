@@ -584,6 +584,200 @@ def apply_edge_threshold_cli_patch(repo_dir: Path, prediction_script: str) -> bo
     return True
 
 
+def apply_margin_gated_distance_rank_patch(repo_dir: Path, prediction_script: str) -> bool:
+    """Opt-in pre-softmax distance boost for near-tie columns in dense scenes."""
+    path = repo_dir / prediction_script
+    source = path.read_text(encoding="utf-8")
+    if "_V106_MARGIN_GATED_DISTANCE_RANK_PATCH = True" in source:
+        return False
+
+    marker = "@dataclass\nclass PredictConfig:\n"
+    if source.count(marker) != 1:
+        raise RuntimeError("support predictor missing PredictConfig for distance-rank patch")
+
+    helpers = '''_V106_MARGIN_GATED_DISTANCE_RANK_PATCH = True
+
+
+def _margin_gated_distance_adjust(
+    raw, coords_so_far, idx_src, idx_tgt, voxel_size,
+    lam, delta, dens_min, radius_um,
+):
+    """Boost logits by lam*dist_um for near-tie target columns in dense scenes."""
+    import numpy as _np
+    import torch as _torch
+    was_tensor = isinstance(raw, _torch.Tensor)
+    device = raw.device if was_tensor else None
+    logits = raw.detach().float().cpu().numpy() if was_tensor else _np.asarray(raw, dtype=_np.float64)
+    n_src, n_tgt = logits.shape
+    if n_src < 2 or n_tgt < 1:
+        return raw
+    src_zyx = _np.asarray(coords_so_far, dtype=_np.float64)[_np.asarray(idx_src, dtype=_np.int64)][:, 1:4]
+    tgt_zyx = _np.asarray(coords_so_far, dtype=_np.float64)[_np.asarray(idx_tgt, dtype=_np.int64)][:, 1:4]
+    scale = _np.asarray(voxel_size, dtype=_np.float64).reshape(1, 1, 3)
+    dists = _np.linalg.norm(
+        (src_zyx[:, None, :] - tgt_zyx[None, :, :]) * scale, axis=2
+    )
+    tgt_scale = _np.asarray(voxel_size, dtype=_np.float64).reshape(1, 1, 3)
+    d_tgt = _np.linalg.norm(
+        (tgt_zyx[:, None, :] - tgt_zyx[None, :, :]) * tgt_scale, axis=2
+    )
+    dens = (d_tgt <= float(radius_um)).sum(axis=1)
+    out = logits.copy()
+    for j in range(n_tgt):
+        col = out[:, j]
+        top2 = _np.partition(col, -2)[-2:]
+        gap = float(top2.max() - top2.min())
+        if gap < float(delta) and float(dens[j]) >= float(dens_min):
+            out[:, j] = col + float(lam) * dists[:, j]
+    if was_tensor:
+        return _torch.from_numpy(out).to(device=device, dtype=raw.dtype)
+    return out
+
+
+'''
+    # Insert helper immediately before @dataclass PredictConfig
+    source = source.replace(marker, helpers + marker, 1)
+
+    replacements = [
+        (
+            """    # Edge filtering
+    edge_activation: str = "softmax"  # "sigmoid" or "softmax"
+    threshold: float = 0.5
+""",
+            """    # Edge filtering
+    edge_activation: str = "softmax"  # "sigmoid" or "softmax"
+    threshold: float = 0.5
+    # Opt-in margin-gated distance rank (pre-softmax). lam=0 disables.
+    margin_gated_dist_lambda: float = 0.0
+    margin_gated_dist_delta: float = 0.15
+    margin_gated_dist_dens_min: float = 8.0
+    margin_gated_dist_radius_um: float = 15.0
+""",
+        ),
+        (
+            """            raw = edge_logits_pair[0]
+            if cfg.edge_activation == "softmax":
+""",
+            """            raw = edge_logits_pair[0]
+            if float(getattr(cfg, "margin_gated_dist_lambda", 0.0) or 0.0) != 0.0:
+                raw = _margin_gated_distance_adjust(
+                    raw, coords_so_far, idx_src, idx_tgt, voxel_size,
+                    float(cfg.margin_gated_dist_lambda),
+                    float(cfg.margin_gated_dist_delta),
+                    float(cfg.margin_gated_dist_dens_min),
+                    float(cfg.margin_gated_dist_radius_um),
+                )
+            if cfg.edge_activation == "softmax":
+""",
+        ),
+        (
+            """    parser.add_argument("--edge-threshold", type=float, default=0.5,
+                        help="Min edge probability admitted to the linker (default: 0.5).")
+""",
+            """    parser.add_argument("--edge-threshold", type=float, default=0.5,
+                        help="Min edge probability admitted to the linker (default: 0.5).")
+    parser.add_argument("--margin-gated-dist-lambda", type=float, default=0.0,
+                        help="Opt-in pre-softmax distance bonus for near-tie dense columns.")
+    parser.add_argument("--margin-gated-dist-delta", type=float, default=0.15,
+                        help="Logit top1-top2 gap below which distance bonus applies.")
+    parser.add_argument("--margin-gated-dist-dens-min", type=float, default=8.0,
+                        help="Min local detection density (radius_um) to apply bonus.")
+    parser.add_argument("--margin-gated-dist-radius-um", type=float, default=15.0,
+                        help="Density neighborhood radius in µm.")
+""",
+        ),
+        (
+            """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+    )
+""",
+            """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+        margin_gated_dist_lambda=args.margin_gated_dist_lambda,
+        margin_gated_dist_delta=args.margin_gated_dist_delta,
+        margin_gated_dist_dens_min=args.margin_gated_dist_dens_min,
+        margin_gated_dist_radius_um=args.margin_gated_dist_radius_um,
+    )
+""",
+        ),
+    ]
+
+    # Edge-threshold patch may not have been applied yet; also accept unpatched PredictConfig block.
+    alt_cfg = (
+        """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+    )
+""",
+        """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+        margin_gated_dist_lambda=args.margin_gated_dist_lambda,
+        margin_gated_dist_delta=args.margin_gated_dist_delta,
+        margin_gated_dist_dens_min=args.margin_gated_dist_dens_min,
+        margin_gated_dist_radius_um=args.margin_gated_dist_radius_um,
+    )
+""",
+    )
+    alt_cli = (
+        """    parser.add_argument("--det-threshold", type=float, default=0.99,
+                        help="Min sigmoid probability for a detection peak to be kept. "
+                             "Default 0.99: the detector is poorly calibrated because the "
+                             "ground truth is sparse (only some cells annotated), so a high "
+                             "threshold keeps precision up. Sweep it for your model.")
+""",
+        """    parser.add_argument("--det-threshold", type=float, default=0.99,
+                        help="Min sigmoid probability for a detection peak to be kept. "
+                             "Default 0.99: the detector is poorly calibrated because the "
+                             "ground truth is sparse (only some cells annotated), so a high "
+                             "threshold keeps precision up. Sweep it for your model.")
+    parser.add_argument("--margin-gated-dist-lambda", type=float, default=0.0,
+                        help="Opt-in pre-softmax distance bonus for near-tie dense columns.")
+    parser.add_argument("--margin-gated-dist-delta", type=float, default=0.15,
+                        help="Logit top1-top2 gap below which distance bonus applies.")
+    parser.add_argument("--margin-gated-dist-dens-min", type=float, default=8.0,
+                        help="Min local detection density (radius_um) to apply bonus.")
+    parser.add_argument("--margin-gated-dist-radius-um", type=float, default=15.0,
+                        help="Density neighborhood radius in µm.")
+""",
+    )
+
+    patched = source
+    for old, new in replacements:
+        if patched.count(old) == 1:
+            patched = patched.replace(old, new, 1)
+        elif old == replacements[2][0] and patched.count(alt_cli[0]) == 1:
+            patched = patched.replace(alt_cli[0], alt_cli[1], 1)
+        elif old == replacements[3][0] and patched.count(alt_cfg[0]) == 1:
+            patched = patched.replace(alt_cfg[0], alt_cfg[1], 1)
+        else:
+            raise RuntimeError(
+                "support predictor does not match margin-gated distance-rank patch preimage"
+            )
+    path.write_text(patched, encoding="utf-8")
+    return True
+
+
 def resolve_ensemble_weights(config: PipelineConfig, primary_weights: Path) -> Path | None:
     relative = config.inference.get("ensemble_weights_relative")
     if relative is None:
@@ -616,6 +810,9 @@ def build_predict_command(
     edge_threshold = inf.get("edge_threshold")
     if edge_threshold is not None:
         apply_edge_threshold_cli_patch(repo_dir, str(inf["prediction_script"]))
+    dist_lam = float(inf.get("margin_gated_dist_lambda") or 0.0)
+    if dist_lam != 0.0:
+        apply_margin_gated_distance_rank_patch(repo_dir, str(inf["prediction_script"]))
     command = [
         sys.executable,
         str(inf["prediction_script"]),
@@ -649,6 +846,19 @@ def build_predict_command(
                 os.path.relpath(ensemble_weights, repo_dir),
                 "--ensemble-alpha",
                 str(inf.get("ensemble_alpha", 0.5)),
+            ]
+        )
+    if dist_lam != 0.0:
+        command.extend(
+            [
+                "--margin-gated-dist-lambda",
+                str(dist_lam),
+                "--margin-gated-dist-delta",
+                str(float(inf.get("margin_gated_dist_delta", 0.15))),
+                "--margin-gated-dist-dens-min",
+                str(float(inf.get("margin_gated_dist_dens_min", 8.0))),
+                "--margin-gated-dist-radius-um",
+                str(float(inf.get("margin_gated_dist_radius_um", 15.0))),
             ]
         )
     if inf["use_ilp"]:

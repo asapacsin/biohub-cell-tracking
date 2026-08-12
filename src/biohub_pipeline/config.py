@@ -101,6 +101,24 @@ def validate_config(raw: object) -> PipelineConfig:
     if not 0.0 <= float(ensemble_alpha) <= 1.0:
         raise ConfigError("inference.ensemble_alpha must be between 0 and 1")
 
+    if "margin_gated_dist_lambda" in inference and inference["margin_gated_dist_lambda"] is not None:
+        lam = inference["margin_gated_dist_lambda"]
+        if isinstance(lam, bool) or not isinstance(lam, (int, float)):
+            raise ConfigError("inference.margin_gated_dist_lambda must be numeric or null")
+        if float(lam) < 0.0:
+            raise ConfigError("inference.margin_gated_dist_lambda must be >= 0")
+    for key, lo in (
+        ("margin_gated_dist_delta", 0.0),
+        ("margin_gated_dist_dens_min", 0.0),
+        ("margin_gated_dist_radius_um", 0.0),
+    ):
+        if key in inference and inference[key] is not None:
+            value = inference[key]
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ConfigError(f"inference.{key} must be numeric or null")
+            if float(value) < lo:
+                raise ConfigError(f"inference.{key} must be >= {lo}")
+
     scale = postprocessing.get("voxel_scale_um")
     if not isinstance(scale, list) or len(scale) != 3 or any(float(v) <= 0 for v in scale):
         raise ConfigError("postprocessing.voxel_scale_um must contain three positive values")
