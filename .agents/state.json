@@ -1,43 +1,39 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-12T15:22:50+08:00",
+  "updated_at": "2026-08-12T16:20:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Edge-gate sweep complete; keep edge_threshold=0.40",
+  "active_milestone": "Fresh candidate capture complete; ranking ~50% SUPPORTED",
   "status": "complete",
   "host": "linux-login01",
   "completed": [
     "Motion-relink OFF promoted",
-    "Edge-gate sweep 0.50\u21920.25 complete under motion OFF",
-    "Band diagnostic: useful signal in 0.40\u20130.50; noise below 0.40",
-    "KEEP edge_threshold=0.40 (0.35 holdout regression vs 0.40)",
-    "Bottleneck rediagnosis at 0.40: threshold mostly fixed; ranking ~50\u201354%; remaining pp_removed=missing endpoints"
+    "Edge-gate sweep KEEP edge_threshold=0.40",
+    "Fresh instrumented candidate capture fixed-8 + holdout-8 under recipe_c_motion_off_edge_0_40",
+    "Ranking ~50% causal claim SUPPORTED (54.3% / 50.0% / 53.0% combined)"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "scripts/run_edge_gate_band_diagnostic.sh \u2192 DONE",
-    "scripts/slurm/run_edge_gate_lower_sweep.sh \u2192 DONE",
-    "scripts/run_rediagnose_edge_0_40.sh \u2192 DONE"
+    "scripts/slurm/run_fresh_candidate_capture_edge_0_40.sh → DONE",
+    "PYTHONPATH=src .venv/bin/python scripts/attribute_fresh_candidate_capture.py → DONE"
   ],
-  "next_action": "Fresh candidate-edge capture on recipe_c_motion_off_edge_0_40 (fixed-8+holdout) before ranking retrain",
+  "next_action": "One targeted edge-scorer ranking improvement under frozen recipe_c_motion_off_edge_0_40; do not reopen short-track OFF or gate sweeps",
   "needs_human": [],
   "artifacts": {
-    "edge_gate_sweep": "outputs/experiments/edge_gate_sweep_motion_off_v1/",
-    "edge_gate_report": "outputs/analysis/edge_gate_sweep_report.md",
-    "rediagnose_0_40": "outputs/experiments/bottleneck_rediagnose_edge_0_40_v1/",
     "promoted_config": "configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml",
+    "fresh_capture_nfs": "~/biohub-outputs/experiments/candidate_capture_recipe_c_edge_0_40_v1/ (compute home)",
+    "fresh_capture_login": "outputs/experiments/candidate_capture_recipe_c_edge_0_40_v1/",
+    "fresh_capture_report": "outputs/analysis/fresh_candidate_capture_edge_0_40_report.md",
     "experiment_log": "outputs/analysis/experiment_log.md"
   },
   "notes": [
+    "Login home ≠ compute NFS for biohub-outputs; always mirror via srun tar | login tar",
     "Do not promote edge 0.35/0.30/0.25",
-    "Do not reopen short-track OFF",
-    "Historical baseline YAMLs (motion ON / edge 0.5) preserved"
+    "Do not reopen short-track OFF"
   ],
   "best_local_scores": {
     "fixed8": 0.9181439782806684,
     "holdout8": 0.9646726188580379,
-    "recipe": "recipe_c_motion_off_edge_0_40_det0_96875",
-    "vs_motion_off_edge_0_5_fixed_delta": 0.01141872512170528,
-    "vs_motion_off_edge_0_5_holdout_delta": 0.0043655672363835
+    "recipe": "recipe_c_motion_off_edge_0_40_det0_96875"
   }
 }

@@ -375,3 +375,22 @@
 - Artifacts: `outputs/experiments/edge_gate_sweep_motion_off_v1/`,
   `outputs/experiments/bottleneck_rediagnose_edge_0_40_v1/`,
   `outputs/analysis/edge_gate_sweep_report.md`.
+
+## Fresh candidate capture @ promoted recipe (2026-08-12)
+
+- Fresh instrumented top-16 captures under
+  `configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml`
+  (motion_relink OFF, edge_threshold=0.40, det=0.96875, α=0.5).
+- Scores exact match: fixed-8 **0.9181439782806684**, holdout-8 **0.9646726188580379**.
+- Causal ordinary-association ranking shares: fixed **54.3%** (70/129), holdout
+  **50.0%** (26/52), combined **53.0%** (96/181). **SUPPORTED** for ~50% ranking claim
+  among endpoint-matched failures.
+- Rank-2 near misses: 46/70 fixed, 21/26 holdout. All `postprocessing_removed` still
+  missing final endpoints (do not disable short-track).
+- Including detection_miss, ranking is only 42%/30%/38% of all ordinary errors;
+  holdout Candidate/gating (detection_miss) is 40% of all-error mass.
+- NFS (compute home, not login): `~/biohub-outputs/experiments/candidate_capture_recipe_c_edge_0_40_v1/`.
+  Login mirror: `outputs/experiments/candidate_capture_recipe_c_edge_0_40_v1/`.
+  Report: `outputs/analysis/fresh_candidate_capture_edge_0_40_report.md`.
+- Recommended next (not run): one targeted edge-scorer ranking improvement under
+  frozen recipe; no further gate sweeps / short-track OFF.
