@@ -1,44 +1,61 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-12T18:00:00+08:00",
+  "updated_at": "2026-08-13T13:25:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Margin-gated distance rank REJECTED; frozen recipe unchanged",
+  "active_milestone": "Pairwise hard-neg ranking v1 REJECTED; 0.5×-weight salvage next under frozen recipe",
   "status": "complete",
   "host": "linux-login01",
+  "eta": {
+    "window_open": "2026-08-12T18:18:07+00:00",
+    "eta_finish": "2026-08-12T18:50:44+00:00",
+    "eta_hours": 0.54,
+    "basis": "GPU pairwise_hardneg_rank_v1 already finished (job 6572, ~33 min)"
+  },
   "completed": [
     "Motion-relink OFF promoted",
     "Edge-gate sweep KEEP edge_threshold=0.40",
     "Fresh instrumented candidate capture fixed-8 + holdout-8 under recipe_c_motion_off_edge_0_40",
     "Ranking ~50% causal claim SUPPORTED (54.3% / 50.0% / 53.0% combined)",
-    "Margin-gated distance rank term evaluated and REJECTED (fixed and holdout both down)"
+    "Margin-gated distance rank REJECTED (fixed −0.0010, holdout −0.0007)",
+    "Standing autonomous-ops Cursor rule persisted",
+    "Pairwise hard-neg ranking v1 REJECTED (fixed +0.00607, holdout −0.00083)"
   ],
   "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "scripts/slurm/run_margin_gated_dist_rank_v1.sh \u2192 DONE (REJECT)",
-    ".venv/bin/python scripts/analysis/verify_margin_gated_patch.py \u2192 OK",
-    "pytest tests/test_margin_gated_distance_rank.py \u2192 OK"
+    "scripts/slurm/run_pairwise_hardneg_rank_v1.sh → DONE (REJECT)",
+    "srun tar mirror compact pairwise summaries login←NFS",
+    ".venv/bin/python -m pytest tests/test_pairwise_hardneg_rank.py → 3 passed"
   ],
-  "next_action": "Learned pairwise / hard-negative ranking improvement under frozen recipe_c_motion_off_edge_0_40; do not retry hand-crafted distance bonuses without appearance features",
+  "next_action": "Run pairwise_hardneg_rank_v1_scale0_5 (same gates, weights ×0.5) on fixed-8 AND holdout-8; if holdout still negative, close linear pairwise reweight",
   "needs_human": [],
   "artifacts": {
     "promoted_config": "configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml",
-    "rejected_candidate_config": "configs/experiments/recipe_c_edge_0_40_margin_gated_dist_v1.yaml",
-    "margin_gated_nfs": "~/biohub-outputs/experiments/margin_gated_dist_rank_v1/",
-    "margin_gated_login": "outputs/experiments/margin_gated_dist_rank_v1/",
-    "margin_gated_report": "outputs/analysis/margin_gated_dist_rank_v1_report.md",
-    "fresh_capture_report": "outputs/analysis/fresh_candidate_capture_edge_0_40_report.md",
-    "experiment_log": "outputs/analysis/experiment_log.md"
+    "rejected_candidate_config": "configs/experiments/recipe_c_edge_0_40_pairwise_hardneg_v1.yaml",
+    "pairwise_report": "outputs/analysis/pairwise_hardneg_rank_v1_report.md",
+    "pairwise_nfs": "~/biohub-outputs/experiments/pairwise_hardneg_rank_v1/",
+    "pairwise_login": "outputs/experiments/pairwise_hardneg_rank_v1/",
+    "autonomous_ops_rule": ".cursor/rules/autonomous-ops.mdc"
   },
   "notes": [
-    "Login home \u2260 compute NFS for biohub-outputs; always mirror via srun tar | login tar",
+    "Login home ≠ compute NFS for biohub-outputs; always mirror via srun tar | login tar",
     "Do not promote edge 0.35/0.30/0.25",
     "Do not reopen short-track OFF",
-    "Do not enable margin_gated_dist_lambda in production recipe"
+    "Do not enable margin_gated_dist_lambda in production recipe",
+    "Do not enable pairwise_hardneg_w in production recipe",
+    "Frozen recipe: motion OFF, edge_threshold=0.40",
+    "Continue autonomously until genuine human-intervention conditions"
   ],
   "best_local_scores": {
     "fixed8": 0.9181439782806684,
     "holdout8": 0.9646726188580379,
     "recipe": "recipe_c_motion_off_edge_0_40_det0_96875"
-  }
+  },
+  "job_ids": [
+    "slurm:6572"
+  ],
+  "resume_commands": [
+    "squeue -u $USER",
+    "cat /home/mc46451/biohub-cell-tracking/logs/slurm/pairwise_hardneg_rank_v1.log"
+  ]
 }

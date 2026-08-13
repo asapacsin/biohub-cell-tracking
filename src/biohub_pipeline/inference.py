@@ -778,6 +778,319 @@ def _margin_gated_distance_adjust(
     return True
 
 
+def apply_pairwise_hardneg_rank_patch(repo_dir: Path, prediction_script: str) -> bool:
+    """Opt-in pre-softmax appearance-aware pairwise hard-neg reweight."""
+    path = repo_dir / prediction_script
+    source = path.read_text(encoding="utf-8")
+    if "_V106_PAIRWISE_HARDNEG_RANK_PATCH = True" in source:
+        return False
+
+    marker = "@dataclass\nclass PredictConfig:\n"
+    if source.count(marker) != 1:
+        raise RuntimeError("support predictor missing PredictConfig for pairwise hardneg patch")
+
+    helpers = '''_V106_PAIRWISE_HARDNEG_RANK_PATCH = True
+
+
+def _pairwise_hardneg_adjust(
+    raw, seed1, seed2, coords_so_far, idx_src, idx_tgt, voxel_size,
+    weights, dens_min, gap_max, radius_um,
+):
+    """blended_logit + w·φ(seed_disagree, seed_min, dist, dens) on near-tie dense columns."""
+    import json as _json
+    import numpy as _np
+    import torch as _torch
+    was_tensor = isinstance(raw, _torch.Tensor)
+    device = raw.device if was_tensor else None
+    logits = raw.detach().float().cpu().numpy() if was_tensor else _np.asarray(raw, dtype=_np.float64)
+    s1 = seed1.detach().float().cpu().numpy() if isinstance(seed1, _torch.Tensor) else _np.asarray(seed1, dtype=_np.float64)
+    s2 = seed2.detach().float().cpu().numpy() if isinstance(seed2, _torch.Tensor) else _np.asarray(seed2, dtype=_np.float64)
+    w = _np.asarray(weights if not isinstance(weights, str) else _json.loads(weights), dtype=_np.float64).reshape(-1)
+    n_src, n_tgt = logits.shape
+    if n_src < 2 or n_tgt < 1 or w.shape[0] != 6:
+        return raw
+    src_zyx = _np.asarray(coords_so_far, dtype=_np.float64)[_np.asarray(idx_src, dtype=_np.int64)][:, 1:4]
+    tgt_zyx = _np.asarray(coords_so_far, dtype=_np.float64)[_np.asarray(idx_tgt, dtype=_np.int64)][:, 1:4]
+    scale = _np.asarray(voxel_size, dtype=_np.float64).reshape(1, 1, 3)
+    dists = _np.linalg.norm((src_zyx[:, None, :] - tgt_zyx[None, :, :]) * scale, axis=2)
+    d_tgt = _np.linalg.norm((tgt_zyx[:, None, :] - tgt_zyx[None, :, :]) * scale, axis=2)
+    dens = (d_tgt <= float(radius_um)).sum(axis=1)
+    disagree = _np.abs(s1 - s2)
+    smin = _np.minimum(s1, s2)
+    dist_n = dists / 10.0
+    log_dens = _np.log1p(_np.maximum(dens.astype(_np.float64), 0.0))
+    log_dens_b = _np.broadcast_to(log_dens.reshape(1, -1), dist_n.shape)
+    feats = _np.stack(
+        [disagree, smin, dist_n, log_dens_b, dist_n * disagree, dist_n * smin],
+        axis=-1,
+    )
+    correction = feats @ w
+    out = logits.copy()
+    for j in range(n_tgt):
+        col = out[:, j]
+        top2 = _np.partition(col, -2)[-2:]
+        gap = float(top2.max() - top2.min())
+        if gap < float(gap_max) and float(dens[j]) >= float(dens_min):
+            out[:, j] = col + correction[:, j]
+    if was_tensor:
+        return _torch.from_numpy(out).to(device=device, dtype=raw.dtype)
+    return out
+
+
+'''
+    source = source.replace(marker, helpers + marker, 1)
+
+    replacements = [
+        (
+            """    # Edge filtering
+    edge_activation: str = "softmax"  # "sigmoid" or "softmax"
+    threshold: float = 0.5
+""",
+            """    # Edge filtering
+    edge_activation: str = "softmax"  # "sigmoid" or "softmax"
+    threshold: float = 0.5
+    # Opt-in pairwise hard-neg reweight (pre-softmax). Empty weights disables.
+    pairwise_hardneg_weights: str = ""
+    pairwise_hardneg_dens_min: float = 8.0
+    pairwise_hardneg_gap_max: float = 1.5
+    pairwise_hardneg_radius_um: float = 15.0
+""",
+        ),
+        (
+            """    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        return _blend_raw_logits(logits1, logits2, self.alpha)
+""",
+            """    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        blended = _blend_raw_logits(logits1, logits2, self.alpha)
+        self._last_edge_components = (logits1[0].detach(), logits2[0].detach())
+        return blended
+""",
+        ),
+        (
+            """            raw = edge_logits_pair[0]
+            if cfg.edge_activation == "softmax":
+""",
+            """            raw = edge_logits_pair[0]
+            _phw = getattr(cfg, "pairwise_hardneg_weights", "") or ""
+            if _phw:
+                _comps = getattr(model, "_last_edge_components", None)
+                if _comps is not None:
+                    raw = _pairwise_hardneg_adjust(
+                        raw, _comps[0], _comps[1], coords_so_far, idx_src, idx_tgt, voxel_size,
+                        _phw,
+                        float(cfg.pairwise_hardneg_dens_min),
+                        float(cfg.pairwise_hardneg_gap_max),
+                        float(cfg.pairwise_hardneg_radius_um),
+                    )
+            if cfg.edge_activation == "softmax":
+""",
+        ),
+        (
+            """    parser.add_argument("--edge-threshold", type=float, default=0.5,
+                        help="Min edge probability admitted to the linker (default: 0.5).")
+""",
+            """    parser.add_argument("--edge-threshold", type=float, default=0.5,
+                        help="Min edge probability admitted to the linker (default: 0.5).")
+    parser.add_argument("--pairwise-hardneg-weights", type=str, default="",
+                        help="JSON list of 6 weights; empty disables pairwise hard-neg reweight.")
+    parser.add_argument("--pairwise-hardneg-dens-min", type=float, default=8.0,
+                        help="Min local detection density to apply pairwise reweight.")
+    parser.add_argument("--pairwise-hardneg-gap-max", type=float, default=1.5,
+                        help="Apply only when top1-top2 logit gap is below this.")
+    parser.add_argument("--pairwise-hardneg-radius-um", type=float, default=15.0,
+                        help="Density neighborhood radius in µm.")
+""",
+        ),
+        (
+            """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+    )
+""",
+            """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+        pairwise_hardneg_weights=args.pairwise_hardneg_weights,
+        pairwise_hardneg_dens_min=args.pairwise_hardneg_dens_min,
+        pairwise_hardneg_gap_max=args.pairwise_hardneg_gap_max,
+        pairwise_hardneg_radius_um=args.pairwise_hardneg_radius_um,
+    )
+""",
+        ),
+    ]
+
+    # Accept PredictConfig that already has margin-gated fields.
+    alt_cfg_margin = (
+        """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+        margin_gated_dist_lambda=args.margin_gated_dist_lambda,
+        margin_gated_dist_delta=args.margin_gated_dist_delta,
+        margin_gated_dist_dens_min=args.margin_gated_dist_dens_min,
+        margin_gated_dist_radius_um=args.margin_gated_dist_radius_um,
+    )
+""",
+        """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        threshold=args.edge_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+        margin_gated_dist_lambda=args.margin_gated_dist_lambda,
+        margin_gated_dist_delta=args.margin_gated_dist_delta,
+        margin_gated_dist_dens_min=args.margin_gated_dist_dens_min,
+        margin_gated_dist_radius_um=args.margin_gated_dist_radius_um,
+        pairwise_hardneg_weights=args.pairwise_hardneg_weights,
+        pairwise_hardneg_dens_min=args.pairwise_hardneg_dens_min,
+        pairwise_hardneg_gap_max=args.pairwise_hardneg_gap_max,
+        pairwise_hardneg_radius_um=args.pairwise_hardneg_radius_um,
+    )
+""",
+    )
+    alt_cfg_plain = (
+        """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+    )
+""",
+        """    cfg = PredictConfig(
+        det_threshold=args.det_threshold,
+        use_ilp=args.use_ilp,
+        ilp_edge_weight=args.ilp_edge_weight,
+        ilp_appearance_weight=args.ilp_appearance_weight,
+        ilp_disappearance_weight=args.ilp_disappearance_weight,
+        ilp_division_weight=args.ilp_division_weight,
+        pairwise_hardneg_weights=args.pairwise_hardneg_weights,
+        pairwise_hardneg_dens_min=args.pairwise_hardneg_dens_min,
+        pairwise_hardneg_gap_max=args.pairwise_hardneg_gap_max,
+        pairwise_hardneg_radius_um=args.pairwise_hardneg_radius_um,
+    )
+""",
+    )
+    alt_cli = (
+        """    parser.add_argument("--det-threshold", type=float, default=0.99,
+                        help="Min sigmoid probability for a detection peak to be kept. "
+                             "Default 0.99: the detector is poorly calibrated because the "
+                             "ground truth is sparse (only some cells annotated), so a high "
+                             "threshold keeps precision up. Sweep it for your model.")
+""",
+        """    parser.add_argument("--det-threshold", type=float, default=0.99,
+                        help="Min sigmoid probability for a detection peak to be kept. "
+                             "Default 0.99: the detector is poorly calibrated because the "
+                             "ground truth is sparse (only some cells annotated), so a high "
+                             "threshold keeps precision up. Sweep it for your model.")
+    parser.add_argument("--pairwise-hardneg-weights", type=str, default="",
+                        help="JSON list of 6 weights; empty disables pairwise hard-neg reweight.")
+    parser.add_argument("--pairwise-hardneg-dens-min", type=float, default=8.0,
+                        help="Min local detection density to apply pairwise reweight.")
+    parser.add_argument("--pairwise-hardneg-gap-max", type=float, default=1.5,
+                        help="Apply only when top1-top2 logit gap is below this.")
+    parser.add_argument("--pairwise-hardneg-radius-um", type=float, default=15.0,
+                        help="Density neighborhood radius in µm.")
+""",
+    )
+    # Diagnostic patch may already stash components conditionally.
+    alt_predict = (
+        """    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        blended = _blend_raw_logits(logits1, logits2, self.alpha)
+        if getattr(self, "_capture_edge_diagnostics", False):
+            self._last_edge_components = (logits1[0].detach(), logits2[0].detach())
+        return blended
+""",
+        """    def predict_edges(self, source, target, *args, **kwargs):
+        logits1 = self.seed1.predict_edges(source.seed1, target.seed1, *args, **kwargs)
+        logits2 = self.seed2.predict_edges(source.seed2, target.seed2, *args, **kwargs)
+        blended = _blend_raw_logits(logits1, logits2, self.alpha)
+        self._last_edge_components = (logits1[0].detach(), logits2[0].detach())
+        return blended
+""",
+    )
+    # Margin-gated may already wrap raw=
+    alt_raw = (
+        """            raw = edge_logits_pair[0]
+            if float(getattr(cfg, "margin_gated_dist_lambda", 0.0) or 0.0) != 0.0:
+                raw = _margin_gated_distance_adjust(
+                    raw, coords_so_far, idx_src, idx_tgt, voxel_size,
+                    float(cfg.margin_gated_dist_lambda),
+                    float(cfg.margin_gated_dist_delta),
+                    float(cfg.margin_gated_dist_dens_min),
+                    float(cfg.margin_gated_dist_radius_um),
+                )
+            if cfg.edge_activation == "softmax":
+""",
+        """            raw = edge_logits_pair[0]
+            if float(getattr(cfg, "margin_gated_dist_lambda", 0.0) or 0.0) != 0.0:
+                raw = _margin_gated_distance_adjust(
+                    raw, coords_so_far, idx_src, idx_tgt, voxel_size,
+                    float(cfg.margin_gated_dist_lambda),
+                    float(cfg.margin_gated_dist_delta),
+                    float(cfg.margin_gated_dist_dens_min),
+                    float(cfg.margin_gated_dist_radius_um),
+                )
+            _phw = getattr(cfg, "pairwise_hardneg_weights", "") or ""
+            if _phw:
+                _comps = getattr(model, "_last_edge_components", None)
+                if _comps is not None:
+                    raw = _pairwise_hardneg_adjust(
+                        raw, _comps[0], _comps[1], coords_so_far, idx_src, idx_tgt, voxel_size,
+                        _phw,
+                        float(cfg.pairwise_hardneg_dens_min),
+                        float(cfg.pairwise_hardneg_gap_max),
+                        float(cfg.pairwise_hardneg_radius_um),
+                    )
+            if cfg.edge_activation == "softmax":
+""",
+    )
+
+    patched = source
+    for old, new in replacements:
+        if patched.count(old) == 1:
+            patched = patched.replace(old, new, 1)
+        elif old == replacements[1][0] and patched.count(alt_predict[0]) == 1:
+            patched = patched.replace(alt_predict[0], alt_predict[1], 1)
+        elif old == replacements[2][0] and patched.count(alt_raw[0]) == 1:
+            patched = patched.replace(alt_raw[0], alt_raw[1], 1)
+        elif old == replacements[3][0] and patched.count(alt_cli[0]) == 1:
+            patched = patched.replace(alt_cli[0], alt_cli[1], 1)
+        elif old == replacements[4][0] and patched.count(alt_cfg_margin[0]) == 1:
+            patched = patched.replace(alt_cfg_margin[0], alt_cfg_margin[1], 1)
+        elif old == replacements[4][0] and patched.count(alt_cfg_plain[0]) == 1:
+            patched = patched.replace(alt_cfg_plain[0], alt_cfg_plain[1], 1)
+        else:
+            raise RuntimeError(
+                "support predictor does not match pairwise hard-neg rank patch preimage"
+            )
+    path.write_text(patched, encoding="utf-8")
+    return True
+
+
 def resolve_ensemble_weights(config: PipelineConfig, primary_weights: Path) -> Path | None:
     relative = config.inference.get("ensemble_weights_relative")
     if relative is None:
@@ -813,6 +1126,9 @@ def build_predict_command(
     dist_lam = float(inf.get("margin_gated_dist_lambda") or 0.0)
     if dist_lam != 0.0:
         apply_margin_gated_distance_rank_patch(repo_dir, str(inf["prediction_script"]))
+    pairwise_w = inf.get("pairwise_hardneg_w")
+    if pairwise_w:
+        apply_pairwise_hardneg_rank_patch(repo_dir, str(inf["prediction_script"]))
     command = [
         sys.executable,
         str(inf["prediction_script"]),
@@ -859,6 +1175,19 @@ def build_predict_command(
                 str(float(inf.get("margin_gated_dist_dens_min", 8.0))),
                 "--margin-gated-dist-radius-um",
                 str(float(inf.get("margin_gated_dist_radius_um", 15.0))),
+            ]
+        )
+    if pairwise_w:
+        command.extend(
+            [
+                "--pairwise-hardneg-weights",
+                json.dumps([float(x) for x in pairwise_w]),
+                "--pairwise-hardneg-dens-min",
+                str(float(inf.get("pairwise_hardneg_dens_min", 8.0))),
+                "--pairwise-hardneg-gap-max",
+                str(float(inf.get("pairwise_hardneg_gap_max", 1.5))),
+                "--pairwise-hardneg-radius-um",
+                str(float(inf.get("pairwise_hardneg_radius_um", 15.0))),
             ]
         )
     if inf["use_ilp"]:

@@ -407,3 +407,40 @@
   reproducibility only.
 - Next: learned pairwise / hard-neg ranking under the same frozen recipe — not another
   hand-crafted distance bonus.
+
+## Standing autonomous ops preferences (2026-08-13)
+
+- Continue experiments until genuine human intervention is required (objective conflict,
+  break frozen recipe, major retrain scope leap, large compute leap, destructive action,
+  missing external info, ambiguous promotion tradeoff). Do not ask routine questions.
+- Before each major experiment, record ETA / window-open in `.agents/state.json` and logs.
+- Frozen production recipe until evidence says otherwise: motion-relink OFF,
+  edge_threshold=0.40 (`configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml`).
+- Always evaluate serious candidates on fixed-8 AND holdout-8.
+- Prefer HPC tar|srun/sbatch; durable results under `~/biohub-outputs/`; mirror compact
+  artifacts to `outputs/`. Login home ≠ compute NFS.
+- Design GPU jobs disconnect-safe (sbatch/nohup); leave job IDs + resume commands in state/logs.
+- Update `.agents/state.json` / `.agents/memory.md` after meaningful findings; commit when appropriate.
+- Cursor rule: `.cursor/rules/autonomous-ops.mdc`.
+
+## Pairwise hard-neg ranking experiment start (2026-08-13)
+
+- Prior margin-gated distance rank REJECTED (commit `6716019` context): fixed −0.0010 / holdout −0.0007.
+- Intervention: appearance-aware pairwise hard-neg reweight pre-softmax under frozen recipe.
+  `score = blended_logit + w·φ(seed_disagree, seed_min, dist_n, log_dens, dist×disagree, dist×seed_min)`
+  gated by dens≥8 and top1−top2 gap < 1.5. Not a hand-crafted distance-only bonus.
+- Offline (capture top-k): fixed rank-2 flips 4/46, holdout 2/21, success drops 0/0.
+- Config: `configs/experiments/recipe_c_edge_0_40_pairwise_hardneg_v1.yaml`
+- Launcher: `scripts/slurm/run_pairwise_hardneg_rank_v1.sh` (nohup; Slurm job on gpu_batch).
+- Baseline to beat: fixed 0.9181439782806684 / holdout 0.9646726188580379.
+
+## Pairwise hard-neg ranking v1 REJECT (2026-08-13)
+
+- GPU job 6572 COMPLETED 2026-08-12T18:50:44Z on um-gpu01 (~33 min). Overnight handoff left state `in_progress`; scores were already in the log + compute NFS.
+- Fixed-8 **0.924211 (+0.006067)** vs 0.918144; holdout-8 **0.963846 (−0.000826)** vs 0.964673.
+- Edges: fixed 3946/167/157 (Δ −3/−20/+3); holdout 4032/78/94 (Δ −5/+2/+5).
+- Holdout regression is one dataset: `44b6_12dfb391` (−0.0101). Fixed gains broad (6↑/1↓), largest `6bba_fc83837d` (+0.0199 FP 70→55).
+- **REJECT.** Do not enable `pairwise_hardneg_*` on the promoted recipe. Opt-in code retained only.
+- Compact login: `outputs/experiments/pairwise_hardneg_rank_v1/`. NFS: `~/biohub-outputs/experiments/pairwise_hardneg_rank_v1/`.
+- Report: `outputs/analysis/pairwise_hardneg_rank_v1_report.md`.
+- Next (low-risk salvage, same freeze): 0.5× weights, same dens/gap gates. If that also fails holdout, close linear pairwise reweight.

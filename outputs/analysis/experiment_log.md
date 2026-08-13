@@ -78,3 +78,12 @@
 - **Result:** fixed **0.917136 (−0.00101)**; holdout **0.964022 (−0.00065)**. Edges fixed 3941/185/162 (Δ −8/−2/+8); holdout 4035/77/91 (Δ −2/+1/+2).
 - **Conclusion:** **REJECT.** Offline top-k flips did not survive full softmax+ILP; net FN increase on both splits.
 - **Next:** learned pairwise / hard-neg ranking improvement (not another hand distance bonus).
+
+## E10 — Pairwise hard-neg ranking v1 (2026-08-13)
+- **Hypothesis:** Appearance-aware pairwise reweight (`w·φ` on seed disagreement / min, dist, density) in dense near-tie columns recovers rank-2 GT edges net-positive under the frozen recipe.
+- **Change:** opt-in pre-softmax `w` from capture fit, dens≥8, gap_max=1.5 / 15µm; motion OFF + edge=0.40 unchanged. Not a distance-only bonus.
+- **Compute:** GPU fixed-8 + holdout-8 (`scripts/slurm/run_pairwise_hardneg_rank_v1.sh`, job 6572, ~33 min).
+- **Control:** 0.918144 / 0.964673.
+- **Result:** fixed **0.924211 (+0.00607)**; holdout **0.963846 (−0.00083)**. Edges fixed 3946/167/157 (Δ −3/−20/+3); holdout 4032/78/94 (Δ −5/+2/+5). Holdout loss concentrated in `44b6_12dfb391` (−0.0101).
+- **Conclusion:** **REJECT.** Fixed-8 FP collapse does not generalize; do not enable pairwise_hardneg in production.
+- **Next:** one 0.5×-weight salvage under the same gates (`pairwise_hardneg_rank_v1_scale0_5`); if that also fails holdout, close linear pairwise reweight.

@@ -1,0 +1,32 @@
+---
+description: Standing autonomous experiment ops preferences for Biohub cell tracking
+alwaysApply: true
+---
+
+# Autonomous experiment ops
+
+## Autonomy
+
+- Continue experiments until genuine human intervention is required: objective conflict, break frozen recipe, major retrain scope leap, large compute leap, destructive action, missing external info, or ambiguous promotion tradeoff.
+- Do not ask routine questions (which threshold, whether to rerun failed jobs, which near-miss to inspect, etc.).
+- Before each major experiment execution, record a short ETA / window-open estimate in state/report (even if the parent already told the user).
+
+## Frozen production recipe
+
+Until evidence says otherwise:
+
+- Motion-relink **OFF**, `edge_threshold` **0.40**
+- Config: `configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml`
+- Do not change gates, short-track, motion-relink, or edge threshold without promotion-grade evidence on **fixed-8 AND holdout-8**
+
+## Evaluation & HPC
+
+- Always evaluate serious candidates on fixed-8 **and** holdout-8.
+- Prefer HPC `tar|srun` / `sbatch` workflow; durable results under `~/biohub-outputs/`; mirror compact artifacts to `outputs/`.
+- Login home ≠ compute NFS for `biohub-outputs`; always mirror via `srun tar | login tar` when needed.
+- Design GPU jobs so work continues on cluster via sbatch/nohup if the user disconnects; leave job IDs and resume commands in state/logs.
+
+## Handoff
+
+- Update `.agents/state.json` and `.agents/memory.md` after meaningful findings.
+- Commit completed experiment work when appropriate (user may have asked to commit in standing prefs).

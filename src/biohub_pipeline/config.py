@@ -111,6 +111,9 @@ def validate_config(raw: object) -> PipelineConfig:
         ("margin_gated_dist_delta", 0.0),
         ("margin_gated_dist_dens_min", 0.0),
         ("margin_gated_dist_radius_um", 0.0),
+        ("pairwise_hardneg_dens_min", 0.0),
+        ("pairwise_hardneg_gap_max", 0.0),
+        ("pairwise_hardneg_radius_um", 0.0),
     ):
         if key in inference and inference[key] is not None:
             value = inference[key]
@@ -118,6 +121,13 @@ def validate_config(raw: object) -> PipelineConfig:
                 raise ConfigError(f"inference.{key} must be numeric or null")
             if float(value) < lo:
                 raise ConfigError(f"inference.{key} must be >= {lo}")
+
+    if "pairwise_hardneg_w" in inference and inference["pairwise_hardneg_w"] is not None:
+        weights = inference["pairwise_hardneg_w"]
+        if not isinstance(weights, list) or len(weights) != 6:
+            raise ConfigError("inference.pairwise_hardneg_w must be a list of 6 numbers or null")
+        if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in weights):
+            raise ConfigError("inference.pairwise_hardneg_w must contain only numbers")
 
     scale = postprocessing.get("voxel_scale_um")
     if not isinstance(scale, list) or len(scale) != 3 or any(float(v) <= 0 for v in scale):
