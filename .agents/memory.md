@@ -444,3 +444,25 @@
 - Compact login: `outputs/experiments/pairwise_hardneg_rank_v1/`. NFS: `~/biohub-outputs/experiments/pairwise_hardneg_rank_v1/`.
 - Report: `outputs/analysis/pairwise_hardneg_rank_v1_report.md`.
 - Next (low-risk salvage, same freeze): 0.5× weights, same dens/gap gates. If that also fails holdout, close linear pairwise reweight.
+
+## Pairwise hard-neg 0.5× salvage start (2026-08-13)
+
+- After v1 REJECT, launched `pairwise_hardneg_rank_v1_scale0_5` (same dens≥8 / gap_max=1.5, weights ×0.5).
+- Config: `configs/experiments/recipe_c_edge_0_40_pairwise_hardneg_v1_scale0_5.yaml`
+- Launcher: `scripts/slurm/run_pairwise_hardneg_rank_v1_scale0_5.sh`
+- Freeze intact: motion OFF, edge=0.40. Baseline still 0.918144 / 0.964673.
+- ETA ~45 min (v1 wall was ~33 min). Disconnect-safe via nohup+srun.
+
+## Pairwise hard-neg 0.5× salvage REJECT (2026-08-13)
+
+- GPU job **6691** COMPLETED 2026-08-13T05:55:06Z on um-gpu01 (~33 min). Did not resubmit (job was already running at handoff).
+- Same gates as v1 (`dens≥8`, `gap_max=1.5`); weights ×0.5. Frozen recipe unchanged.
+- Fixed-8 **0.924009 (+0.005865)** vs 0.918144; holdout-8 **0.963839 (−0.000834)** vs 0.964673.
+- Vs v1: fixed −0.000202, holdout −0.000007 (holdout essentially unchanged).
+- Edges: fixed 3954/169/149 (Δ +5/−18/−5 vs frozen); holdout 4035/79/91 (Δ −2/+3/+2).
+- Holdout regression still one dataset: `44b6_12dfb391` adj −0.00561 (TP 745→743, FP 41→44, FN 28→30). v1 was −0.0101 (740/45/33); 0.5× recovered about half the damage but not back to frozen.
+- Fixed gain still dominated by `6bba_fc83837d` (+0.0228, FP 70→53).
+- **REJECT.** Close linear pairwise reweight. Do not enable `pairwise_hardneg_*` (v1 or 0.5×). Do not keep scaling weights.
+- Compact login: `outputs/experiments/pairwise_hardneg_rank_v1_scale0_5/`.
+- Report: `outputs/analysis/pairwise_hardneg_rank_v1_scale0_5_report.md`.
+- Recommended next (not executed): edge-scorer retrain with pairwise hard-neg mining under frozen recipe. Major scope leap — recommend only.

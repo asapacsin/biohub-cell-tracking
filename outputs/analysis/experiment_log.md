@@ -87,3 +87,12 @@
 - **Result:** fixed **0.924211 (+0.00607)**; holdout **0.963846 (−0.00083)**. Edges fixed 3946/167/157 (Δ −3/−20/+3); holdout 4032/78/94 (Δ −5/+2/+5). Holdout loss concentrated in `44b6_12dfb391` (−0.0101).
 - **Conclusion:** **REJECT.** Fixed-8 FP collapse does not generalize; do not enable pairwise_hardneg in production.
 - **Next:** one 0.5×-weight salvage under the same gates (`pairwise_hardneg_rank_v1_scale0_5`); if that also fails holdout, close linear pairwise reweight.
+
+## E11 — Pairwise hard-neg ranking 0.5× salvage (2026-08-13)
+- **Hypothesis:** Halving v1 pairwise weights keeps the fixed-8 dense-scene FP collapse without the `44b6_12dfb391` holdout hit.
+- **Change:** same dens≥8 / gap_max=1.5 gates; `pairwise_hardneg_w` ×0.5. Motion OFF + edge=0.40 unchanged.
+- **Compute:** GPU fixed-8 + holdout-8 (`scripts/slurm/run_pairwise_hardneg_rank_v1_scale0_5.sh`, job 6691, ~33 min). Did not duplicate; awaited in-flight job.
+- **Control:** 0.918144 / 0.964673. Also vs v1 0.924211 / 0.963846.
+- **Result:** fixed **0.924009 (+0.00587)**; holdout **0.963839 (−0.00083)**. `44b6_12dfb391` −0.00561 (half of v1's −0.0101, still net-negative).
+- **Conclusion:** **REJECT.** Close linear pairwise reweight. Do not scale weights further.
+- **Next (recommend only, not executed):** edge-scorer retrain with pairwise hard-neg mining under the frozen recipe.
