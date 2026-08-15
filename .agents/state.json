@@ -1,83 +1,55 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-15T08:35:00+08:00",
+  "updated_at": "2026-08-16T00:20:00+08:00",
   "project": "biohub-cell-tracking",
-  "active_milestone": "Edge-scorer hard-neg retrain v1 REJECTED; frozen recipe C unchanged",
-  "status": "idle",
+  "active_milestone": "Frozen-recipe official test inference / Kaggle pack",
+  "status": "in_progress",
   "host": "linux-login01",
   "eta": {
-    "window_open": "2026-08-15T07:39+08:00",
-    "eta_finish": "2026-08-15T08:34+08:00",
-    "eta_hours": 0.92,
-    "basis": "slurm 7104 COMPLETED 00:54:53 on um-gpu01. Train + fixed-8 + holdout-8 done. REJECT."
+    "window_open": "2026-08-16T00:20+08:00",
+    "eta_finish": "2026-08-16T01:50+08:00",
+    "eta_hours": 1.5,
+    "basis": "Queue empty. 4 test zarrs (1.8G), two-seed D4 + ILP + postprocess. Same shape as ~1/4 of a 16-dataset ~33–55 min GPU eval, plus pip/unpack. 1.5h with buffer. 4h srun limit."
   },
-  "completed": [
-    "Motion-relink OFF promoted",
-    "Edge-gate sweep KEEP edge_threshold=0.40",
-    "Fresh instrumented candidate capture fixed-8 + holdout-8 under recipe_c_motion_off_edge_0_40",
-    "Ranking ~50% causal claim SUPPORTED (54.3% / 50.0% / 53.0% combined)",
-    "Margin-gated distance rank REJECTED (fixed \u22120.0010, holdout \u22120.0007)",
-    "Standing autonomous-ops Cursor rule persisted",
-    "Pairwise hard-neg ranking v1 REJECTED (fixed +0.00607, holdout \u22120.00083, commit 37b30a7)",
-    "Pairwise hard-neg 0.5\u00d7 salvage REJECTED (fixed +0.00587, holdout \u22120.00083, slurm 6691); linear pairwise reweight closed",
-    "Edge-scorer hard-neg retrain v1 REJECTED (fixed \u22120.00255, holdout \u22120.00461, slurm 7104)"
+  "completed": [],
+  "in_progress": [
+    "Official test inference under recipe_c_motion_off_edge_0_40_det0_96875"
   ],
-  "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
-    "squeue -u  \u2192 empty",
-    "sacct -j 7104 \u2192 COMPLETED 00:54:53 ExitCode 0:0 um-gpu01",
-    "outputs/experiments/edge_scorer_hardneg_retrain_v1/comparison.json \u2192 promote=false"
+    "squeue -u → empty",
+    "ls data/competition/test → 4 zarrs, 1.8G"
   ],
-  "next_action": "Do not start another edge-scorer retrain. Inspect remaining ordinary-association failures on holdout 44b6_12dfb391 with frozen detections (ILP / candidate set). Do not execute unless that is the chosen next experiment.",
-  "needs_human": [],
+  "next_action": "Wait for GPU test submit (nohup + tar|srun). Then upload outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv to Kaggle.",
+  "needs_human": [
+    "Kaggle upload: this host packs the CSV; it does not submit to the leaderboard"
+  ],
   "artifacts": {
     "promoted_config": "configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml",
-    "rejected_config": "configs/experiments/recipe_c_edge_0_40_hardneg_retrain_v1.yaml",
-    "login_compact": "outputs/experiments/edge_scorer_hardneg_retrain_v1/",
-    "report": "outputs/analysis/edge_scorer_hardneg_retrain_v1_report.md",
-    "nfs": "~/biohub-outputs/experiments/edge_scorer_hardneg_retrain_v1/",
-    "nohup_log": "logs/slurm/edge_scorer_hardneg_retrain_v1.nohup.out"
+    "launcher": "scripts/slurm/run_frozen_recipe_test_submit.sh",
+    "log": "logs/slurm/frozen_recipe_test_submit.log",
+    "nohup_log": "logs/slurm/frozen_recipe_test_submit.nohup.out",
+    "nfs": "~/biohub-outputs/kaggle/recipe_c_motion_off_edge_0_40_v1/",
+    "login_csv": "outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv"
   },
   "notes": [
-    "Login home \u2260 compute NFS for biohub-outputs; always mirror via srun tar | login tar",
-    "Friday 2026-08-14 submit wrote code but never landed a GPU job (sbatch used login-only paths)",
-    "NFS 7G stage hit compute-home quota; successful job used tar|srun to node /tmp",
+    "Frozen recipe: motion OFF, edge_threshold=0.40, det=0.96875, two-seed α=0.5",
     "QOSMaxJobsPerUserLimit=1",
-    "Do not promote edge 0.35/0.30/0.25",
-    "Do not reopen short-track OFF",
-    "Do not enable margin_gated_dist_lambda, pairwise_hardneg_w, or hardneg_v1 weights in production recipe",
-    "Frozen recipe: motion OFF, edge_threshold=0.40",
-    "Do not start another edge-scorer retrain"
+    "Login home ≠ compute NFS; mirror via srun tar | login tar",
+    "Test inference produces no local GT score"
   ],
   "best_local_scores": {
     "fixed8": 0.9181439782806684,
     "holdout8": 0.9646726188580379,
     "recipe": "recipe_c_motion_off_edge_0_40_det0_96875"
   },
-  "last_experiment": {
-    "name": "edge_scorer_hardneg_retrain_v1",
-    "decision": "REJECT",
-    "fixed8": 0.9155928318042139,
-    "fixed8_delta": -0.002551146476454491,
-    "holdout8": 0.960067468096261,
-    "holdout8_delta": -0.004605150761776922,
-    "dataset_44b6_12dfb391": {
-      "baseline": 0.9347073959325116,
-      "new": 0.9306093037330831
-    },
-    "job_id": "7104",
-    "git_at_run": "e21070f8f7270d17aa3a8ab1b96f22b0708dee32"
-  },
   "job_ids": [
-    "slurm:7104 COMPLETED um-gpu01 00:54:53",
-    "nohup:2813718",
-    "slurm:7100 FAILED quota tee (superseded)",
-    "slurm:6691 COMPLETED"
+    "slurm:7198 RUNNING um-gpu01",
+    "nohup:2835396"
   ],
   "resume_commands": [
-    "squeue -u ",
-    "cat outputs/experiments/edge_scorer_hardneg_retrain_v1/comparison.json",
-    "sacct -j 7104 --format=JobID,State,Elapsed,NodeList,ExitCode"
+    "squeue -u",
+    "tail -50 logs/slurm/frozen_recipe_test_submit.nohup.out",
+    "cat outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/metadata.json"
   ]
 }

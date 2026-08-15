@@ -492,3 +492,33 @@
 - Compact login: outputs/experiments/edge_scorer_hardneg_retrain_v1/. NFS: ~/biohub-outputs/experiments/edge_scorer_hardneg_retrain_v1/.
 - Report: outputs/analysis/edge_scorer_hardneg_retrain_v1_report.md.
 - Recommended next (not executed): inspect remaining ordinary-association failures on holdout 44b6_12dfb391 with frozen detections (ILP / candidate set), not another ranking-weight or architecture sweep.
+
+## OA ILP / candidate-set audit on 44b6_12dfb391 (2026-08-15)
+
+- CPU-only inspection of frozen-recipe capture (no GPU, no recipe change, no scorer retrain).
+- Dataset: 771 ordinary associations, 27 errors, 24 causal. Native causes: ranking 15, ILP 4, rematch 4, threshold 1, detection 3.
+- **62.5% of causal errors never enter ILP** (14 ranking-below-gate + 1 rank-1 threshold). Only 1/15 native ranking rows is gated (`p=0.462`). Candidate-absent (not in top-16 ∪ gated capture) = 0.
+- Admitting every source-top-1 below 0.40: **5670** extra candidates vs **7** recoverable GTs (810:1). ILP disappearance 1.575 would select almost all of them. **REJECTED offline** — same FP mechanism as the rejected 0.35/0.30/0.25 gate sweep.
+- All 4 ILP errors are `source_taken`. Stolen child is **not a GT pair** (4/4). Stolen is closer (0–2.3 µm vs GT 2.3–5.6 µm) and higher-prob; stolen↔GT ≈ 4.6–6.1 µm (nearest neighbors). Same proximal-distractor geometry as rejected distance-rank. t=14 source has three `target_rank=1` gated children — recovering GT requires a false division or extra-peak suppression.
+- Rematch 4; 2 share a node with an ILP/ranking conflict (cascade).
+- **Decision: close ILP / candidate-set branch.** Production stays motion-relink OFF / edge 0.40. Do not start another edge-scorer retrain.
+- Artifacts: `outputs/experiments/oa_ilp_candidate_audit_v1/`, report `outputs/analysis/oa_ilp_candidate_audit_44b6_12dfb391_report.md`.
+- Next (not started; detector-scope leap): remaining holdout all-error mass is detection miss on `6bba_07e24132` (22/34 OA errors there).
+
+## Detection-miss audit + z-shift REJECT (2026-08-15)
+
+- 22 OA `detection_miss` on holdout `6bba_07e24132` = **17 unmatched GT nodes**. None lack a nearby peak. 11 have a **free** pred at 7–10 µm, almost pure `dz ≈ −6.5 to −9.8 µm` (bright plane vs GT center). 3 are ≤7 µm already matched to another GT. Same z-offset pattern on fixed-8 `6bba_fc83837d` (also 17 unmatched).
+- Global z-shift of frozen submission node coords (edges unchanged): **+1 voxel** lifts this dataset recall 0.936→0.953 and adj 0.827→0.836 but **fixed −0.0140 / holdout −0.0079** (FP 187→229 / 76→102). No nonzero shift nonnegative on both splits. **REJECT.**
+- Intensity z-COM (±6 voxels on `6bba_07e24132.zarr` TZYX 100×64×256×256, spacing from that store's `zarr.json`) does not move unmatched peaks toward GT.
+- Do not reopen `det=0.960`. Do not start a detector retrain for these 17 nodes (appearance peak ≠ GT center).
+- Artifacts: `outputs/experiments/detection_z_shift_v1/`; report `outputs/analysis/detection_miss_6bba_07e24132_report.md`.
+- Frozen recipe remains the best defensible result: fixed-8 **0.918144**, holdout-8 **0.964673**.
+
+## Frozen-recipe official test submit started (2026-08-16)
+
+- User asked to pack a Kaggle test submission of the frozen recipe (motion OFF, edge=0.40, det=0.96875, two-seed α=0.5).
+- Launcher: `scripts/slurm/run_frozen_recipe_test_submit.sh` (nohup + tar|srun to node `/tmp`).
+- slurm **7198** RUNNING um-gpu01; nohup pid 2835396. RECIPE_OK and 4 test stems confirmed.
+- NFS: `~/biohub-outputs/kaggle/recipe_c_motion_off_edge_0_40_v1/`. Login mirror after job: `outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv`.
+- This host cannot upload to Kaggle; CSV must be submitted on the competition page.
+- ETA ~1.5h (4h srun limit). QOS max 1 job; do not submit another GPU job until 7198 finishes.

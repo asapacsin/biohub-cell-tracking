@@ -96,3 +96,26 @@
 - **Result:** fixed **0.924009 (+0.00587)**; holdout **0.963839 (−0.00083)**. `44b6_12dfb391` −0.00561 (half of v1's −0.0101, still net-negative).
 - **Conclusion:** **REJECT.** Close linear pairwise reweight. Do not scale weights further.
 - **Next (recommend only, not executed):** edge-scorer retrain with pairwise hard-neg mining under the frozen recipe.
+
+## E12 — Edge-scorer hard-neg retrain v1 (2026-08-15)
+- **Hypothesis:** Fine-tuning both two-seed edge transformers with pairwise ranking loss on fixed-8 rank-2 mines recovers remaining OA ranking failures net-positive under the frozen recipe.
+- **Change:** UNet/detect_head frozen; holdout not mined; linear pairwise reweight off. Eval config `recipe_c_edge_0_40_hardneg_retrain_v1.yaml`.
+- **Compute:** slurm 7104, um-gpu01, 54m53s.
+- **Control:** 0.918144 / 0.964673.
+- **Result:** fixed **0.915593 (−0.00255)**; holdout **0.960067 (−0.00461)**. `44b6_12dfb391` 0.934707 → 0.930609.
+- **Conclusion:** **REJECT.** Do not install hardneg_v1 weights. Do not start another edge-scorer retrain.
+
+## E13 — OA ILP / candidate-set audit on holdout 44b6_12dfb391 (2026-08-15)
+- **Hypothesis:** Remaining OA failures on this holdout killer are ILP occupancy or a candidate-set hole, not scorer ranking inside the gated graph.
+- **Change:** none to recipe. CPU audit of frozen-recipe capture + raw GEFF.
+- **Result:** 62.5% of causal errors never enter ILP (softmax ≤ 0.40). Only 1/15 ranking rows is gated. Source-top-1 admit would add 5670 extras vs 7 GTs (810:1) — **REJECTED offline**. All 4 ILP errors are source_taken by a non-GT closer extra detection.
+- **Conclusion:** **Close ILP / candidate-set branch.** Frozen recipe unchanged.
+- **Next (not started):** detector-scope leap — holdout detection miss on `6bba_07e24132` (22/34). Not another ranking or ILP job.
+
+## E14 — Detection-miss audit + frozen z-shift on 6bba_07e24132 (2026-08-15)
+- **Hypothesis:** Holdout OA detection misses are missing peaks, recoverable by a global +z convention fix without a detector retrain.
+- **Change:** none to recipe. CPU nearest-peak audit; z-shift sweep Δ∈{−2..+4} voxels on frozen postprocessed submissions (edges unchanged).
+- **Control:** 0.918144 / 0.964673.
+- **Result:** 17 unmatched GT, all with a nearby peak (median 8.64 µm, mostly −z). +1 voxel helps this dataset (recall 0.936→0.953) but fixed **−0.0140** / holdout **−0.0079**. Intensity z-COM does not walk toward GT.
+- **Conclusion:** **REJECT** global z-shift. Do not retrain the detector for these misses. Frozen recipe unchanged.
+- **Next:** stop. No remaining cheap both-split promote path on association or detection coordinates.
