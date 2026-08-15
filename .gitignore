@@ -7,12 +7,28 @@ __pycache__/
 .coverage
 dist/
 build/
+
+# Notebook / editor / OS caches
+.ipynb_checkpoints/
+.cache/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local runtime noise
+*.log
+nohup.out
+slurm-*.out
+*.tmp
+*.bak
+
 data/competition/*
 !data/competition/.gitkeep
 data/cache/*
 !data/cache/.gitkeep
+
 # Generated bulky artifacts stay out of git (captures, GEFFs, train dumps, logs).
-# Do NOT gitignore Kaggle packs: submission CSVs are the upload artifact even if large.
 outputs/*
 !outputs/.gitkeep
 !outputs/analysis/
@@ -20,12 +36,19 @@ outputs/*
 !outputs/kaggle_submission/
 !outputs/kaggle_submission/**
 
-# Experiment dumps that are too large to version (not Kaggle deliverables)
+# Kaggle submission CSVs are generated/upload artifacts, not source.
+# Keep lightweight README/config/metadata files under kaggle_submission, but never CSV payloads.
+outputs/kaggle_submission/*.csv
+outputs/kaggle_submission/**/*.csv
+
+# Experiment dumps that are too large to version.
 outputs/experiments/**/predictions/
 outputs/experiments/**/raw_geff/
 outputs/experiments/**/*.npz
 outputs/experiments/candidate_capture*/
 outputs/experiments/**/candidate_edge_diagnostic.csv
+outputs/experiments/**/checkpoints/
+outputs/experiments/**/weights/
 
 artifacts/
 *.parquet
@@ -38,3 +61,6 @@ data/tmp_*/
 logs/
 data/deepcenter/
 *.pt
+
+# Local code-analysis metadata
+.ua/
