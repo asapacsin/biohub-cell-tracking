@@ -1,0 +1,110 @@
+{
+  "control": "motion_relink_OFF edge_threshold=0.5",
+  "control_fixed8": 0.9067252533426169,
+  "control_holdout8": 0.9603073913068769,
+  "source": "prior GPU/postprocess experiments reused",
+  "thresholds": {
+    "0.40": {
+      "fixed8": {
+        "adj_edge_jaccard": 0.9181439782806684,
+        "delta_vs_motion_off_edge_0_5": 0.011418724938051517,
+        "div_tp_fp_fn": [
+          0,
+          10,
+          7
+        ],
+        "edge_threshold": 0.4,
+        "edge_tp_fp_fn": [
+          3949,
+          187,
+          154
+        ],
+        "score": 0.9181439782806684
+      },
+      "holdout8": {
+        "adj_edge_jaccard": 0.9646726188580379,
+        "delta_vs_motion_off_edge_0_5": 0.004365227551160977,
+        "div_tp_fp_fn": [
+          0,
+          5,
+          5
+        ],
+        "edge_threshold": 0.4,
+        "edge_tp_fp_fn": [
+          4037,
+          76,
+          89
+        ],
+        "score": 0.9646726188580379
+      }
+    },
+    "0.45": {
+      "fixed8": {
+        "adj_edge_jaccard": 0.9151933585182082,
+        "delta_vs_motion_off_edge_0_5": 0.008468105175591267,
+        "div_tp_fp_fn": [
+          0,
+          10,
+          7
+        ],
+        "edge_threshold": 0.45,
+        "edge_tp_fp_fn": [
+          3927,
+          185,
+          176
+        ],
+        "score": 0.9151933585182082
+      },
+      "holdout8": {
+        "adj_edge_jaccard": 0.9627392206380307,
+        "delta_vs_motion_off_edge_0_5": 0.002431829331153823,
+        "div_tp_fp_fn": [
+          0,
+          6,
+          5
+        ],
+        "edge_threshold": 0.45,
+        "edge_tp_fp_fn": [
+          4031,
+          82,
+          95
+        ],
+        "score": 0.9627392206380307
+      }
+    },
+    "0.50": {
+      "fixed8": {
+        "adj_edge_jaccard": 0.9067252533426169,
+        "delta_vs_motion_off_edge_0_5": 0.0,
+        "div_tp_fp_fn": [
+          0,
+          16,
+          7
+        ],
+        "edge_threshold": 0.5,
+        "edge_tp_fp_fn": [
+          3889,
+          195,
+          214
+        ],
+        "score": 0.9067252533426169
+      },
+      "holdout8": {
+        "adj_edge_jaccard": 0.9603073913068769,
+        "delta_vs_motion_off_edge_0_5": 0.0,
+        "div_tp_fp_fn": [
+          0,
+          8,
+          5
+        ],
+        "edge_threshold": 0.5,
+        "edge_tp_fp_fn": [
+          4017,
+          84,
+          109
+        ],
+        "score": 0.9603073913068769
+      }
+    }
+  }
+}

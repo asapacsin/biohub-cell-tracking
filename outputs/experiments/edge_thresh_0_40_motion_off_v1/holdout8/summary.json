@@ -1,0 +1,30 @@
+{
+  "adj_edge_jaccard": 0.9646726188580379,
+  "control_score_motion_off_edge_0_45": 0.9627392206380307,
+  "datasets": [
+    "44b6_0c582fdc",
+    "44b6_0db75fae",
+    "44b6_12dfb391",
+    "44b6_144b256d",
+    "6bba_062c8d37",
+    "6bba_07477033",
+    "6bba_07e24132",
+    "6bba_085bf656"
+  ],
+  "delta_vs_motion_off_control": 0.0019333982200071542,
+  "detection_threshold": 0.96875,
+  "division_fn": 5,
+  "division_fp": 5,
+  "division_jaccard": 0.0,
+  "division_tp": 0,
+  "edge_fn": 89,
+  "edge_fp": 76,
+  "edge_jaccard_micro": 0.9607329842931938,
+  "edge_threshold": 0.4,
+  "edge_tp": 4037,
+  "label": "holdout8_edge_thresh_0_40_motion_off",
+  "node_recall": 0.9905593580363464,
+  "output_motion_relink": false,
+  "runtime_seconds": 895.024683375028,
+  "score": 0.9646726188580379
+}

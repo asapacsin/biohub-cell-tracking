@@ -1,0 +1,25 @@
+{
+  "control_fixed8_motion_off_edge_0_45": 0.9151933585182082,
+  "control_holdout8_motion_off_edge_0_45": 0.9627392206380307,
+  "decision": "PROMOTE edge_threshold=0.40",
+  "fixed8": {
+    "delta": 0.0029506197624602493,
+    "edge_tp_fp_fn": [
+      3949,
+      187,
+      154
+    ],
+    "score": 0.9181439782806684
+  },
+  "holdout8": {
+    "delta": 0.0019333982200071542,
+    "edge_tp_fp_fn": [
+      4037,
+      76,
+      89
+    ],
+    "score": 0.9646726188580379
+  },
+  "hypothesis": "Lowering edge_threshold 0.5\u21920.40 under motion-relink OFF recovers near-threshold true edges net-positive",
+  "promote": true
+}

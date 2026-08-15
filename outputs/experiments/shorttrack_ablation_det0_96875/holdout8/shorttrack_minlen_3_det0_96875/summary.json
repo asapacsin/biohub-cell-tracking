@@ -1,0 +1,33 @@
+{
+  "adaptive_short_track_rescue": false,
+  "adj_edge_jaccard": 0.9576780076664706,
+  "datasets": [
+    "44b6_0c582fdc",
+    "44b6_0db75fae",
+    "44b6_12dfb391",
+    "44b6_144b256d",
+    "6bba_062c8d37",
+    "6bba_07477033",
+    "6bba_07e24132",
+    "6bba_085bf656"
+  ],
+  "delta_vs_control": -0.0013350439551838011,
+  "detection_threshold": 0.96875,
+  "division_fn": 5,
+  "division_fp": 10,
+  "division_jaccard": 0.0,
+  "division_tp": 0,
+  "edge_fn": 97,
+  "edge_fp": 94,
+  "edge_jaccard_micro": 0.954739336492891,
+  "edge_tp": 4029,
+  "ensemble_alpha": 0.5,
+  "label": "holdout8_shorttrack_minlen_3_det0_96875",
+  "node_recall": 0.9922114703799858,
+  "output_filter_short_tracks": true,
+  "output_min_track_len": 3,
+  "score": 0.9576780076664706,
+  "short_track_components_removed_total": 30,
+  "short_track_edges_removed_total": 30,
+  "short_track_nodes_removed_total": 60
+}

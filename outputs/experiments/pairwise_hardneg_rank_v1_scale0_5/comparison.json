@@ -1,0 +1,10 @@
+{
+  "experiment": "pairwise_hardneg_rank_v1_scale0_5",
+  "control_fixed": 0.9181439782806684,
+  "control_holdout": 0.9646726188580379,
+  "fixed8_score": 0.924009074688947,
+  "holdout8_score": 0.963838933678889,
+  "fixed8_delta": 0.005865096408278592,
+  "holdout8_delta": -0.0008336851791489464,
+  "decision_hint": "REJECT"
+}

@@ -1,0 +1,193 @@
+{
+  "baseline": {
+    "fixed8": 0.9181439782806684,
+    "holdout8": 0.9646726188580379
+  },
+  "best_nonnegative_both_splits": null,
+  "by_shift": {
+    "-1": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.7982766479122847,
+        "dataset_6bba_fc83837d_node_recall": 0.9540229885057471,
+        "delta_voxels": -1,
+        "delta_vs_baseline": -0.023003268381214026,
+        "edge_fn": 201,
+        "edge_fp": 245,
+        "edge_tp": 3902,
+        "node_recall": 0.9856064181217555,
+        "score": 0.8951407098994544,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.8027694372211148,
+        "dataset_6bba_07e24132_node_recall": 0.9275766016713092,
+        "delta_voxels": -1,
+        "delta_vs_baseline": -0.005770179611522708,
+        "edge_fn": 102,
+        "edge_fp": 88,
+        "edge_tp": 4024,
+        "node_recall": 0.9886712296436158,
+        "score": 0.9589024392465152,
+        "split": "holdout8"
+      }
+    },
+    "-2": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.7024788856476342,
+        "dataset_6bba_fc83837d_node_recall": 0.9059561128526645,
+        "delta_voxels": -2,
+        "delta_vs_baseline": -0.11185346344394931,
+        "edge_fn": 403,
+        "edge_fp": 474,
+        "edge_tp": 3700,
+        "node_recall": 0.9650778669183577,
+        "score": 0.8062905148367191,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.7691723363769525,
+        "dataset_6bba_07e24132_node_recall": 0.9136490250696379,
+        "delta_voxels": -2,
+        "delta_vs_baseline": -0.06008562767042713,
+        "edge_fn": 212,
+        "edge_fp": 219,
+        "edge_tp": 3914,
+        "node_recall": 0.9782865234835969,
+        "score": 0.9045869911876108,
+        "split": "holdout8"
+      }
+    },
+    "0": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.8588800675562589,
+        "dataset_6bba_fc83837d_node_recall": 0.9749216300940439,
+        "delta_voxels": 0,
+        "delta_vs_baseline": 0.0,
+        "edge_fn": 154,
+        "edge_fp": 187,
+        "edge_tp": 3949,
+        "node_recall": 0.989853704577631,
+        "score": 0.9181439782806684,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.8271682915430139,
+        "dataset_6bba_07e24132_node_recall": 0.935933147632312,
+        "delta_voxels": 0,
+        "delta_vs_baseline": 0.0,
+        "edge_fn": 89,
+        "edge_fp": 76,
+        "edge_tp": 4037,
+        "node_recall": 0.9905593580363464,
+        "score": 0.9646726188580379,
+        "split": "holdout8"
+      }
+    },
+    "1": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.8330812451049929,
+        "dataset_6bba_fc83837d_node_recall": 0.9749216300940439,
+        "delta_voxels": 1,
+        "delta_vs_baseline": -0.01397450846884385,
+        "edge_fn": 176,
+        "edge_fp": 229,
+        "edge_tp": 3927,
+        "node_recall": 0.9893817838603115,
+        "score": 0.9041694698118246,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.8362667053262475,
+        "dataset_6bba_07e24132_node_recall": 0.9526462395543176,
+        "delta_voxels": 1,
+        "delta_vs_baseline": -0.007906922827967677,
+        "edge_fn": 97,
+        "edge_fp": 102,
+        "edge_tp": 4029,
+        "node_recall": 0.9912674061836205,
+        "score": 0.9567656960300702,
+        "split": "holdout8"
+      }
+    },
+    "2": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.8239014230036421,
+        "dataset_6bba_fc83837d_node_recall": 0.9613375130616509,
+        "delta_voxels": 2,
+        "delta_vs_baseline": -0.05723746955277231,
+        "edge_fn": 260,
+        "edge_fp": 349,
+        "edge_tp": 3843,
+        "node_recall": 0.9837187352524775,
+        "score": 0.8609065087278961,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.8153791940383621,
+        "dataset_6bba_07e24132_node_recall": 0.958217270194986,
+        "delta_voxels": 2,
+        "delta_vs_baseline": -0.030094344300311326,
+        "edge_fn": 133,
+        "edge_fp": 163,
+        "edge_tp": 3993,
+        "node_recall": 0.9896152938399811,
+        "score": 0.9345782745577266,
+        "split": "holdout8"
+      }
+    },
+    "3": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.7642741279852856,
+        "dataset_6bba_fc83837d_node_recall": 0.9393939393939394,
+        "delta_voxels": 3,
+        "delta_vs_baseline": -0.1846713891462186,
+        "edge_fn": 532,
+        "edge_fp": 752,
+        "edge_tp": 3571,
+        "node_recall": 0.9681453515809344,
+        "score": 0.7334725891344498,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.7027006529863516,
+        "dataset_6bba_07e24132_node_recall": 0.9554317548746518,
+        "delta_voxels": 3,
+        "delta_vs_baseline": -0.11726578116852304,
+        "edge_fn": 289,
+        "edge_fp": 418,
+        "edge_tp": 3837,
+        "node_recall": 0.9827708284163323,
+        "score": 0.8474068376895149,
+        "split": "holdout8"
+      }
+    },
+    "4": {
+      "fixed8": {
+        "dataset_6bba_fc83837d": 0.5701277912502538,
+        "dataset_6bba_fc83837d_node_recall": 0.8725182863113897,
+        "delta_voxels": 4,
+        "delta_vs_baseline": -0.35412972375082674,
+        "edge_fn": 1049,
+        "edge_fp": 1296,
+        "edge_tp": 3054,
+        "node_recall": 0.9098631429919773,
+        "score": 0.5640142545298417,
+        "split": "fixed8"
+      },
+      "holdout8": {
+        "dataset_6bba_07e24132": 0.4913124424522671,
+        "dataset_6bba_07e24132_node_recall": 0.9192200557103064,
+        "delta_voxels": 4,
+        "delta_vs_baseline": -0.29780992843849396,
+        "edge_fn": 817,
+        "edge_fp": 854,
+        "edge_tp": 3309,
+        "node_recall": 0.9091338210998348,
+        "score": 0.6668626904195439,
+        "split": "holdout8"
+      }
+    }
+  },
+  "promote": false,
+  "rule": "Promote a z-shift only if fixed-8 AND holdout-8 are not below frozen baseline."
+}

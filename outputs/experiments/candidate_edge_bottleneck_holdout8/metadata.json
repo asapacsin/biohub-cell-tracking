@@ -1,0 +1,29 @@
+{
+  "config": "/tmp/mc46451/biohub-candidate-bottleneck-holdout/configs/sweeps/two_seed_det_thresh_0_96875.yaml",
+  "config_sha256": "03c0090f0ebdea1cd9faa0a67bba9b4a7f3618bb8cf186f8ec212adcbad26b60",
+  "control_score": 0.9590130516216544,
+  "created_at_utc": "2026-08-09T14:59:03.015545+00:00",
+  "datasets": [
+    "44b6_0c582fdc",
+    "44b6_0db75fae",
+    "44b6_12dfb391",
+    "44b6_144b256d",
+    "6bba_062c8d37",
+    "6bba_07477033",
+    "6bba_07e24132",
+    "6bba_085bf656"
+  ],
+  "experiment": "candidate_edge_bottleneck_v1",
+  "experiment_score": 0.9590130516216544,
+  "git_commit": "unknown",
+  "instrumented_predictor_sha256": "1173a6023c845ff3a018ee808d9498cabc78d89c8e71a878b61803917bb6968e",
+  "prediction_equivalent_to_control": true,
+  "primary_checkpoint": "/tmp/mc46451/biohub-candidate-bottleneck-holdout/data/support/weights/unet_transformer/split_0/edge_predictor_best.pth",
+  "primary_checkpoint_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
+  "runtime_seconds": 1034.9878758949926,
+  "schema_version": 1,
+  "secondary_checkpoint": "/tmp/mc46451/biohub-candidate-bottleneck-holdout/data/support/weights/unet_transformer/seed_314159/edge_predictor_best.pth",
+  "secondary_checkpoint_sha256": "9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f",
+  "split_file": "/tmp/mc46451/biohub-candidate-bottleneck-holdout/outputs/experiments/candidate_edge_bottleneck_holdout8_work/support_repo/clean_v106_test_splits.json",
+  "top_k": 16
+}

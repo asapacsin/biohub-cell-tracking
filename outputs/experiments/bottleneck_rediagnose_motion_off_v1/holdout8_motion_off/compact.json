@@ -1,0 +1,23 @@
+{
+  "causal_errors": 72,
+  "classification": "D. HYPOTHESIS REJECTED",
+  "counts": {
+    "candidate_threshold": 16,
+    "correct": 4009,
+    "detection_miss": 35,
+    "ilp_global": 12,
+    "postprocessing_rematch": 5,
+    "postprocessing_removed": 14,
+    "scorer_ranking": 25
+  },
+  "mechanism_shares": {
+    "candidate_threshold": 0.2222222222222222,
+    "ilp_global": 0.16666666666666666,
+    "postprocessing_rematch": 0.06944444444444445,
+    "postprocessing_removed": 0.19444444444444445,
+    "scorer_ranking": 0.3472222222222222
+  },
+  "ranking_share": 0.3472222222222222,
+  "recommended_next_action": "Repeat the ranking diagnostic on an independent holdout before changing the production recipe.",
+  "split": "holdout8_motion_off"
+}

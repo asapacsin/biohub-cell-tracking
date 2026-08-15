@@ -1,0 +1,7 @@
+{
+  "config": "/tmp/mc46451/biohub-pairwise-hardneg-v1/configs/experiments/recipe_c_edge_0_40_pairwise_hardneg_v1.yaml",
+  "experiment": "pairwise_hardneg_rank_v1",
+  "frozen_recipe": "recipe_c_motion_off_edge_0_40_det0_96875",
+  "schema_version": 1,
+  "split": "fixed8"
+}

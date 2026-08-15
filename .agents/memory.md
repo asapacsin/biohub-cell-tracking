@@ -514,11 +514,20 @@
 - Artifacts: `outputs/experiments/detection_z_shift_v1/`; report `outputs/analysis/detection_miss_6bba_07e24132_report.md`.
 - Frozen recipe remains the best defensible result: fixed-8 **0.918144**, holdout-8 **0.964673**.
 
-## Frozen-recipe official test submit started (2026-08-16)
+## Kaggle submission ready — frozen recipe C (2026-08-15)
 
-- User asked to pack a Kaggle test submission of the frozen recipe (motion OFF, edge=0.40, det=0.96875, two-seed α=0.5).
-- Launcher: `scripts/slurm/run_frozen_recipe_test_submit.sh` (nohup + tar|srun to node `/tmp`).
-- slurm **7198** RUNNING um-gpu01; nohup pid 2835396. RECIPE_OK and 4 test stems confirmed.
-- NFS: `~/biohub-outputs/kaggle/recipe_c_motion_off_edge_0_40_v1/`. Login mirror after job: `outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv`.
-- This host cannot upload to Kaggle; CSV must be submitted on the competition page.
-- ETA ~1.5h (4h srun limit). QOS max 1 job; do not submit another GPU job until 7198 finishes.
+- **Status: READY TO UPLOAD.** This host cannot submit; human uploads to Kaggle.
+- Path: `outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv` (12.06M)
+- sha256: `1c11c98a2b8458215a9d9a4a2c90b15b2a51bc34dbafe55eb73b22f1b8a2ff01`
+- VALIDATE_OK: 4 datasets, 123692 nodes, 119231 edges, 242923 rows
+- Recipe: motion-relink OFF, edge_threshold 0.40, det 0.96875, two-seed α=0.5, short-track ON, safe-div ON
+- Config: `configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml`
+- Job: slurm **7198** COMPLETED um-gpu01, 577s. NFS: `~/biohub-outputs/kaggle/recipe_c_motion_off_edge_0_40_v1/`
+- Compare public LB to **0.908** (V106 notebook; not re-verified from this host)
+
+## Standing: record every Kaggle-ready pack; do not gitignore submission CSVs (2026-08-16)
+
+- Every VALIDATE_OK official-test pack must be appended to this file as `## Kaggle submission ready` (path, sha256, stats, recipe, job, NFS).
+- `outputs/kaggle_submission/` is **not** gitignored, including large `submission.csv` files. Size is not a reason to ignore an upload artifact.
+- Still gitignore non-deliverable dumps: captures, GEFFs, train `predictions/`, logs, weights, `data/competition`.
+- Rule: `.cursor/rules/kaggle-submission.mdc`

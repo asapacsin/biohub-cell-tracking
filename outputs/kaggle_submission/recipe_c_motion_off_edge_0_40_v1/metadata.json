@@ -1,0 +1,37 @@
+{
+  "config": "configs/experiments/recipe_c_motion_off_edge_0_40_det0_96875.yaml",
+  "created_at_utc": "2026-08-15T16:33:47.504865+00:00",
+  "csv_sha256": "1c11c98a2b8458215a9d9a4a2c90b15b2a51bc34dbafe55eb73b22f1b8a2ff01",
+  "datasets": [
+    "44b6_0113de3b",
+    "44b6_0b24845f",
+    "6bba_05b6850b",
+    "6bba_05db0fb1"
+  ],
+  "elapsed_seconds": 577.03588,
+  "experiment": "recipe_c_motion_off_edge_0_40_test_submit",
+  "git_commit": "unknown",
+  "local_cv_reference": {
+    "fixed8": 0.9181439782806684,
+    "holdout8": 0.9646726188580379
+  },
+  "note": "Official test inference. No local GT score. Upload submission.csv to Kaggle.",
+  "primary_checkpoint_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
+  "recipe": {
+    "detection_threshold": 0.96875,
+    "edge_threshold": 0.4,
+    "ensemble_alpha": 0.5,
+    "output_filter_short_tracks": true,
+    "output_min_track_len": 6,
+    "output_motion_relink": false,
+    "output_safe_divisions": true
+  },
+  "schema_version": 1,
+  "secondary_checkpoint_sha256": "9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f",
+  "validate": {
+    "datasets": 4,
+    "edges": 119231,
+    "nodes": 123692,
+    "rows": 242923
+  }
+}

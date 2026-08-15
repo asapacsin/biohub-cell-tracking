@@ -1,0 +1,44 @@
+{
+  "dominant_fixed8": "motion_relink",
+  "dominant_holdout8": "motion_relink",
+  "fixed8": {
+    "config": "configs/sweeps/two_seed_det_thresh_0_96875.yaml",
+    "diagnostic": ".tmp_stage_attr_diags/fixed8_candidate_edge_diagnostic.csv",
+    "motion_relink": true,
+    "n_postprocessing_removed": 57,
+    "raw_geff": "/home/mc46451/biohub-outputs/experiments/candidate_edge_bottleneck_v1/raw_geff",
+    "safe_divisions": true,
+    "short_track_filter": true,
+    "single_child_repair": false,
+    "single_parent_repair": true,
+    "split": "fixed8",
+    "stage_counts": {
+      "motion_relink": 46,
+      "short_track_filter": 11
+    },
+    "stage_fractions": {
+      "motion_relink": 0.8070175438596491,
+      "short_track_filter": 0.19298245614035087
+    }
+  },
+  "holdout8": {
+    "config": "configs/sweeps/two_seed_det_thresh_0_96875.yaml",
+    "diagnostic": ".tmp_stage_attr_diags/holdout8_candidate_edge_diagnostic.csv",
+    "motion_relink": true,
+    "n_postprocessing_removed": 23,
+    "raw_geff": "/home/mc46451/biohub-outputs/holdout8/det0_96875_safeon/raw_geff",
+    "safe_divisions": true,
+    "short_track_filter": true,
+    "single_child_repair": false,
+    "single_parent_repair": true,
+    "split": "holdout8",
+    "stage_counts": {
+      "motion_relink": 13,
+      "short_track_filter": 10
+    },
+    "stage_fractions": {
+      "motion_relink": 0.5652173913043478,
+      "short_track_filter": 0.43478260869565216
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "causal_errors": 180,
+  "classification": "B. PROMISING - NEEDS INDEPENDENT VALIDATION",
+  "hypothesis_rejected": false,
+  "hypothesis_supported": false,
+  "mechanism_shares": {
+    "candidate_threshold": 0.26666666666666666,
+    "ilp_global": 0.11666666666666667,
+    "postprocessing_rematch": 0.07222222222222222,
+    "postprocessing_removed": 0.12777777777777777,
+    "scorer_ranking": 0.4166666666666667
+  },
+  "ranking_share": 0.4166666666666667,
+  "recommended_next_action": "Repeat the same score-capture diagnostic on an independent holdout before choosing a mechanism-specific intervention.",
+  "runner_up_share": 0.26666666666666666
+}

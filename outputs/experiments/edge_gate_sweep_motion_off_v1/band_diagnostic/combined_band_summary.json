@@ -1,0 +1,234 @@
+{
+  "fixed8": {
+    "additional_admitted_vs_0.5": {
+      "edge_0.40": 7500,
+      "edge_0.45": 4405
+    },
+    "band_precision_proxy": {
+      "0.25-0.30": {
+        "captured_pairs": 8008,
+        "precision_proxy": 0.0018731268731268732,
+        "true_ordinary_matches": 15
+      },
+      "0.30-0.35": {
+        "captured_pairs": 6428,
+        "precision_proxy": 0.0023335407591785935,
+        "true_ordinary_matches": 15
+      },
+      "0.35-0.40": {
+        "captured_pairs": 5706,
+        "precision_proxy": 0.0031545741324921135,
+        "true_ordinary_matches": 18
+      },
+      "0.40-0.45": {
+        "captured_pairs": 5299,
+        "precision_proxy": 0.005472730703906397,
+        "true_ordinary_matches": 29
+      },
+      "0.45-0.50": {
+        "captured_pairs": 5358,
+        "precision_proxy": 0.007465472191116088,
+        "true_ordinary_matches": 40
+      }
+    },
+    "captured_pairs_by_band": {
+      "0.25-0.30": 8008,
+      "0.30-0.35": 6428,
+      "0.35-0.40": 5706,
+      "0.40-0.45": 5299,
+      "0.45-0.50": 5358
+    },
+    "control_edge_threshold": 0.5,
+    "final_present_gt_ordinary_by_band": {
+      "edge_0.40_motion_off": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 15,
+        "0.45-0.50": 25
+      },
+      "edge_0.45_motion_off": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 1,
+        "0.45-0.50": 25
+      },
+      "edge_0.50_motion_off": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 1,
+        "0.45-0.50": 1
+      }
+    },
+    "gt_candidate_threshold_errors_by_band": {
+      "0.25-0.30": 4,
+      "0.30-0.35": 1,
+      "0.35-0.40": 7,
+      "0.40-0.45": 14,
+      "0.45-0.50": 21
+    },
+    "gt_candidate_threshold_errors_total": 47,
+    "gt_ordinary_top1_in_band": {
+      "0.25-0.30": 4,
+      "0.30-0.35": 5,
+      "0.35-0.40": 7,
+      "0.40-0.45": 18,
+      "0.45-0.50": 31
+    },
+    "gt_ordinary_with_prob_in_band": {
+      "0.25-0.30": 15,
+      "0.30-0.35": 15,
+      "0.35-0.40": 18,
+      "0.40-0.45": 29,
+      "0.45-0.50": 40
+    },
+    "ilp_selected_gt_ordinary_by_band": {
+      "edge_0.40": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 15,
+        "0.45-0.50": 26
+      },
+      "edge_0.45": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 0,
+        "0.45-0.50": 26
+      },
+      "edge_0.50": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 0,
+        "0.45-0.50": 0
+      }
+    },
+    "note": "Capture is top-k censored; precision_proxy uses captured pairs only. GT threshold-error bands use motion-off diagnostic causes when available.",
+    "raw_geff_admitted_edges": {
+      "edge_0.40": 174774,
+      "edge_0.45": 171679,
+      "edge_0.50": 167274
+    },
+    "split": "fixed8"
+  },
+  "holdout8": {
+    "additional_admitted_vs_0.5": {
+      "edge_0.40": 6501,
+      "edge_0.45": 3772
+    },
+    "band_precision_proxy": {
+      "0.25-0.30": {
+        "captured_pairs": 6604,
+        "precision_proxy": 0.0021199273167777106,
+        "true_ordinary_matches": 14
+      },
+      "0.30-0.35": {
+        "captured_pairs": 5224,
+        "precision_proxy": 0.002871362940275651,
+        "true_ordinary_matches": 15
+      },
+      "0.35-0.40": {
+        "captured_pairs": 4539,
+        "precision_proxy": 0.0024234412866270105,
+        "true_ordinary_matches": 11
+      },
+      "0.40-0.45": {
+        "captured_pairs": 4237,
+        "precision_proxy": 0.003068208638187397,
+        "true_ordinary_matches": 13
+      },
+      "0.45-0.50": {
+        "captured_pairs": 4512,
+        "precision_proxy": 0.004875886524822695,
+        "true_ordinary_matches": 22
+      }
+    },
+    "captured_pairs_by_band": {
+      "0.25-0.30": 6604,
+      "0.30-0.35": 5224,
+      "0.35-0.40": 4539,
+      "0.40-0.45": 4237,
+      "0.45-0.50": 4512
+    },
+    "control_edge_threshold": 0.5,
+    "final_present_gt_ordinary_by_band": {
+      "edge_0.40_motion_off": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 7,
+        "0.45-0.50": 9
+      },
+      "edge_0.45_motion_off": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 1,
+        "0.45-0.50": 10
+      },
+      "edge_0.50_motion_off": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 1,
+        "0.35-0.40": 0,
+        "0.40-0.45": 1,
+        "0.45-0.50": 1
+      }
+    },
+    "gt_candidate_threshold_errors_by_band": {
+      "0.25-0.30": 1,
+      "0.30-0.35": 0,
+      "0.35-0.40": 2,
+      "0.40-0.45": 4,
+      "0.45-0.50": 9
+    },
+    "gt_candidate_threshold_errors_total": 16,
+    "gt_ordinary_top1_in_band": {
+      "0.25-0.30": 1,
+      "0.30-0.35": 1,
+      "0.35-0.40": 2,
+      "0.40-0.45": 7,
+      "0.45-0.50": 13
+    },
+    "gt_ordinary_with_prob_in_band": {
+      "0.25-0.30": 14,
+      "0.30-0.35": 15,
+      "0.35-0.40": 11,
+      "0.40-0.45": 13,
+      "0.45-0.50": 22
+    },
+    "ilp_selected_gt_ordinary_by_band": {
+      "edge_0.40": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 7,
+        "0.45-0.50": 9
+      },
+      "edge_0.45": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 0,
+        "0.45-0.50": 10
+      },
+      "edge_0.50": {
+        "0.25-0.30": 0,
+        "0.30-0.35": 0,
+        "0.35-0.40": 0,
+        "0.40-0.45": 0,
+        "0.45-0.50": 0
+      }
+    },
+    "note": "Capture is top-k censored; precision_proxy uses captured pairs only. GT threshold-error bands use motion-off diagnostic causes when available.",
+    "raw_geff_admitted_edges": {
+      "edge_0.40": 157720,
+      "edge_0.45": 154991,
+      "edge_0.50": 151219
+    },
+    "split": "holdout8"
+  }
+}

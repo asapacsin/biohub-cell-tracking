@@ -1,0 +1,607 @@
+{
+  "44b6_0db75fae": [
+    {
+      "stage": "distance_next_frame_filter",
+      "n_edges": 16794,
+      "n_nodes": 17849,
+      "watched_still_present": 7,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "motion_relink",
+      "n_edges": 16833,
+      "n_nodes": 17849,
+      "watched_still_present": 5,
+      "watched_lost_here": 2,
+      "lost_edges": [
+        [
+          1092,
+          1383
+        ],
+        [
+          351,
+          610
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 2
+    },
+    {
+      "stage": "single_parent_repair",
+      "n_edges": 16833,
+      "n_nodes": 17849,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "single_child_repair",
+      "n_edges": 16833,
+      "n_nodes": 17849,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap_close",
+      "n_edges": 17227,
+      "n_nodes": 18046,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap2_recovery",
+      "n_edges": 17227,
+      "n_nodes": 18046,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "safe_divisions",
+      "n_edges": 17266,
+      "n_nodes": 18046,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "division_geometry_filter",
+      "n_edges": 17266,
+      "n_nodes": 18046,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "prune_isolated",
+      "n_edges": 17266,
+      "n_nodes": 18020,
+      "watched_still_present": 5,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "short_track_filter",
+      "n_edges": 16976,
+      "n_nodes": 17622,
+      "watched_still_present": 0,
+      "watched_lost_here": 5,
+      "lost_edges": [
+        [
+          92,
+          351
+        ],
+        [
+          1383,
+          1646
+        ],
+        [
+          2812,
+          3082
+        ],
+        [
+          811,
+          1092
+        ],
+        [
+          1646,
+          1919
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "linefit_smooth",
+      "n_edges": 16976,
+      "n_nodes": 17622,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    }
+  ],
+  "6bba_062c8d37": [
+    {
+      "stage": "distance_next_frame_filter",
+      "n_edges": 5592,
+      "n_nodes": 5963,
+      "watched_still_present": 7,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "motion_relink",
+      "n_edges": 5581,
+      "n_nodes": 5963,
+      "watched_still_present": 2,
+      "watched_lost_here": 5,
+      "lost_edges": [
+        [
+          2215,
+          2281
+        ],
+        [
+          194,
+          276
+        ],
+        [
+          2158,
+          2224
+        ],
+        [
+          658,
+          731
+        ],
+        [
+          215,
+          293
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 5
+    },
+    {
+      "stage": "single_parent_repair",
+      "n_edges": 5581,
+      "n_nodes": 5963,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "single_child_repair",
+      "n_edges": 5581,
+      "n_nodes": 5963,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap_close",
+      "n_edges": 5673,
+      "n_nodes": 6009,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap2_recovery",
+      "n_edges": 5673,
+      "n_nodes": 6009,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "safe_divisions",
+      "n_edges": 5677,
+      "n_nodes": 6009,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "division_geometry_filter",
+      "n_edges": 5677,
+      "n_nodes": 6009,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "prune_isolated",
+      "n_edges": 5677,
+      "n_nodes": 5983,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "short_track_filter",
+      "n_edges": 5504,
+      "n_nodes": 5742,
+      "watched_still_present": 0,
+      "watched_lost_here": 2,
+      "lost_edges": [
+        [
+          21,
+          109
+        ],
+        [
+          109,
+          194
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "linefit_smooth",
+      "n_edges": 5504,
+      "n_nodes": 5742,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    }
+  ],
+  "6bba_07477033": [
+    {
+      "stage": "distance_next_frame_filter",
+      "n_edges": 4468,
+      "n_nodes": 4720,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "motion_relink",
+      "n_edges": 4498,
+      "n_nodes": 4720,
+      "watched_still_present": 0,
+      "watched_lost_here": 2,
+      "lost_edges": [
+        [
+          2803,
+          2857
+        ],
+        [
+          3177,
+          3233
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 2
+    },
+    {
+      "stage": "single_parent_repair",
+      "n_edges": 4498,
+      "n_nodes": 4720,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "single_child_repair",
+      "n_edges": 4498,
+      "n_nodes": 4720,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap_close",
+      "n_edges": 4540,
+      "n_nodes": 4741,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap2_recovery",
+      "n_edges": 4540,
+      "n_nodes": 4741,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "safe_divisions",
+      "n_edges": 4546,
+      "n_nodes": 4741,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "division_geometry_filter",
+      "n_edges": 4546,
+      "n_nodes": 4741,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "prune_isolated",
+      "n_edges": 4546,
+      "n_nodes": 4738,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "short_track_filter",
+      "n_edges": 4428,
+      "n_nodes": 4582,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "linefit_smooth",
+      "n_edges": 4428,
+      "n_nodes": 4582,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    }
+  ],
+  "6bba_07e24132": [
+    {
+      "stage": "distance_next_frame_filter",
+      "n_edges": 25166,
+      "n_nodes": 27469,
+      "watched_still_present": 6,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "motion_relink",
+      "n_edges": 25749,
+      "n_nodes": 27469,
+      "watched_still_present": 2,
+      "watched_lost_here": 4,
+      "lost_edges": [
+        [
+          27084,
+          27394
+        ],
+        [
+          27225,
+          27594
+        ],
+        [
+          27196,
+          27555
+        ],
+        [
+          10263,
+          10613
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 4
+    },
+    {
+      "stage": "single_parent_repair",
+      "n_edges": 25749,
+      "n_nodes": 27469,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "single_child_repair",
+      "n_edges": 25749,
+      "n_nodes": 27469,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap_close",
+      "n_edges": 26417,
+      "n_nodes": 27803,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap2_recovery",
+      "n_edges": 26417,
+      "n_nodes": 27803,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "safe_divisions",
+      "n_edges": 26482,
+      "n_nodes": 27803,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "division_geometry_filter",
+      "n_edges": 26482,
+      "n_nodes": 27803,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "prune_isolated",
+      "n_edges": 26482,
+      "n_nodes": 27799,
+      "watched_still_present": 2,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "short_track_filter",
+      "n_edges": 25548,
+      "n_nodes": 26564,
+      "watched_still_present": 0,
+      "watched_lost_here": 2,
+      "lost_edges": [
+        [
+          28966,
+          29328
+        ],
+        [
+          29328,
+          29667
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "linefit_smooth",
+      "n_edges": 25548,
+      "n_nodes": 26564,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    }
+  ],
+  "6bba_085bf656": [
+    {
+      "stage": "distance_next_frame_filter",
+      "n_edges": 8137,
+      "n_nodes": 8486,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "motion_relink",
+      "n_edges": 8149,
+      "n_nodes": 8486,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "single_parent_repair",
+      "n_edges": 8149,
+      "n_nodes": 8486,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "single_child_repair",
+      "n_edges": 8149,
+      "n_nodes": 8486,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap_close",
+      "n_edges": 8183,
+      "n_nodes": 8503,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "gap2_recovery",
+      "n_edges": 8183,
+      "n_nodes": 8503,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "safe_divisions",
+      "n_edges": 8186,
+      "n_nodes": 8503,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "division_geometry_filter",
+      "n_edges": 8186,
+      "n_nodes": 8503,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "prune_isolated",
+      "n_edges": 8186,
+      "n_nodes": 8500,
+      "watched_still_present": 1,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "short_track_filter",
+      "n_edges": 8077,
+      "n_nodes": 8354,
+      "watched_still_present": 0,
+      "watched_lost_here": 1,
+      "lost_edges": [
+        [
+          4553,
+          4648
+        ]
+      ],
+      "lost_with_both_nodes_still_present": 0
+    },
+    {
+      "stage": "linefit_smooth",
+      "n_edges": 8077,
+      "n_nodes": 8354,
+      "watched_still_present": 0,
+      "watched_lost_here": 0,
+      "lost_edges": [],
+      "lost_with_both_nodes_still_present": 0
+    }
+  ]
+}

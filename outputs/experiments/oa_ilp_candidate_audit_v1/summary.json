@@ -1,0 +1,54 @@
+{
+  "admit_source_top1_unsafe": true,
+  "bucket_counts": {
+    "candidate_absent": 0,
+    "candidate_threshold": 1,
+    "detection_miss": 3,
+    "ilp_global": 4,
+    "other": 0,
+    "postprocessing_rematch": 4,
+    "ranking_below_gate": 14,
+    "ranking_gated": 1
+  },
+  "causal_errors": 24,
+  "causal_share_below_gate": 0.625,
+  "causal_share_ilp_contention": 0.16666666666666666,
+  "causal_share_in_ilp_graph": 0.20833333333333334,
+  "causal_share_rematch": 0.16666666666666666,
+  "dataset": "44b6_12dfb391",
+  "errors": 27,
+  "extra_candidates_per_gt_err": 810.0,
+  "ilp_conflict_counts": {
+    "source_taken": 4
+  },
+  "ilp_stolen_child_not_gt": 4,
+  "ordinary_associations": 771,
+  "ranking_below_gate_no_gated_child": 8,
+  "ranking_below_gate_source_top1": 7,
+  "ranking_below_gate_wrong_gated_child": 6,
+  "recommended_next": {
+    "do_not": [
+      "edge-scorer retrain",
+      "global edge_threshold < 0.40",
+      "short-track OFF",
+      "motion-relink ON",
+      "admit every source-top1 below 0.40"
+    ],
+    "experiment": "close_ilp_candidate_set_branch",
+    "rationale": "The candidate-set hole is real (most causal GTs never enter ILP) but admitting source-top-1 below 0.40 would add too many extra candidates for the current disappearance cost to ignore. The ILP occupancy errors are the same proximal extra-detection theft already rejected as a ranking term: the stolen child is not a GT association. Do not change the frozen recipe. Do not start another edge-scorer retrain."
+  },
+  "recoverability_counts": {
+    "admit_source_top1": 7,
+    "ilp_contention_repair": 4,
+    "ilp_override_rank2": 1,
+    "needs_detection": 3,
+    "needs_identity_repair": 4,
+    "needs_ranking_or_lower_gate": 8
+  },
+  "rematch_cascade_from_conflict": 2,
+  "selected_edge_source": "geff",
+  "source_top1_below_gate": 5670,
+  "source_top1_below_gate_gt_err": 7,
+  "source_top1_below_gate_gt_ok": 8,
+  "source_top1_below_gate_median_prob": 0.12403785809874535
+}

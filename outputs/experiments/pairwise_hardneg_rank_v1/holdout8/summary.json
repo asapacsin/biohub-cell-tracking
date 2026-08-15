@@ -1,0 +1,40 @@
+{
+  "adj_edge_jaccard": 0.9638461817004692,
+  "control_score": 0.9646726188580379,
+  "datasets": [
+    "44b6_0c582fdc",
+    "44b6_0db75fae",
+    "44b6_12dfb391",
+    "44b6_144b256d",
+    "6bba_062c8d37",
+    "6bba_07477033",
+    "6bba_07e24132",
+    "6bba_085bf656"
+  ],
+  "delta_vs_control": -0.0008264371575686935,
+  "detection_threshold": 0.96875,
+  "division_fn": 5,
+  "division_fp": 6,
+  "division_jaccard": 0.0,
+  "division_tp": 0,
+  "edge_fn": 94,
+  "edge_fp": 78,
+  "edge_jaccard_micro": 0.9590865842055185,
+  "edge_threshold": 0.4,
+  "edge_tp": 4032,
+  "label": "holdout8_pairwise_hardneg_rank_v1",
+  "node_recall": 0.9900873259381638,
+  "output_motion_relink": false,
+  "pairwise_hardneg_dens_min": 8.0,
+  "pairwise_hardneg_gap_max": 1.5,
+  "pairwise_hardneg_w": [
+    0.06048430557517773,
+    -0.20873041671137216,
+    0.3215443121183514,
+    0.010288477630157047,
+    0.05010097561745133,
+    0.08922273697430483
+  ],
+  "runtime_seconds": 900.9950783241075,
+  "score": 0.9638461817004692
+}

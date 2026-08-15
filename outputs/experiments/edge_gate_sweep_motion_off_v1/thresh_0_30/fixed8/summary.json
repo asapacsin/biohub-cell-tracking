@@ -1,0 +1,113 @@
+{
+  "adj_edge_jaccard": 0.9170526895915343,
+  "control_score_motion_off_edge_0_5": 0.9067252533426169,
+  "datasets": [
+    "44b6_0113de3b",
+    "44b6_0b24845f",
+    "44b6_341df25f",
+    "44b6_e57ff5c6",
+    "6bba_05b6850b",
+    "6bba_05db0fb1",
+    "6bba_969618f6",
+    "6bba_fc83837d"
+  ],
+  "delta_vs_motion_off_edge_0_5": 0.01032743624891741,
+  "detection_threshold": 0.96875,
+  "division_fn": 7,
+  "division_fp": 12,
+  "division_jaccard": 0.0,
+  "division_tp": 0,
+  "edge_fn": 142,
+  "edge_fp": 195,
+  "edge_jaccard_micro": 0.9215914378780828,
+  "edge_threshold": 0.3,
+  "edge_tp": 3961,
+  "label": "fixed8_edge_thresh_0.3_motion_off",
+  "node_recall": 0.9917413874469089,
+  "output_motion_relink": false,
+  "per_dataset": [
+    {
+      "adj_edge_jaccard": 0.9611890506697728,
+      "dataset": "44b6_0113de3b",
+      "division_fn": 0,
+      "division_fp": 0,
+      "division_tp": 0,
+      "edge_fn": 2,
+      "edge_fp": 0,
+      "edge_tp": 48
+    },
+    {
+      "adj_edge_jaccard": 1.0102322305229456,
+      "dataset": "44b6_0b24845f",
+      "division_fn": 0,
+      "division_fp": 1,
+      "division_tp": 0,
+      "edge_fn": 0,
+      "edge_fp": 1,
+      "edge_tp": 49
+    },
+    {
+      "adj_edge_jaccard": 0.9642427329564485,
+      "dataset": "44b6_341df25f",
+      "division_fn": 1,
+      "division_fp": 1,
+      "division_tp": 0,
+      "edge_fn": 2,
+      "edge_fp": 3,
+      "edge_tp": 207
+    },
+    {
+      "adj_edge_jaccard": 0.8209206369096101,
+      "dataset": "44b6_e57ff5c6",
+      "division_fn": 0,
+      "division_fp": 3,
+      "division_tp": 0,
+      "edge_fn": 15,
+      "edge_fp": 23,
+      "edge_tp": 171
+    },
+    {
+      "adj_edge_jaccard": 0.9790205393474806,
+      "dataset": "6bba_05b6850b",
+      "division_fn": 0,
+      "division_fp": 1,
+      "division_tp": 0,
+      "edge_fn": 8,
+      "edge_fp": 13,
+      "edge_tp": 837
+    },
+    {
+      "adj_edge_jaccard": 0.8973536064689536,
+      "dataset": "6bba_05db0fb1",
+      "division_fn": 3,
+      "division_fp": 4,
+      "division_tp": 0,
+      "edge_fn": 50,
+      "edge_fp": 76,
+      "edge_tp": 1133
+    },
+    {
+      "adj_edge_jaccard": 0.9679638051052134,
+      "dataset": "6bba_969618f6",
+      "division_fn": 3,
+      "division_fp": 1,
+      "division_tp": 0,
+      "edge_fn": 6,
+      "edge_fp": 6,
+      "edge_tp": 652
+    },
+    {
+      "adj_edge_jaccard": 0.8578652042263959,
+      "dataset": "6bba_fc83837d",
+      "division_fn": 0,
+      "division_fp": 1,
+      "division_tp": 0,
+      "edge_fn": 59,
+      "edge_fp": 73,
+      "edge_tp": 864
+    }
+  ],
+  "raw_geff_admitted_edges": 178869,
+  "runtime_seconds": 1010.3086821470642,
+  "score": 0.9170526895915343
+}

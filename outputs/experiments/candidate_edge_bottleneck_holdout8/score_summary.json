@@ -1,0 +1,23 @@
+{
+  "adj_edge_jaccard": 0.9590130516216544,
+  "datasets": [
+    "44b6_0c582fdc",
+    "44b6_0db75fae",
+    "44b6_12dfb391",
+    "44b6_144b256d",
+    "6bba_062c8d37",
+    "6bba_07477033",
+    "6bba_07e24132",
+    "6bba_085bf656"
+  ],
+  "division_fn": 5,
+  "division_fp": 10,
+  "division_jaccard": 0.0,
+  "division_tp": 0,
+  "edge_fn": 104,
+  "edge_fp": 93,
+  "edge_jaccard_micro": 0.9533064707276606,
+  "edge_tp": 4022,
+  "node_recall": 0.9893792777908897,
+  "score": 0.9590130516216544
+}

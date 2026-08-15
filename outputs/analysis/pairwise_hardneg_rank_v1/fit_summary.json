@@ -1,0 +1,1249 @@
+{
+  "feature_names": [
+    "seed_disagree",
+    "seed_min",
+    "dist_n",
+    "log_dens",
+    "dist_x_disagree",
+    "dist_x_seedmin"
+  ],
+  "n_train_pairs": 2247,
+  "best": {
+    "l2": 0.1,
+    "dens_min": 8.0,
+    "gap_max": 99.0,
+    "w": [
+      -0.18526337735550208,
+      0.10136896790207497,
+      -0.014979421718245964,
+      0.0,
+      -0.05665660862274096,
+      -0.084155117316905
+    ],
+    "w_named": {
+      "seed_disagree": -0.18526337735550208,
+      "seed_min": 0.10136896790207497,
+      "dist_n": -0.014979421718245964,
+      "log_dens": 0.0,
+      "dist_x_disagree": -0.05665660862274096,
+      "dist_x_seedmin": -0.084155117316905
+    },
+    "fixed": {
+      "rank2": {
+        "n": 46,
+        "applied": 29,
+        "mean_rank": 2.0,
+        "top1_rate": 0.021739130434782608,
+        "flips_to_1": 1,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "rank_fail": {
+        "n": 70,
+        "applied": 45,
+        "mean_rank": 2.5428571428571427,
+        "top1_rate": 0.014285714285714285,
+        "flips_to_1": 1,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "success": {
+        "n": 3853,
+        "applied": 1457,
+        "mean_rank": 1.0007786140669608,
+        "top1_rate": 0.9992213859330392,
+        "flips_to_1": 0,
+        "success_drops": 3,
+        "base_top1_rate": 1.0
+      }
+    },
+    "holdout": {
+      "rank2": {
+        "n": 21,
+        "applied": 12,
+        "mean_rank": 2.1904761904761907,
+        "top1_rate": 0.0,
+        "flips_to_1": 0,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "rank_fail": {
+        "n": 26,
+        "applied": 15,
+        "mean_rank": 2.3846153846153846,
+        "top1_rate": 0.0,
+        "flips_to_1": 0,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "success": {
+        "n": 3974,
+        "applied": 722,
+        "mean_rank": 1.0002516356316054,
+        "top1_rate": 0.9997483643683945,
+        "flips_to_1": 0,
+        "success_drops": 1,
+        "base_top1_rate": 1.0
+      }
+    },
+    "score": -7.0
+  },
+  "w_l2_1_ungated": {
+    "w": [
+      -0.18432393262554275,
+      0.10123444377314553,
+      -0.014839135286482917,
+      0.0,
+      -0.05647188358936958,
+      -0.08395441801351924
+    ],
+    "w_named": {
+      "seed_disagree": -0.18432393262554275,
+      "seed_min": 0.10123444377314553,
+      "dist_n": -0.014839135286482917,
+      "log_dens": 0.0,
+      "dist_x_disagree": -0.05647188358936958,
+      "dist_x_seedmin": -0.08395441801351924
+    },
+    "fixed": {
+      "rank2": {
+        "n": 46,
+        "applied": 46,
+        "mean_rank": 2.0,
+        "top1_rate": 0.021739130434782608,
+        "flips_to_1": 1,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "rank_fail": {
+        "n": 70,
+        "applied": 70,
+        "mean_rank": 2.5428571428571427,
+        "top1_rate": 0.014285714285714285,
+        "flips_to_1": 1,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "success": {
+        "n": 3853,
+        "applied": 3853,
+        "mean_rank": 1.0023358422008823,
+        "top1_rate": 0.9976641577991175,
+        "flips_to_1": 0,
+        "success_drops": 9,
+        "base_top1_rate": 1.0
+      }
+    },
+    "holdout": {
+      "rank2": {
+        "n": 21,
+        "applied": 21,
+        "mean_rank": 2.1904761904761907,
+        "top1_rate": 0.0,
+        "flips_to_1": 0,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "rank_fail": {
+        "n": 26,
+        "applied": 26,
+        "mean_rank": 2.3846153846153846,
+        "top1_rate": 0.0,
+        "flips_to_1": 0,
+        "success_drops": 0,
+        "base_top1_rate": 0.0
+      },
+      "success": {
+        "n": 3974,
+        "applied": 3974,
+        "mean_rank": 1.000503271263211,
+        "top1_rate": 0.9994967287367891,
+        "flips_to_1": 0,
+        "success_drops": 2,
+        "base_top1_rate": 1.0
+      }
+    }
+  },
+  "top_results": [
+    {
+      "l2": 0.1,
+      "dens_min": 8.0,
+      "gap_max": 99.0,
+      "w": [
+        -0.18526337735550208,
+        0.10136896790207497,
+        -0.014979421718245964,
+        0.0,
+        -0.05665660862274096,
+        -0.084155117316905
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 29,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 45,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 1457,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 12,
+          "mean_rank": 2.1904761904761907,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 15,
+          "mean_rank": 2.3846153846153846,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 722,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.1,
+      "dens_min": 8.0,
+      "gap_max": 1.5,
+      "w": [
+        -0.18526337735550208,
+        0.10136896790207497,
+        -0.014979421718245964,
+        0.0,
+        -0.05665660862274096,
+        -0.084155117316905
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 20,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 29,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 137,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 7,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 8,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 90,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.1,
+      "dens_min": 8.0,
+      "gap_max": 1.0,
+      "w": [
+        -0.18526337735550208,
+        0.10136896790207497,
+        -0.014979421718245964,
+        0.0,
+        -0.05665660862274096,
+        -0.084155117316905
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 15,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 23,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 71,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 42,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.1,
+      "dens_min": 8.0,
+      "gap_max": 0.5,
+      "w": [
+        -0.18526337735550208,
+        0.10136896790207497,
+        -0.014979421718245964,
+        0.0,
+        -0.05665660862274096,
+        -0.084155117316905
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 11,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 16,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 24,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 16,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.5,
+      "dens_min": 8.0,
+      "gap_max": 99.0,
+      "w": [
+        -0.18484490321859873,
+        0.1013091826816576,
+        -0.014916891307505438,
+        0.0,
+        -0.056574389553017884,
+        -0.08406583959455602
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 29,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 45,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 1457,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 12,
+          "mean_rank": 2.1904761904761907,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 15,
+          "mean_rank": 2.3846153846153846,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 722,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.5,
+      "dens_min": 8.0,
+      "gap_max": 1.5,
+      "w": [
+        -0.18484490321859873,
+        0.1013091826816576,
+        -0.014916891307505438,
+        0.0,
+        -0.056574389553017884,
+        -0.08406583959455602
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 20,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 29,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 137,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 7,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 8,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 90,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.5,
+      "dens_min": 8.0,
+      "gap_max": 1.0,
+      "w": [
+        -0.18484490321859873,
+        0.1013091826816576,
+        -0.014916891307505438,
+        0.0,
+        -0.056574389553017884,
+        -0.08406583959455602
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 15,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 23,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 71,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 42,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 0.5,
+      "dens_min": 8.0,
+      "gap_max": 0.5,
+      "w": [
+        -0.18484490321859873,
+        0.1013091826816576,
+        -0.014916891307505438,
+        0.0,
+        -0.056574389553017884,
+        -0.08406583959455602
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 11,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 16,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 24,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 16,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 1.0,
+      "dens_min": 8.0,
+      "gap_max": 99.0,
+      "w": [
+        -0.18432393262554275,
+        0.10123444377314553,
+        -0.014839135286482917,
+        0.0,
+        -0.05647188358936958,
+        -0.08395441801351924
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 29,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 45,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 1457,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 12,
+          "mean_rank": 2.1904761904761907,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 15,
+          "mean_rank": 2.3846153846153846,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 722,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 1.0,
+      "dens_min": 8.0,
+      "gap_max": 1.5,
+      "w": [
+        -0.18432393262554275,
+        0.10123444377314553,
+        -0.014839135286482917,
+        0.0,
+        -0.05647188358936958,
+        -0.08395441801351924
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 20,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 29,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 137,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 7,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 8,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 90,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 1.0,
+      "dens_min": 8.0,
+      "gap_max": 1.0,
+      "w": [
+        -0.18432393262554275,
+        0.10123444377314553,
+        -0.014839135286482917,
+        0.0,
+        -0.05647188358936958,
+        -0.08395441801351924
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 15,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 23,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 71,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 42,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 1.0,
+      "dens_min": 8.0,
+      "gap_max": 0.5,
+      "w": [
+        -0.18432393262554275,
+        0.10123444377314553,
+        -0.014839135286482917,
+        0.0,
+        -0.05647188358936958,
+        -0.08395441801351924
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 11,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 16,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 24,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 16,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 2.0,
+      "dens_min": 8.0,
+      "gap_max": 99.0,
+      "w": [
+        -0.18328901595726182,
+        0.10108494340241214,
+        -0.01468496988128664,
+        0.0,
+        -0.0562677607560735,
+        -0.08373215785035196
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 29,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 45,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 1457,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 12,
+          "mean_rank": 2.1904761904761907,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 15,
+          "mean_rank": 2.3846153846153846,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 722,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 2.0,
+      "dens_min": 8.0,
+      "gap_max": 1.5,
+      "w": [
+        -0.18328901595726182,
+        0.10108494340241214,
+        -0.01468496988128664,
+        0.0,
+        -0.0562677607560735,
+        -0.08373215785035196
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 20,
+          "mean_rank": 2.0,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 29,
+          "mean_rank": 2.5428571428571427,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 137,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 7,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 8,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 90,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    },
+    {
+      "l2": 2.0,
+      "dens_min": 8.0,
+      "gap_max": 1.0,
+      "w": [
+        -0.18328901595726182,
+        0.10108494340241214,
+        -0.01468496988128664,
+        0.0,
+        -0.0562677607560735,
+        -0.08373215785035196
+      ],
+      "fixed": {
+        "rank2": {
+          "n": 46,
+          "applied": 15,
+          "mean_rank": 1.9782608695652173,
+          "top1_rate": 0.021739130434782608,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 70,
+          "applied": 23,
+          "mean_rank": 2.5285714285714285,
+          "top1_rate": 0.014285714285714285,
+          "flips_to_1": 1,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3853,
+          "applied": 71,
+          "mean_rank": 1.0007786140669608,
+          "top1_rate": 0.9992213859330392,
+          "flips_to_1": 0,
+          "success_drops": 3,
+          "base_top1_rate": 1.0
+        }
+      },
+      "holdout": {
+        "rank2": {
+          "n": 21,
+          "applied": 5,
+          "mean_rank": 2.0,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "rank_fail": {
+          "n": 26,
+          "applied": 6,
+          "mean_rank": 2.230769230769231,
+          "top1_rate": 0.0,
+          "flips_to_1": 0,
+          "success_drops": 0,
+          "base_top1_rate": 0.0
+        },
+        "success": {
+          "n": 3974,
+          "applied": 42,
+          "mean_rank": 1.0002516356316054,
+          "top1_rate": 0.9997483643683945,
+          "flips_to_1": 0,
+          "success_drops": 1,
+          "base_top1_rate": 1.0
+        }
+      },
+      "score": -7.0
+    }
+  ]
+}

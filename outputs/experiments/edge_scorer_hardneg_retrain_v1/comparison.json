@@ -1,0 +1,77 @@
+{
+  "baseline_fixed8": 0.9181439782806684,
+  "baseline_holdout8": 0.9646726188580379,
+  "decision": "REJECT",
+  "experiment": "edge_scorer_hardneg_retrain_v1",
+  "fixed8": {
+    "baseline_ranking": {
+      "causal_oa": 129,
+      "ordinary": 4089,
+      "rank2": 46,
+      "ranking_share_causal": 0.5426356589147286,
+      "scorer_ranking": 70
+    },
+    "edge_tp_fp_fn": [
+      3965,
+      198,
+      138
+    ],
+    "new_ranking": {
+      "causal_oa": 110,
+      "ordinary": 4089,
+      "rank2": 36,
+      "ranking_share_causal": 0.4636363636363636,
+      "scorer_ranking": 51
+    },
+    "score": 0.9155928318042139
+  },
+  "fixed_baseline": 0.9181439782806684,
+  "fixed_delta": -0.002551146476454491,
+  "fixed_score": 0.9155928318042139,
+  "frozen_recipe": "recipe_c_motion_off_edge_0_40_det0_96875",
+  "git_commit": "e21070f8f7270d17aa3a8ab1b96f22b0708dee32",
+  "holdout8": {
+    "baseline_ranking": {
+      "causal_oa": 52,
+      "ordinary": 4116,
+      "rank2": 21,
+      "ranking_share_causal": 0.5,
+      "scorer_ranking": 26
+    },
+    "dataset_44b6_12dfb391": {
+      "baseline": {
+        "adj_edge_jaccard": 0.9347073959325116,
+        "dataset": "44b6_12dfb391",
+        "edge_fn": 28,
+        "edge_fp": 41,
+        "edge_tp": 745
+      },
+      "new": {
+        "adj_edge_jaccard": 0.9306093037330831,
+        "dataset": "44b6_12dfb391",
+        "edge_fn": 27,
+        "edge_fp": 43,
+        "edge_tp": 746
+      }
+    },
+    "edge_tp_fp_fn": [
+      4042,
+      88,
+      84
+    ],
+    "new_ranking": {
+      "causal_oa": 48,
+      "ordinary": 4116,
+      "rank2": 18,
+      "ranking_share_causal": 0.4791666666666667,
+      "scorer_ranking": 23
+    },
+    "score": 0.960067468096261
+  },
+  "holdout_baseline": 0.9646726188580379,
+  "holdout_delta": -0.004605150761776922,
+  "holdout_score": 0.960067468096261,
+  "job_id": "7104",
+  "next_step": "Do not start another edge-scorer retrain. Inspect remaining ordinary-association failures on holdout 44b6_12dfb391 with frozen detections (ILP / candidate set), not another ranking-weight or architecture sweep.",
+  "promote": false
+}

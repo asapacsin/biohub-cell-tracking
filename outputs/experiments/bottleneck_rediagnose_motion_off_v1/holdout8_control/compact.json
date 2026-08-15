@@ -1,0 +1,23 @@
+{
+  "causal_errors": 67,
+  "classification": "D. HYPOTHESIS REJECTED",
+  "counts": {
+    "candidate_threshold": 8,
+    "correct": 4014,
+    "detection_miss": 35,
+    "ilp_global": 9,
+    "postprocessing_rematch": 5,
+    "postprocessing_removed": 23,
+    "scorer_ranking": 22
+  },
+  "mechanism_shares": {
+    "candidate_threshold": 0.11940298507462686,
+    "ilp_global": 0.13432835820895522,
+    "postprocessing_rematch": 0.07462686567164178,
+    "postprocessing_removed": 0.34328358208955223,
+    "scorer_ranking": 0.3283582089552239
+  },
+  "ranking_share": 0.3283582089552239,
+  "recommended_next_action": "Hold raw GEFF predictions fixed and test one targeted postprocessing retention change on fixed-8 plus an independent holdout.",
+  "split": "holdout8_control"
+}

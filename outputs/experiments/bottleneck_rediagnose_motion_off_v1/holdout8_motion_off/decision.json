@@ -1,0 +1,16 @@
+{
+  "causal_errors": 72,
+  "classification": "D. HYPOTHESIS REJECTED",
+  "hypothesis_rejected": true,
+  "hypothesis_supported": false,
+  "mechanism_shares": {
+    "candidate_threshold": 0.2222222222222222,
+    "ilp_global": 0.16666666666666666,
+    "postprocessing_rematch": 0.06944444444444445,
+    "postprocessing_removed": 0.19444444444444445,
+    "scorer_ranking": 0.3472222222222222
+  },
+  "ranking_share": 0.3472222222222222,
+  "recommended_next_action": "Repeat the ranking diagnostic on an independent holdout before changing the production recipe.",
+  "runner_up_share": 0.2222222222222222
+}

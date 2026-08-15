@@ -1,0 +1,8 @@
+{
+  "motion_relink": false,
+  "n": 14,
+  "split": "holdout8",
+  "stage_counts": {
+    "short_track_filter": 14
+  }
+}

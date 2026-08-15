@@ -1,0 +1,31 @@
+{
+  "control_fixed8": 0.9181439782806684,
+  "control_holdout8": 0.9646726188580379,
+  "decision": "REJECT",
+  "fixed8": {
+    "delta": -0.0010084306546915833,
+    "edge_tp_fp_fn": [
+      3941,
+      185,
+      162
+    ],
+    "score": 0.9171355476259768
+  },
+  "holdout8": {
+    "delta": -0.0006502972176761768,
+    "edge_tp_fp_fn": [
+      4035,
+      77,
+      91
+    ],
+    "score": 0.9640223216403617
+  },
+  "hypothesis": "Margin-gated pre-softmax +lam*dist on near-tie dense columns recovers rank-2 ordinary associations without destroying short true edges",
+  "params": {
+    "margin_gated_dist_delta": 0.15,
+    "margin_gated_dist_dens_min": 8.0,
+    "margin_gated_dist_lambda": 0.1,
+    "margin_gated_dist_radius_um": 15.0
+  },
+  "promote": false
+}

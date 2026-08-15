@@ -1,26 +1,29 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-16T00:20:00+08:00",
+  "updated_at": "2026-08-16T00:42:00+08:00",
   "project": "biohub-cell-tracking",
   "active_milestone": "Frozen-recipe official test inference / Kaggle pack",
-  "status": "in_progress",
+  "status": "needs_human",
   "host": "linux-login01",
   "eta": {
     "window_open": "2026-08-16T00:20+08:00",
-    "eta_finish": "2026-08-16T01:50+08:00",
-    "eta_hours": 1.5,
-    "basis": "Queue empty. 4 test zarrs (1.8G), two-seed D4 + ILP + postprocess. Same shape as ~1/4 of a 16-dataset ~33–55 min GPU eval, plus pip/unpack. 1.5h with buffer. 4h srun limit."
+    "eta_finish": "2026-08-15T16:33:50+00:00",
+    "eta_hours": 0.16,
+    "basis": "Job 7198 finished in 577s (~10 min). VALIDATE_OK. CSV mirrored to login."
   },
-  "completed": [],
-  "in_progress": [
-    "Official test inference under recipe_c_motion_off_edge_0_40_det0_96875"
+  "completed": [
+    "Official test inference under recipe_c_motion_off_edge_0_40_det0_96875",
+    "Un-ignore all outputs/kaggle_submission/ packs (large CSVs stay in git)",
+    "Standing rule: record every Kaggle-ready pack in memory"
   ],
+  "in_progress": [],
   "blocked": [],
   "last_verified_commands": [
     "squeue -u → empty",
-    "ls data/competition/test → 4 zarrs, 1.8G"
+    "VALIDATE_OK {rows: 242923, datasets: 4, nodes: 123692, edges: 119231}",
+    "ls outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv → 12.06M"
   ],
-  "next_action": "Wait for GPU test submit (nohup + tar|srun). Then upload outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv to Kaggle.",
+  "next_action": "Upload outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv to Kaggle. Compare public LB to 0.908.",
   "needs_human": [
     "Kaggle upload: this host packs the CSV; it does not submit to the leaderboard"
   ],
@@ -30,13 +33,14 @@
     "log": "logs/slurm/frozen_recipe_test_submit.log",
     "nohup_log": "logs/slurm/frozen_recipe_test_submit.nohup.out",
     "nfs": "~/biohub-outputs/kaggle/recipe_c_motion_off_edge_0_40_v1/",
-    "login_csv": "outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv"
+    "login_csv": "outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/submission.csv",
+    "csv_sha256": "1c11c98a2b8458215a9d9a4a2c90b15b2a51bc34dbafe55eb73b22f1b8a2ff01"
   },
   "notes": [
     "Frozen recipe: motion OFF, edge_threshold=0.40, det=0.96875, two-seed α=0.5",
-    "QOSMaxJobsPerUserLimit=1",
-    "Login home ≠ compute NFS; mirror via srun tar | login tar",
-    "Test inference produces no local GT score"
+    "outputs/* no longer blankets analysis reports or any outputs/kaggle_submission/ pack",
+    "Kaggle CSVs stay tracked even when large; still ignore captures/GEFFs/logs/weights",
+    "Every VALIDATE_OK test pack must be recorded in memory as Kaggle submission ready"
   ],
   "best_local_scores": {
     "fixed8": 0.9181439782806684,
@@ -44,12 +48,11 @@
     "recipe": "recipe_c_motion_off_edge_0_40_det0_96875"
   },
   "job_ids": [
-    "slurm:7198 RUNNING um-gpu01",
+    "slurm:7198 COMPLETED um-gpu01",
     "nohup:2835396"
   ],
   "resume_commands": [
-    "squeue -u",
-    "tail -50 logs/slurm/frozen_recipe_test_submit.nohup.out",
+    "ls -lh outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/",
     "cat outputs/kaggle_submission/recipe_c_motion_off_edge_0_40_v1/metadata.json"
   ]
 }
