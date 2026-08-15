@@ -10,7 +10,7 @@ After a meaningful work session:
 4. keep official data findings traceable to an inspection command and source path;
 5. do not mark a milestone complete unless its listed verification has passed;
 6. every time a Kaggle pack is VALIDATE_OK and mirrored to login, append a **Kaggle submission ready**
-   record to `.agents/memory.md`. Do not gitignore `outputs/kaggle_submission/` CSVs (size is not a reason).
+   record to `.agents/memory.md`. Keep large `submission.csv` files gitignored; do not commit them.
 
 The competition files and `sample_submission.csv` remain the source of truth. Agent memory is a
 handoff aid, not an authoritative competition specification.

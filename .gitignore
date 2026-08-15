@@ -11,14 +11,17 @@ data/competition/*
 !data/competition/.gitkeep
 data/cache/*
 !data/cache/.gitkeep
-# Generated bulky artifacts stay out of git (captures, GEFFs, train dumps, logs).
-# Do NOT gitignore Kaggle packs: submission CSVs are the upload artifact even if large.
+# Generated bulky artifacts stay out of git (captures, GEFFs, train dumps, logs, Kaggle CSVs).
 outputs/*
 !outputs/.gitkeep
 !outputs/analysis/
 !outputs/experiments/
 !outputs/kaggle_submission/
 !outputs/kaggle_submission/**
+
+# Large Kaggle CSVs stay local + NFS; record path/sha256 in .agents/memory.md instead.
+outputs/kaggle_submission/*.csv
+outputs/kaggle_submission/**/*.csv
 
 # Experiment dumps that are too large to version (not Kaggle deliverables)
 outputs/experiments/**/predictions/

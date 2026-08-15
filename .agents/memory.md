@@ -525,9 +525,10 @@
 - Job: slurm **7198** COMPLETED um-gpu01, 577s. NFS: `~/biohub-outputs/kaggle/recipe_c_motion_off_edge_0_40_v1/`
 - Compare public LB to **0.908** (V106 notebook; not re-verified from this host)
 
-## Standing: record every Kaggle-ready pack; do not gitignore submission CSVs (2026-08-16)
+## Standing: record every Kaggle-ready pack; never commit large CSVs (2026-08-16)
 
 - Every VALIDATE_OK official-test pack must be appended to this file as `## Kaggle submission ready` (path, sha256, stats, recipe, job, NFS).
-- `outputs/kaggle_submission/` is **not** gitignored, including large `submission.csv` files. Size is not a reason to ignore an upload artifact.
-- Still gitignore non-deliverable dumps: captures, GEFFs, train `predictions/`, logs, weights, `data/competition`.
+- Large `outputs/kaggle_submission/**/*.csv` stay **gitignored** (local disk + NFS). Compact sidecars (metadata.json, yaml, README, DONE) may be tracked.
+- Commit `8cc9c3e` accidentally added ~35MB of those CSVs and made Windows `git pull` crawl (~117 KiB/s). They were removed from the index in a follow-up; history still contains the blobs until a rewrite.
+- Still gitignore captures, GEFFs, train `predictions/`, logs, weights, `data/competition`.
 - Rule: `.cursor/rules/kaggle-submission.mdc`

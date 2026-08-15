@@ -29,5 +29,5 @@ Until evidence says otherwise:
 ## Handoff
 
 - Update `.agents/state.json` and `.agents/memory.md` after meaningful findings.
-- Every Kaggle-ready pack: record path, sha256, VALIDATE_OK stats, recipe, job id in memory. Do not gitignore `outputs/kaggle_submission/`.
+- Every Kaggle-ready pack: record path, sha256, VALIDATE_OK stats, recipe, job id in memory. Keep large CSVs gitignored (local + NFS only).
 - Commit completed experiment work when appropriate (user may have asked to commit in standing prefs).

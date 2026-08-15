@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-16T00:42:00+08:00",
+  "updated_at": "2026-08-16T00:45:00+08:00",
   "project": "biohub-cell-tracking",
   "active_milestone": "Frozen-recipe official test inference / Kaggle pack",
   "status": "needs_human",
@@ -13,8 +13,8 @@
   },
   "completed": [
     "Official test inference under recipe_c_motion_off_edge_0_40_det0_96875",
-    "Un-ignore all outputs/kaggle_submission/ packs (large CSVs stay in git)",
-    "Standing rule: record every Kaggle-ready pack in memory"
+    "Un-ignore compact outputs/analysis and kaggle sidecars; keep large CSVs gitignored",
+    "Standing rule: record every Kaggle-ready pack in memory; never commit submission CSVs"
   ],
   "in_progress": [],
   "blocked": [],
@@ -38,8 +38,7 @@
   },
   "notes": [
     "Frozen recipe: motion OFF, edge_threshold=0.40, det=0.96875, two-seed α=0.5",
-    "outputs/* no longer blankets analysis reports or any outputs/kaggle_submission/ pack",
-    "Kaggle CSVs stay tracked even when large; still ignore captures/GEFFs/logs/weights",
+    "Compact analysis + kaggle sidecars may be tracked; large CSVs stay gitignored (local + NFS)",
     "Every VALIDATE_OK test pack must be recorded in memory as Kaggle submission ready"
   ],
   "best_local_scores": {

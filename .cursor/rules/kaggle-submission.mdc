@@ -1,14 +1,13 @@
 ---
-description: Record every Kaggle-ready pack in memory; do not gitignore submission CSVs
+description: Record every Kaggle-ready pack in memory; never commit large submission CSVs
 alwaysApply: true
 ---
 
 # Kaggle submission ready
 
-When official test inference **VALIDATE_OK** and the login CSV exists, treat it as **Kaggle submission ready**. Do this every time, even if the pack is large:
+When official test inference **VALIDATE_OK** and the login CSV exists, treat it as **Kaggle submission ready**. Do this every time:
 
 1. Append a `## Kaggle submission ready` block to `.agents/memory.md` with: path, sha256, VALIDATE_OK stats (datasets/nodes/edges/rows), recipe/config, job id, NFS twin, compare-to public LB **0.908**.
 2. Put the same path in `.agents/state.json` `artifacts` / `next_action` (`needs_human`: Kaggle upload).
-3. **Do not gitignore** files under `outputs/kaggle_submission/` (including `submission.csv`). Size is not a reason to ignore a pack the human must upload.
-4. Still gitignore non-deliverable dumps: captures, GEFFs, train `predictions/`, logs, weights, `data/competition`.
-5. If a new pack lands and gitignore would hide it, un-ignore that path immediately, then record memory.
+3. **Keep large CSVs gitignored.** Record them in memory; leave the file on disk and NFS. Do not `git add` `outputs/kaggle_submission/**/*.csv`. Compact sidecars (README, metadata.json, yaml, DONE) may be tracked.
+4. Still gitignore captures, GEFFs, train `predictions/`, logs, weights, `data/competition`.
