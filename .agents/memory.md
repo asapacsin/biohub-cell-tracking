@@ -466,3 +466,29 @@
 - Compact login: `outputs/experiments/pairwise_hardneg_rank_v1_scale0_5/`.
 - Report: `outputs/analysis/pairwise_hardneg_rank_v1_scale0_5_report.md`.
 - Recommended next (not executed): edge-scorer retrain with pairwise hard-neg mining under frozen recipe. Major scope leap — recommend only.
+
+## Edge-scorer hard-neg retrain v1 submitted (2026-08-15)
+
+- User said "just submit" 2026-08-14 ~15:01 +08. Friday subagent wrote untracked train/mine/eval code but never landed a long GPU job (6938/6939 were 1–3s probes). Direct sbatch cannot see login `/home/mc46451/biohub-cell-tracking` on compute.
+- NFS 7G stage hit compute-home quota (`cat: Disk quota exceeded`). Regenerable `~/.cache/pip` (9.4G) was cleared so compact NFS writes work. Did not touch `music-recommendation` / `music_db.tar`.
+- Submitted once via proven nohup `tar|srun` to node `/tmp`. **slurm 7104** RUNNING um-gpu01 (RTX 2080 Ti). nohup pid 2813718.
+- Frozen recipe unchanged (motion OFF, edge=0.40). Holdout-8 not mined. Mined 2315 pairs (138 rank-2 / 72 ranking / 2105 control) from fixed-8 capture only.
+- Seed `hardneg_v1_split_0` 6/6 epochs done (~63s/epoch, best loss 0.230). Seed 314159 caching. Then fixed-8 + holdout-8 eval.
+- Revised ETA ~1.1h total (not 14h). Window-open: job already running. Baseline still 0.918144 / 0.964673.
+- Launcher: `scripts/slurm/run_edge_scorer_hardneg_retrain_v1.sh`. Log: `logs/slurm/edge_scorer_hardneg_retrain_v1.nohup.out`.
+- QOSMaxJobsPerUserLimit=1. Do not submit a second job.
+
+## Edge-scorer hard-neg retrain v1 REJECT (2026-08-15)
+
+- GPU job **7104** COMPLETED 2026-08-15T00:34:15Z on um-gpu01 (54m53s). nohup 2813718. Did not resubmit (QOS max 1; job already running).
+- Fine-tuned both two-seed edge transformers (UNet/detect_head frozen) with pairwise ranking loss on fixed-8 capture mines only (2315 pairs: 138 rank-2 / 72 ranking / 2105 control). Holdout-8 not mined. Linear pairwise reweight stayed off.
+- Checkpoints: hardneg_v1_split_0 sha256 3696384a56d… (best loss 0.230211, pair-win 0.933); hardneg_v1_seed_314159 8d7c9eed3e03… (best loss 0.228557, pair-win 0.935). Both differ from frozen split_0 / seed_314159.
+- Frozen recipe unchanged: motion-relink OFF, edge_threshold=0.40.
+- Fixed-8 **0.915593 (−0.002551)** vs 0.918144; holdout-8 **0.960067 (−0.004605)** vs 0.964673.
+- Edges: fixed 3965/198/138; holdout 4042/88/84.
+- Ranking causal share fell (fixed 54.3%→46.4%, holdout 50.0%→47.9%); rank-2 counts 46→36 / 21→18. Training-set ranking improved but did not transfer — overall Jaccard dropped on both splits.
+- Holdout killer 44b6_12dfb391: 0.934707 → **0.930609** (TP/FP/FN 745/41/28 → 746/43/27).
+- **REJECT.** Do not install hardneg_v1_* weights. Do not start another edge-scorer retrain.
+- Compact login: outputs/experiments/edge_scorer_hardneg_retrain_v1/. NFS: ~/biohub-outputs/experiments/edge_scorer_hardneg_retrain_v1/.
+- Report: outputs/analysis/edge_scorer_hardneg_retrain_v1_report.md.
+- Recommended next (not executed): inspect remaining ordinary-association failures on holdout 44b6_12dfb391 with frozen detections (ILP / candidate set), not another ranking-weight or architecture sweep.
